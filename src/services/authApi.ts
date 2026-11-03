@@ -7,15 +7,15 @@ export const requestOtp = async (identifier: string) => {
   return data;
 };
 
-// /** Customer: verify OTP (name only needed for new customers) */
-// export const verifyOtp = async (identifier: string, code: string, name?: string) => {
-//   const { data } = await api.post<AuthResponse>("/auth/otp/verify", {
-//     identifier,
-//     code,
-//     ...(name && { name }),
-//   });
-//   return data;
-// };
+/** Customer: verify OTP (name only needed for new customers) */
+export const verifyOtp = async (identifier: string, code: string, name?: string) => {
+  const { data } = await api.post<AuthResponse>("/auth/otp/verify", {
+    identifier,
+    code,
+    ...(name && { name }),
+  });
+  return data;
+};
 
 // /** Super Admin & Manager: email + password */
 // export const staffLogin = async (email: string, password: string) => {
