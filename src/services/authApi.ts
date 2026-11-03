@@ -1,11 +1,11 @@
-// import { api } from "../lib/api";
-// import type { AuthResponse, RequestOtpResponse, User } from "../types/auth";
+import { api } from "../lib/api";
+import type { AuthResponse, RequestOtpResponse, User } from "../types/auth";
 
-// /** Customer: send OTP to phone or email */
-// export const requestOtp = async (identifier: string) => {
-//   const { data } = await api.post<RequestOtpResponse>("/auth/otp/request", { identifier });
-//   return data;
-// };
+/** Customer: send OTP to phone or email */
+export const requestOtp = async (identifier: string) => {
+  const { data } = await api.post<RequestOtpResponse>("/auth/otp/request", { identifier });
+  return data;
+};
 
 // /** Customer: verify OTP (name only needed for new customers) */
 // export const verifyOtp = async (identifier: string, code: string, name?: string) => {
