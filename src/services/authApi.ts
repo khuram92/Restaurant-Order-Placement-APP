@@ -17,11 +17,11 @@ export const verifyOtp = async (identifier: string, code: string, name?: string)
   return data;
 };
 
-// /** Super Admin & Manager: email + password */
-// export const staffLogin = async (email: string, password: string) => {
-//   const { data } = await api.post<AuthResponse>("/auth/login", { email, password });
-//   return data;
-// };
+/** Super Admin & Manager: email + password */
+export const staffLogin = async (email: string, password: string) => {
+  const { data } = await api.post<AuthResponse>("/auth/login", { email, password });
+  return data;
+};
 
 // /** Any logged-in user: get current user (token is attached automatically) */
 // export const getMe = async () => {
