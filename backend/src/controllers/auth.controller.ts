@@ -30,7 +30,7 @@ export const staffLogin = async (req: Request, res: Response) => {
   res.json({ token, user });
 };
 
-/** GET /api/auth/me: any logged-in user */
-export const getMe = async (req: Request, res: Response) => {
-  res.json({ user: req.user });
-};
+// /** GET /api/auth/me: any logged-in user */
+// export const getMe = async (req: Request, res: Response) => {
+//   res.json({ user: req.user });
+// };
