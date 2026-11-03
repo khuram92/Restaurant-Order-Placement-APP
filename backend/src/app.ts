@@ -1,6 +1,8 @@
 
 import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
+import authRoutes from "./routes/auth.routes.js";
+
 
 const app = express();
 
@@ -9,11 +11,10 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
-
 app.get("/api/health", (req: Request, res: Response) => {
   res.json({ status: "ok" });
 });
-
+app.use("/api/auth", authRoutes);
 
 
 // 404 handler
