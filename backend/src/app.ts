@@ -10,8 +10,6 @@ app.use(express.json());
 
 // Routes
 
-
-
 app.get("/api/health", (req: Request, res: Response) => {
   res.json({ status: "ok" });
 });
