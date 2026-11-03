@@ -23,8 +23,8 @@ export const staffLogin = async (email: string, password: string) => {
   return data;
 };
 
-// /** Any logged-in user: get current user (token is attached automatically) */
-// export const getMe = async () => {
-//   const { data } = await api.get<{ user: User }>("/auth/me");
-//   return data.user;
-// };
+/** Any logged-in user: get current user (token is attached automatically) */
+export const getMe = async () => {
+  const { data } = await api.get<{ user: User }>("/auth/me");
+  return data.user;
+};
