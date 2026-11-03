@@ -103,54 +103,54 @@ export const requestOtp = async (req: Request, res: Response) => {
 };
 
 // /** POST /api/auth/otp/verify   { identifier, code, name? } */
-// export const verifyOtp = async (req: Request, res: Response) => {
-//   const parsed = verifyOtpSchema.safeParse(req.body);
-//   if (!parsed.success) {
-//     return res.status(400).json({ message: parsed.error.issues[0]?.message });
-//   }
+export const verifyOtp = async (req: Request, res: Response) => {
+  const parsed = verifyOtpSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ message: parsed.error.issues[0]?.message });
+  }
 
-//   const result = parseIdentifier(parsed.data.identifier);
-//   if (!result) {
-//     return res.status(400).json({ message: "Enter a valid email or phone (03XXXXXXXXX)" });
-//   }
-//   const { identifier, channel } = result;
-//   const { code, name } = parsed.data;
+  const result = parseIdentifier(parsed.data.identifier);
+  if (!result) {
+    return res.status(400).json({ message: "Enter a valid email or phone (03XXXXXXXXX)" });
+  }
+  const { identifier, channel } = result;
+  const { code, name } = parsed.data;
 
-//   const otp = await Otp.findOne({ identifier });
-//   if (!otp || otp.expiresAt < new Date()) {
-//     return res.status(400).json({ message: "Code expired, please request a new one" });
-//   }
-//   if (otp.attempts >= OTP_MAX_ATTEMPTS) {
-//     await otp.deleteOne();
-//     return res.status(429).json({ message: "Too many wrong attempts, request a new code" });
-//   }
-//   if (!otpMatches(code, otp.codeHash)) {
-//     otp.attempts += 1;
-//     await otp.save();
-//     const left = OTP_MAX_ATTEMPTS - otp.attempts;
-//     return res.status(400).json({ message: `Incorrect code. ${left} attempt(s) left` });
-//   }
+  const otp = await Otp.findOne({ identifier });
+  if (!otp || otp.expiresAt < new Date()) {
+    return res.status(400).json({ message: "Code expired, please request a new one" });
+  }
+  if (otp.attempts >= OTP_MAX_ATTEMPTS) {
+    await otp.deleteOne();
+    return res.status(429).json({ message: "Too many wrong attempts, request a new code" });
+  }
+  if (!otpMatches(code, otp.codeHash)) {
+    otp.attempts += 1;
+    await otp.save();
+    const left = OTP_MAX_ATTEMPTS - otp.attempts;
+    return res.status(400).json({ message: `Incorrect code. ${left} attempt(s) left` });
+  }
 
-//   let user = await User.findOne({ [channel]: identifier });
-//   let isNewUser = false;
+  let user = await User.findOne({ [channel]: identifier });
+  let isNewUser = false;
 
-//   if (!user) {
-//     if (!name) {
-//       return res.status(400).json({ message: "Name is required to create your account" });
-//     }
-//     user = await User.create({ name, [channel]: identifier, role: "customer" });
-//     isNewUser = true;
-//   } else if (user.role !== "customer") {
-//     return res.status(403).json({ message: "Staff must log in with email and password" });
-//   } else if (!user.isActive) {
-//     return res.status(403).json({ message: "Account is deactivated" });
-//   }
+  if (!user) {
+    if (!name) {
+      return res.status(400).json({ message: "Name is required to create your account" });
+    }
+    user = await User.create({ name, [channel]: identifier, role: "customer" });
+    isNewUser = true;
+  } else if (user.role !== "customer") {
+    return res.status(403).json({ message: "Staff must log in with email and password" });
+  } else if (!user.isActive) {
+    return res.status(403).json({ message: "Account is deactivated" });
+  }
 
-//   await otp.deleteOne(); // one-time use
+  await otp.deleteOne(); // one-time use
 
-//   const token = signToken({ id: user.id, role: user.role });
-//   res.status(isNewUser ? 201 : 200).json({ token, user, isNewUser });
-// };
+  const token = signToken({ id: user.id, role: user.role });
+  res.status(isNewUser ? 201 : 200).json({ token, user, isNewUser });
+};
 
 // ---------- Everyone ----------
 
