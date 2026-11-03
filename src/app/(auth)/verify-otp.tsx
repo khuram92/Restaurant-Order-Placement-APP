@@ -1,3 +1,5 @@
+import { LinearGradient } from "expo-linear-gradient";
+import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -10,11 +12,9 @@ import {
   type TextInputInstance,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { LinearGradient } from "expo-linear-gradient";
-import { router, useLocalSearchParams } from "expo-router";
-import { requestOtp, verifyOtp } from "../../services/authApi";
-import { getErrorMessage } from "../../lib/api";
 import { useAuth } from "../../context/AuthContext";
+import { getErrorMessage } from "../../lib/api";
+import { requestOtp, verifyOtp } from "../../services/authApi";
 
 const RESEND_SECONDS = 60; // must match OTP_RESEND_SECONDS in backend .env
 const CODE_LENGTH = 6;
@@ -48,7 +48,7 @@ export default function VerifyOtpScreen() {
   const channelIcon = params.channel === "phone" ? "📱" : "✉️";
   const { signIn } = useAuth();
 
-   const codeInputRef = useRef<TextInputInstance>(null);
+  const codeInputRef = useRef<TextInputInstance>(null);
 
   const [code, setCode] = useState("");
   const [name, setName] = useState("");
@@ -84,7 +84,11 @@ export default function VerifyOtpScreen() {
 
     setLoading(true);
     try {
-      const res = await verifyOtp(identifier, codeToVerify, isNewUser ? name.trim() : undefined);
+      const res = await verifyOtp(
+        identifier,
+        codeToVerify,
+        isNewUser ? name.trim() : undefined,
+      );
       await signIn(res.token, res.user);
       // No navigation needed: guards switch to (customer) automatically
     } catch (err) {
@@ -121,13 +125,19 @@ export default function VerifyOtpScreen() {
   };
 
   const canSubmit =
-    code.length === CODE_LENGTH && (!isNewUser || name.trim().length >= 2) && !loading;
+    code.length === CODE_LENGTH &&
+    (!isNewUser || name.trim().length >= 2) &&
+    !loading;
 
   // Which box is "next" (highlighted)
   const activeIndex = Math.min(code.length, CODE_LENGTH - 1);
 
   return (
-    <LinearGradient colors={COLORS.bg} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ flex: 1 }}>
+    <LinearGradient
+      colors={COLORS.bg}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={{ flex: 1 }}>
       {/* Soft decorative circles */}
       <View className="absolute -right-16 -top-12 h-56 w-56 rounded-full bg-pink-300 opacity-40" />
       <View className="absolute -left-20 bottom-24 h-60 w-60 rounded-full bg-rose-200 opacity-50" />
@@ -135,14 +145,12 @@ export default function VerifyOtpScreen() {
       <SafeAreaView className="flex-1">
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : undefined}
-          className="flex-1 justify-center px-6"
-        >
+          className="flex-1 justify-center px-6">
           {/* Header */}
           <View className="mb-6 items-center">
             <View
               className="h-20 w-20 items-center justify-center rounded-full bg-white"
-              style={pinkShadow(0.35, 16, 10)}
-            >
+              style={pinkShadow(0.35, 16, 10)}>
               <Text className="text-4xl">🔐</Text>
             </View>
             <Text className="mt-4 text-3xl font-extrabold text-pink-600">
@@ -166,17 +174,22 @@ export default function VerifyOtpScreen() {
           </View>
 
           {/* White card */}
-          <View className="rounded-3xl bg-white p-6" style={pinkShadow(0.25, 24, 12)}>
+          <View
+            className="rounded-3xl bg-white p-6"
+            style={pinkShadow(0.25, 24, 12)}>
             {/* Name: new customers only */}
             {isNewUser && (
               <View className="mb-5">
-                <Text className="mb-2 text-sm font-semibold text-gray-700">Your name</Text>
+                <Text className="mb-2 text-sm font-semibold text-gray-700">
+                  Your name
+                </Text>
                 <View
                   className={`flex-row items-center rounded-2xl border-2 px-4 ${
                     nameFocused ? "bg-pink-50" : "bg-gray-50"
                   }`}
-                  style={{ borderColor: nameFocused ? COLORS.pink : "#F3D1DE" }}
-                >
+                  style={{
+                    borderColor: nameFocused ? COLORS.pink : "#F3D1DE",
+                  }}>
                   <Text className="mr-2 text-lg">👤</Text>
                   <TextInput
                     value={name}
@@ -198,7 +211,9 @@ export default function VerifyOtpScreen() {
             )}
 
             {/* Code boxes */}
-            <Text className="mb-3 text-sm font-semibold text-gray-700">Verification code</Text>
+            <Text className="mb-3 text-sm font-semibold text-gray-700">
+              Verification code
+            </Text>
             <Pressable onPress={() => codeInputRef.current?.focus()}>
               <View className="flex-row justify-between">
                 {Array.from({ length: CODE_LENGTH }).map((_, i) => {
@@ -219,11 +234,14 @@ export default function VerifyOtpScreen() {
                       className={`h-14 w-12 items-center justify-center rounded-2xl border-2 ${
                         digit ? "bg-pink-50" : "bg-gray-50"
                       }`}
-                      style={{ borderColor }}
-                    >
-                      <Text className="text-2xl font-bold text-pink-600">{digit ?? ""}</Text>
+                      style={{ borderColor }}>
+                      <Text className="text-2xl font-bold text-pink-600">
+                        {digit ?? ""}
+                      </Text>
                       {/* Small bar in the next empty box */}
-                      {isActive && !digit && <View className="h-0.5 w-4 rounded-full bg-pink-500" />}
+                      {isActive && !digit && (
+                        <View className="h-0.5 w-4 rounded-full bg-pink-500" />
+                      )}
                     </View>
                   );
                 })}
@@ -243,14 +261,23 @@ export default function VerifyOtpScreen() {
                 autoComplete="sms-otp" // Android: autofill from SMS
                 editable={!loading}
                 caretHidden
-                style={{ position: "absolute", width: 1, height: 1, opacity: 0 }}
+                style={{
+                  position: "absolute",
+                  width: 1,
+                  height: 1,
+                  opacity: 0,
+                }}
               />
             </Pressable>
 
             {/* Messages */}
-            {!!error && <Text className="mt-3 text-sm text-red-500">{error}</Text>}
-            {!!info && <Text className="mt-3 text-sm text-green-600">{info}</Text>}
-            
+            {!!error && (
+              <Text className="mt-3 text-sm text-red-500">{error}</Text>
+            )}
+            {!!info && (
+              <Text className="mt-3 text-sm text-green-600">{info}</Text>
+            )}
+
             {/* Verify button */}
             <Pressable
               onPress={() => handleVerify()}
@@ -261,14 +288,16 @@ export default function VerifyOtpScreen() {
                 borderRadius: 16,
                 opacity: pressed ? 0.85 : 1,
                 ...pinkShadow(canSubmit ? 0.4 : 0, 12, canSubmit ? 6 : 0),
-              })}
-            >
+              })}>
               <LinearGradient
                 colors={canSubmit ? COLORS.button : COLORS.buttonDisabled}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
-                style={{ borderRadius: 16, paddingVertical: 16, alignItems: "center" }}
-              >
+                style={{
+                  borderRadius: 16,
+                  paddingVertical: 16,
+                  alignItems: "center",
+                }}>
                 {loading ? (
                   <ActivityIndicator color="#fff" />
                 ) : (
@@ -284,11 +313,15 @@ export default function VerifyOtpScreen() {
               {secondsLeft > 0 ? (
                 <View className="rounded-full bg-pink-50 px-4 py-2">
                   <Text className="text-sm text-pink-700">
-                    Resend code in <Text className="font-bold">{secondsLeft}s</Text>
+                    Resend code in{" "}
+                    <Text className="font-bold">{secondsLeft}s</Text>
                   </Text>
                 </View>
               ) : (
-                <Pressable onPress={handleResend} disabled={resending} hitSlop={8}>
+                <Pressable
+                  onPress={handleResend}
+                  disabled={resending}
+                  hitSlop={8}>
                   <Text className="text-sm font-bold text-pink-600">
                     {resending ? "Sending..." : "Didn't get it? Resend code"}
                   </Text>
