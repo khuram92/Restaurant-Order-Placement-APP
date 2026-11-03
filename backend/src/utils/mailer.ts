@@ -28,6 +28,6 @@ export const sendEmail = async (to: string, subject: string, html: string, text:
     to,
     subject,
     html,
-    text, // plain-text fallback
+    text, 
   });
 };
