@@ -1,0 +1,67 @@
+import { Schema, model, Types, type HydratedDocument, type Model } from "mongoose";
+import bcrypt from "bcryptjs";
+
+export const ROLES = ["superadmin", "manager", "customer"] as const;
+export type Role = (typeof ROLES)[number];
+
+export interface IUser {
+  name: string;
+  email?: string;
+  phone?: string;
+  password?: string;            
+  role: Role;
+  restaurantId?: Types.ObjectId; 
+  isActive: boolean;
+}
+
+interface IUserMethods {
+  comparePassword(candidate: string): Promise<boolean>;
+}
+
+export type UserDoc = HydratedDocument<IUser, IUserMethods>;
+
+const userSchema = new Schema<IUser, Model<IUser, {}, IUserMethods>, IUserMethods>(
+  {
+    name: { type: String, required: true, trim: true },
+    email: { type: String, trim: true, lowercase: true },
+    phone: { type: String, trim: true, match: [/^03\d{9}$/, "Phone must be 03XXXXXXXXX"] },
+    password: { type: String, select: false, minlength: 8 },
+    role: { type: String, enum: ROLES, default: "customer" },
+    restaurantId: { type: Schema.Types.ObjectId, ref: "Restaurant" },
+    isActive: { type: Boolean, default: true },
+  },
+  { timestamps: true }
+);
+
+// Unique only when the field exists (a customer may have only email OR only phone)
+userSchema.index({ email: 1 }, { unique: true, partialFilterExpression: { email: { $type: "string" } } });
+userSchema.index({ phone: 1 }, { unique: true, partialFilterExpression: { phone: { $type: "string" } } });
+
+userSchema.pre("validate", function () {
+  if (!this.email && !this.phone) this.invalidate("email", "Email or phone is required");
+  if (this.role !== "customer" && this.isNew && !this.password) {
+    this.invalidate("password", "Password is required for staff accounts");
+  }
+  if (this.role === "manager" && !this.restaurantId) {
+    this.invalidate("restaurantId", "Manager must be assigned to a restaurant");
+  }
+});
+
+userSchema.pre("save", async function () {
+  if (!this.isModified("password") || !this.password) return;
+  this.password = await bcrypt.hash(this.password, 12);
+});
+
+userSchema.methods.comparePassword = function (candidate: string) {
+  return this.password ? bcrypt.compare(candidate, this.password) : Promise.resolve(false);
+};
+
+// Never send password in responses
+userSchema.set("toJSON", {
+  transform: (_doc, ret) => {
+    const { password: _p, __v: _v, ...safe } = ret;
+    return safe;
+  },
+});
+
+export const User = model<IUser, Model<IUser, {}, IUserMethods>>("User", userSchema);
