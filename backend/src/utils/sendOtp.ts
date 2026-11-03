@@ -1,5 +1,6 @@
 import type { Channel } from "./otp.js";
 import { sendEmail } from "./mailer.js";
+import { sendSms } from "./sms.js";
 
 const OTP_EXPIRES_MINUTES = Number(process.env.OTP_EXPIRES_MINUTES) || 5;
 
@@ -23,6 +24,9 @@ export const sendOtp = async (identifier: string, channel: Channel, code: string
     return;
   }
 
-  // TODO:  SMS provider (phone). Console for now
-  console.log(`📱 [OTP] to ${identifier}: ${code}`);
+  // Phone → Twilio SMS (identifier is already 03XXXXXXXXX)
+  await sendSms(
+    identifier,
+    `Your Food App code is ${code}. It expires in ${OTP_EXPIRES_MINUTES} minutes. Don't share it with anyone.`
+  );
 };
