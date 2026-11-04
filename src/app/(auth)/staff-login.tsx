@@ -122,7 +122,7 @@ export default function StaffLoginScreen() {
             <Text className="mb-2 text-sm font-semibold text-gray-700">Password</Text>
             <View
               className={`flex-row items-center rounded-2xl border-2 px-4 ${
-                focused === "password" ? "bg-pink-50" : "bg-gray-50"
+                focused === "password" ? "bg-[#e0e1df]" : "bg-gray-50"
               }`}
               style={{ borderColor: fieldBorder("password") }}
             >
@@ -147,7 +147,7 @@ export default function StaffLoginScreen() {
                 className="flex-1 py-4 text-base text-gray-900"
               />
               <Pressable onPress={() => setShowPassword((s) => !s)} hitSlop={8}>
-                <Text className="text-sm font-semibold text-pink-600">
+                <Text className="text-sm font-semibold text-[#4e5c4a]">
                   {showPassword ? "Hide" : "Show"}
                 </Text>
               </Pressable>
@@ -157,6 +157,7 @@ export default function StaffLoginScreen() {
 
             {/* Login button */}
             <Pressable
+            className="mt-6"
               onPress={handleLogin}
               disabled={!canSubmit}
               style={({ pressed }) => ({
@@ -183,7 +184,7 @@ export default function StaffLoginScreen() {
 
           {/* Back to customer login */}
           <Pressable onPress={() => router.back()} className="mt-6 items-center" hitSlop={8}>
-            <Text className="text-sm text-pink-900/70">
+            <Text className="text-sm text-[#4e5c4a]">
               Not staff? <Text className="font-bold text-pink-600">Customer login</Text>
             </Text>
           </Pressable>
