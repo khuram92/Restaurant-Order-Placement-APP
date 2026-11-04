@@ -20,6 +20,7 @@ function RootNavigator() {
   const { user, isLoading } = useAuth();
   const segments = useSegments(); // e.g. ["(auth)", "verify-otp"]
 
+  const isSuperAdmin = user?.role === "superadmin";
   const isCustomer = user?.role === "customer";
   const needsProfile = isCustomer && !user?.profileCompleted;
 
@@ -30,15 +31,22 @@ function RootNavigator() {
 
     if (!user && group !== "(auth)") {
       router.replace("/login");
+    } else if (isSuperAdmin && group !== "(admin)") {
+      router.replace("/dashboard");
     } else if (needsProfile && group !== "(onboarding)") {
       router.replace("/complete-profile");
     } else if (isCustomer && !needsProfile && group !== "(customer)") {
       router.replace("/");
     }
-  }, [user, isLoading, needsProfile, isCustomer, segments]);
+  }, [user, isLoading, isSuperAdmin, needsProfile, isCustomer, segments]);
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
+      {/* Super Admin */}
+      <Stack.Protected guard={isSuperAdmin}>
+        <Stack.Screen name="(admin)" />
+      </Stack.Protected>
+
       {/* Customers with a complete profile */}
       <Stack.Protected guard={isCustomer && !needsProfile}>
         <Stack.Screen name="(customer)" />
@@ -54,7 +62,7 @@ function RootNavigator() {
         <Stack.Screen name="(auth)" />
       </Stack.Protected>
 
-      {/* Later: (manager) and (admin) groups go here with their own guards */}
+      {/* Later: (manager) group with its own guard */}
     </Stack>
   );
 }

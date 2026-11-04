@@ -200,6 +200,16 @@ export default function LoginScreen() {
               We'll send you a 6-digit code to verify it's you.
             </Text>
           </Animated.View>
+          {/* Staff entry */}
+          <Pressable
+            onPress={() => router.push("/staff-login")}
+            className="mt-6 items-center"
+            hitSlop={8}>
+            <Text className="text-sm text-pink-900/70">
+              Restaurant staff?{" "}
+              <Text className="font-bold text-pink-600">Log in here</Text>
+            </Text>
+          </Pressable>
         </KeyboardAvoidingView>
       </SafeAreaView>
     </LinearGradient>
