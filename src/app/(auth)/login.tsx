@@ -79,7 +79,7 @@ export default function LoginScreen() {
           className="flex-1 justify-center px-6"
         >
           {/* Header */}
-          <Animated.View entering={FadeInUp.duration(600)} className="mb-8 items-center">
+          <Animated.View entering={FadeInUp.duration(600)} className="mb-10 items-center">
             <View
               className="h-24 w-24 items-center justify-center rounded-full bg-white"
               style={{
