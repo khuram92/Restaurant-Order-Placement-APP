@@ -16,19 +16,19 @@ import { requestOtp, verifyOtp } from "../../services/authApi";
 import { getErrorMessage } from "../../lib/api";
 import { useAuth } from "../../context/AuthContext";
 
-const RESEND_SECONDS = 60; // must match OTP_RESEND_SECONDS in backend .env
+const RESEND_SECONDS = 60; 
 const CODE_LENGTH = 6;
 
 // Same palette as the login screen
 const COLORS = {
-  bg: ["#FFF1F5", "#FFD1DC", "#F9A8D4"] as const,
-  button: ["#F472B6", "#EC4899"] as const,
+  bg: ["#e0e1df", "#e0e1df", "#F9A8D4"] as const,
+  button: ["#4e5c4a", "#EC4899"] as const,
   buttonDisabled: ["#F9C6DC", "#F5B5D0"] as const,
-  pink: "#EC4899",
+  focus: "#4e5c4a",
 };
 
 const pinkShadow = (opacity: number, radius: number, elevation: number) => ({
-  shadowColor: COLORS.pink,
+  shadowColor: COLORS.focus,
   shadowOpacity: opacity,
   shadowRadius: radius,
   shadowOffset: { width: 0, height: radius / 2 },
@@ -167,7 +167,7 @@ export default function VerifyOtpScreen() {
                   const borderColor = error
                     ? "#EF4444"
                     : isActive
-                      ? COLORS.pink
+                      ? COLORS.focus
                       : digit
                         ? "#F9A8D4"
                         : "#F3D1DE";
