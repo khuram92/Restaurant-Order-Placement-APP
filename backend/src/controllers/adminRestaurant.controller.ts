@@ -80,41 +80,41 @@ export const listRestaurants = async (req: Request, res: Response) => {
   res.json({ restaurants, total, page, pages: Math.max(1, Math.ceil(total / limit)) });
 };
 
-// /** GET /api/admin/restaurants/:id */
-// export const getRestaurant = async (req: Request, res: Response) => {
-//   const restaurant = await findRestaurantOr404(req, res);
-//   if (!restaurant) return;
-//   res.json({ restaurant });
-// };
+/** GET /api/admin/restaurants/:id */
+export const getRestaurant = async (req: Request, res: Response) => {
+  const restaurant = await findRestaurantOr404(req, res);
+  if (!restaurant) return;
+  res.json({ restaurant });
+};
 
-// /** PATCH /api/admin/restaurants/:id   (send only the fields to change) */
-// export const updateRestaurant = async (req: Request, res: Response) => {
-//   const parsed = updateRestaurantSchema.safeParse(req.body);
-//   if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
+/** PATCH /api/admin/restaurants/:id   (send only the fields to change) */
+export const updateRestaurant = async (req: Request, res: Response) => {
+  const parsed = updateRestaurantSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
 
-//   const restaurant = await findRestaurantOr404(req, res);
-//   if (!restaurant) return;
+  const restaurant = await findRestaurantOr404(req, res);
+  if (!restaurant) return;
 
-//   const { address, services, location, ...rest } = parsed.data;
+  const { address, services, location, ...rest } = parsed.data;
 
-//   // Simple fields
-//   restaurant.set(rest);
+  // Simple fields
+  restaurant.set(rest);
 
-//   // Nested objects: only change the keys that were sent
-//   if (address) {
-//     for (const [key, value] of Object.entries(address)) restaurant.set(`address.${key}`, value);
-//   }
-//   if (services) {
-//     for (const [key, value] of Object.entries(services)) restaurant.set(`services.${key}`, value);
-//   }
+  // Nested objects: only change the keys that were sent
+  if (address) {
+    for (const [key, value] of Object.entries(address)) restaurant.set(`address.${key}`, value);
+  }
+  if (services) {
+    for (const [key, value] of Object.entries(services)) restaurant.set(`services.${key}`, value);
+  }
 
-//   // Location: object = set, null = remove
-//   if (location === null) restaurant.set("location", undefined);
-//   else if (location) restaurant.set("location", toGeoPoint(location));
+  // Location: object = set, null = remove
+  if (location === null) restaurant.set("location", undefined);
+  else if (location) restaurant.set("location", toGeoPoint(location));
 
-//   await restaurant.save(); // runs model validation (e.g. at least one service)
-//   res.json({ restaurant });
-// };
+  await restaurant.save(); // runs model validation (e.g. at least one service)
+  res.json({ restaurant });
+};
 
 // /** PATCH /api/admin/restaurants/:id/status   { isActive: true | false } */
 // export const setRestaurantStatus = async (req: Request, res: Response) => {
