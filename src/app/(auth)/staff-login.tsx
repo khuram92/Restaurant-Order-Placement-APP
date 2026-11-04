@@ -83,18 +83,18 @@ export default function StaffLoginScreen() {
               <Text className="text-4xl">🛡️</Text>
             </View>
             <Text className="mt-4 text-3xl font-extrabold text-[#4e5c4a]">Staff Login</Text>
-            <Text className="mt-1 text-center text-base text-[#4e5c4a]70">
+            <Text className="mt-1 text-center text-base text-[#4e5c4a]/70">
               For admins and restaurant managers
             </Text>
           </View>
 
           {/* White card */}
-          <View className="rounded-3xl bg-white p-6" style={pShadow(0.25, 24, 12)}>
+          <View className="rounded-3xl bg-gray-100 p-6" style={pShadow(0.35, 34, 18)}>
             {/* Email */}
-            <Text className="mb-2 text-sm font-semibold text-gray-700">Email</Text>
+            <Text className="mb-2 text-sm font-semibold text-gray-800">Email</Text>
             <View
               className={`mb-4 flex-row items-center rounded-2xl border-2 px-4 ${
-                focused === "email" ? "bg-pink-50" : "bg-gray-50"
+                focused === "email" ? "bg-[#e0e1df]" : "bg-gray-50"
               }`}
               style={{ borderColor: fieldBorder("email") }}
             >
