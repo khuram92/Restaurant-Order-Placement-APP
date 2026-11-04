@@ -116,19 +116,19 @@ export const updateRestaurant = async (req: Request, res: Response) => {
   res.json({ restaurant });
 };
 
-// /** PATCH /api/admin/restaurants/:id/status   { isActive: true | false } */
-// export const setRestaurantStatus = async (req: Request, res: Response) => {
-//   const parsed = statusSchema.safeParse(req.body);
-//   if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
+/** PATCH /api/admin/restaurants/:id/status   { isActive: true | false } */
+export const setRestaurantStatus = async (req: Request, res: Response) => {
+  const parsed = statusSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
 
-//   const restaurant = await findRestaurantOr404(req, res);
-//   if (!restaurant) return;
+  const restaurant = await findRestaurantOr404(req, res);
+  if (!restaurant) return;
 
-//   restaurant.isActive = parsed.data.isActive;
-//   await restaurant.save();
+  restaurant.isActive = parsed.data.isActive;
+  await restaurant.save();
 
-//   res.json({
-//     message: restaurant.isActive ? "Restaurant activated" : "Restaurant deactivated",
-//     restaurant,
-//   });
-// };
+  res.json({
+    message: restaurant.isActive ? "Restaurant activated" : "Restaurant deactivated",
+    restaurant,
+  });
+};
