@@ -85,16 +85,16 @@ function Field({
   return (
     <View className="mb-4">
       <View className="mb-2 flex-row items-center justify-between">
-        <Text className="text-sm font-semibold text-gray-700">{label}</Text>
+        <Text className="text-sm font-semibold text-gray-900">{label}</Text>
         {locked && <Text className="text-xs text-pink-500">🔒 Verified</Text>}
         {optional && <Text className="text-xs text-gray-400">Optional</Text>}
       </View>
       <View
         className={`flex-row items-center rounded-2xl border-2 px-4 ${
-          locked ? "bg-pink-50" : focused ? "bg-pink-50" : "bg-gray-50"
+          locked ? "bg-[#e0e1df]" : focused ? "bg-[#e0e1df]" : "bg-gray-50"
         }`}
         style={{
-          borderColor: locked ? "#FBCFE8" : focused ? COLORS.focus : "#F3D1DE",
+          borderColor: locked ? "#e0e1df" : focused ? COLORS.focus : "#e0e1df",
         }}>
         <Text className="mr-2 text-lg">{icon}</Text>
         <TextInput
@@ -222,7 +222,6 @@ export default function CompleteProfileScreen() {
               </Text>
             </View>
 
-            {/* White card */}
             <View
               className="rounded-3xl bg-gray-100 p-6"
               style={pShadow(0.25, 24, 12)}>
@@ -258,7 +257,9 @@ export default function CompleteProfileScreen() {
                   className={`flex-row items-center rounded-2xl border-2 px-4 py-4 ${
                     showPicker ? "bg-pink-50" : "bg-gray-50"
                   }`}
-                  style={{ borderColor: showPicker ? COLORS.focus : "#F3D1DE" }}>
+                  style={{
+                    borderColor: showPicker ? COLORS.focus : "#F3D1DE",
+                  }}>
                   <Text className="mr-2 text-lg">🎂</Text>
                   <Text
                     className={`flex-1 text-base ${dob ? "text-gray-900" : "text-[#C9A3B5]"}`}>
