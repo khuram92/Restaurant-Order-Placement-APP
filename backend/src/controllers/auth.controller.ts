@@ -41,6 +41,24 @@ const verifyOtpSchema = z.object({
     .regex(/^\d{6}$/, "OTP must be 6 digits"),
 });
 
+const nameField = (label: string) =>
+  z
+    .string({ error: `${label} is required` })
+    .trim()
+    .min(2, `${label} must be at least 2 characters`)
+    .max(40, `${label} is too long`)
+    .regex(/^[\p{L}\s'.-]+$/u, `${label} can only contain letters`);
+
+const completeProfileSchema = z.object({
+  firstName: nameField("First name"),
+  lastName: nameField("Last name"),
+  dob: z
+    .string({ error: "Date of birth is required" })
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Date of birth must be YYYY-MM-DD"),
+  email: z.string().trim().optional(),
+  phone: z.string().trim().optional(),
+});
+
 // ---------- Staff ----------
 
 /** POST /api/auth/login: Super Admin & Managers */
@@ -186,6 +204,55 @@ export const verifyOtp = async (req: Request, res: Response) => {
 };
 
 // ---------- Everyone ----------
+/** PATCH /api/auth/complete-profile   { firstName, lastName, dob, email?, phone? } */
+export const completeProfile = async (req: Request, res: Response) => {
+  const parsed = completeProfileSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ message: parsed.error.issues[0]?.message });
+  }
+
+  const user = req.user!; // set by protect
+  const { firstName, lastName, dob, email, phone } = parsed.data;
+
+  // ----- Date of birth: real date, in the past, max 100 years ago -----
+  const dobDate = new Date(`${dob}T00:00:00.000Z`);
+  const isRealDate = !isNaN(dobDate.getTime()) && dobDate.toISOString().slice(0, 10) === dob; // rejects 2000-02-31
+  const oldest = new Date();
+  oldest.setFullYear(oldest.getFullYear() - 100);
+
+  if (!isRealDate) return res.status(400).json({ message: "Enter a valid date of birth" });
+  if (dobDate >= new Date()) return res.status(400).json({ message: "Date of birth must be in the past" });
+  if (dobDate < oldest) return res.status(400).json({ message: "Enter a realistic date of birth" });
+
+  // ----- Second contact (optional). The login contact is locked. -----
+  if (email && !user.email) {
+    const result = parseIdentifier(email);
+    if (!result || result.channel !== "email") {
+      return res.status(400).json({ message: "Enter a valid email" });
+    }
+    const taken = await User.exists({ email: result.identifier, _id: { $ne: user._id } });
+    if (taken) return res.status(409).json({ message: "This email is already used by another account" });
+    user.email = result.identifier;
+  }
+
+  if (phone && !user.phone) {
+    const result = parseIdentifier(phone);
+    if (!result || result.channel !== "phone") {
+      return res.status(400).json({ message: "Enter a valid phone number (03XXXXXXXXX)" });
+    }
+    const taken = await User.exists({ phone: result.identifier, _id: { $ne: user._id } });
+    if (taken) return res.status(409).json({ message: "This phone number is already used by another account" });
+    user.phone = result.identifier;
+  }
+
+  user.firstName = firstName;
+  user.lastName = lastName;
+  user.dob = dobDate;
+  user.profileCompleted = true;
+
+  await user.save();
+  res.json({ user });
+};
 
 /** GET /api/auth/me */
 export const getMe = async (req: Request, res: Response) => {
