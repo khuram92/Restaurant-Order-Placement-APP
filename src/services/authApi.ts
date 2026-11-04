@@ -8,12 +8,9 @@ export const requestOtp = async (identifier: string) => {
 };
 
 /** Customer: verify OTP (name only needed for new customers) */
-export const verifyOtp = async (identifier: string, code: string, name?: string) => {
-  const { data } = await api.post<AuthResponse>("/auth/otp/verify", {
-    identifier,
-    code,
-    ...(name && { name }),
-  });
+/** Customer: verify OTP and log in (creates the account if new) */
+export const verifyOtp = async (identifier: string, code: string) => {
+  const { data } = await api.post<AuthResponse>("/auth/otp/verify", { identifier, code });
   return data;
 };
 
