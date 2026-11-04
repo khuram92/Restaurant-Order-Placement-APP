@@ -224,7 +224,7 @@ export default function CompleteProfileScreen() {
 
             {/* White card */}
             <View
-              className="rounded-3xl bg-white p-6"
+              className="rounded-3xl bg-gray-100 p-6"
               style={pShadow(0.25, 24, 12)}>
               {/* Names side by side */}
               <View className="flex-row gap-3">
