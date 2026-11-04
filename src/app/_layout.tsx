@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { SplashScreen, Stack } from "expo-router";
+import { SplashScreen, Stack, router, useSegments } from "expo-router";
 import { AuthProvider, useAuth } from "../context/AuthContext";
 import "../../global.css";
 
@@ -17,9 +17,25 @@ function SplashScreenController() {
 }
 
 function RootNavigator() {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
+  const segments = useSegments(); // e.g. ["(auth)", "verify-otp"]
+
   const isCustomer = user?.role === "customer";
   const needsProfile = isCustomer && !user?.profileCompleted;
+
+  // Send the user to the right group whenever their state changes
+  useEffect(() => {
+    if (isLoading) return;
+    const group = segments[0];
+
+    if (!user && group !== "(auth)") {
+      router.replace("/login");
+    } else if (needsProfile && group !== "(onboarding)") {
+      router.replace("/complete-profile");
+    } else if (isCustomer && !needsProfile && group !== "(customer)") {
+      router.replace("/");
+    }
+  }, [user, isLoading, needsProfile, isCustomer, segments]);
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
