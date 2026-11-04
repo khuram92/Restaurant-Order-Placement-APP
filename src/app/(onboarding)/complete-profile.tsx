@@ -24,14 +24,13 @@ import { parseIdentifier } from "../../utils/identifier";
 
 // Same palette as the auth screens
 const COLORS = {
-  bg: ["#FFF1F5", "#FFD1DC", "#F9A8D4"] as const,
-  button: ["#F472B6", "#EC4899"] as const,
-  buttonDisabled: ["#F9C6DC", "#F5B5D0"] as const,
-  pink: "#EC4899",
+  bg: ["#e0e1df", "#e0e1df", "#F9A8D4"] as const,
+  button: ["#4e5c4a", "#F9A8D4"] as const,
+  buttonDisabled: ["#4e5c4a", "#F9A8D4"] as const,
+  focus: "#4e5c4a",
 };
-
-const pinkShadow = (opacity: number, radius: number, elevation: number) => ({
-  shadowColor: COLORS.pink,
+const pShadow = (opacity: number, radius: number, elevation: number) => ({
+  shadowColor: COLORS.focus,
   shadowOpacity: opacity,
   shadowRadius: radius,
   shadowOffset: { width: 0, height: radius / 2 },
@@ -95,7 +94,7 @@ function Field({
           locked ? "bg-pink-50" : focused ? "bg-pink-50" : "bg-gray-50"
         }`}
         style={{
-          borderColor: locked ? "#FBCFE8" : focused ? COLORS.pink : "#F3D1DE",
+          borderColor: locked ? "#FBCFE8" : focused ? COLORS.focus : "#F3D1DE",
         }}>
         <Text className="mr-2 text-lg">{icon}</Text>
         <TextInput
@@ -109,7 +108,7 @@ function Field({
           keyboardType={keyboardType}
           autoCapitalize={autoCapitalize}
           autoCorrect={false}
-          selectionColor={COLORS.pink}
+          selectionColor={COLORS.focus}
           className={`flex-1 py-4 text-base ${locked ? "text-gray-500" : "text-gray-900"}`}
         />
       </View>
@@ -226,7 +225,7 @@ export default function CompleteProfileScreen() {
             {/* White card */}
             <View
               className="rounded-3xl bg-white p-6"
-              style={pinkShadow(0.25, 24, 12)}>
+              style={pShadow(0.25, 24, 12)}>
               {/* Names side by side */}
               <View className="flex-row gap-3">
                 <View className="flex-1">
@@ -259,7 +258,7 @@ export default function CompleteProfileScreen() {
                   className={`flex-row items-center rounded-2xl border-2 px-4 py-4 ${
                     showPicker ? "bg-pink-50" : "bg-gray-50"
                   }`}
-                  style={{ borderColor: showPicker ? COLORS.pink : "#F3D1DE" }}>
+                  style={{ borderColor: showPicker ? COLORS.focus : "#F3D1DE" }}>
                   <Text className="mr-2 text-lg">🎂</Text>
                   <Text
                     className={`flex-1 text-base ${dob ? "text-gray-900" : "text-[#C9A3B5]"}`}>
@@ -325,7 +324,7 @@ export default function CompleteProfileScreen() {
                   marginTop: 8,
                   borderRadius: 16,
                   opacity: pressed ? 0.85 : 1,
-                  ...pinkShadow(canSubmit ? 0.4 : 0, 12, canSubmit ? 6 : 0),
+                  ...pShadow(canSubmit ? 0.4 : 0, 12, canSubmit ? 6 : 0),
                 })}>
                 <LinearGradient
                   colors={canSubmit ? COLORS.button : COLORS.buttonDisabled}

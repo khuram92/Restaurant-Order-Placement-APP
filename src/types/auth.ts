@@ -33,8 +33,8 @@ export interface AuthResponse {
 export interface CompleteProfileInput {
   firstName: string;
   lastName: string;
-  dob: string; // YYYY-MM-DD
-  email?: string; // only if the user logged in with phone
-  phone?: string; // only if the user logged in with email
-  avatar?: string; // Cloudinary image URL
+  dob: string; 
+  email?: string; 
+  phone?: string; 
+  avatar?: string; 
 }
