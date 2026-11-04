@@ -25,7 +25,7 @@ import AvatarPicker from "@/components/AvatarPicker";
 // Same palette as the auth screens
 const COLORS = {
   bg: ["#e0e1df", "#e0e1df", "#4e5c4a"] as const,
-  button: ["#4e5c4a", "#F9A8D4"] as const,
+  button: ["#4e5c4a", "#EC4899"] as const,
   buttonDisabled: ["#F9C6DC", "#F5B5D0"] as const,
   focus: "#4e5c4a",
 };

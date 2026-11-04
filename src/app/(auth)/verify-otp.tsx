@@ -21,12 +21,11 @@ const CODE_LENGTH = 6;
 
 // Same palette as the login screen
 const COLORS = {
-  bg: ["#e0e1df", "#e0e1df", "#F9A8D4"] as const,
-  button: ["#4e5c4a", "#F9A8D4"] as const,
+  bg: ["#e0e1df", "#e0e1df", "#4e5c4a"] as const,
+  button: ["#4e5c4a", "#EC4899"] as const,
   buttonDisabled: ["#F9C6DC", "#F5B5D0"] as const,
   focus: "#4e5c4a",
 };
-
 const pShadow = (opacity: number, radius: number, elevation: number) => ({
   shadowColor: COLORS.focus,
   shadowOpacity: opacity,
@@ -124,7 +123,7 @@ export default function VerifyOtpScreen() {
       end={{ x: 1, y: 1 }}
       style={{ flex: 1 }}>
       <View className="absolute -right-16 -top-12 h-56 w-56 rounded-full bg-pink-300 opacity-40" />
-      <View className="absolute -left-16 -bottom-12 h-56 w-56 rounded-full bg-rose-400 opacity-50" />
+      <View className="absolute -left-16 -bottom-12 h-56 w-56 rounded-full bg-rose-200 opacity-30" />
 
       <SafeAreaView className="flex-1">
         <KeyboardAvoidingView
