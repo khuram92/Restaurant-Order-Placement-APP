@@ -56,7 +56,6 @@ const hundredYearsAgo = new Date(
   today.getDate(),
 );
 
-// ---------- Reusable input field ----------
 type FieldProps = {
   label: string;
   icon: string;
@@ -116,7 +115,6 @@ function Field({
   );
 }
 
-// ---------- Screen ----------
 export default function CompleteProfileScreen() {
   const { user, updateUser, signOut } = useAuth();
 
