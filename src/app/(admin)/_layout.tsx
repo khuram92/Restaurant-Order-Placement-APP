@@ -6,11 +6,11 @@ export default function AdminLayout() {
   return (
     <Stack
       screenOptions={{
-        headerTintColor: "#EC4899",
-        headerTitleStyle: { fontWeight: "700", color: "#831843" },
-        headerStyle: { backgroundColor: "#FFF1F5" },
+        headerTintColor: "#4e5c4a",
+        headerTitleStyle: { fontWeight: "700", color: "#4e5c4a" },
+        headerStyle: { backgroundColor: "#e0e1df" },
         headerShadowVisible: false,
-        contentStyle: { backgroundColor: "#FFF1F5" },
+        contentStyle: { backgroundColor: "#e0e1df" },
       }}
     />
   );
