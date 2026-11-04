@@ -84,16 +84,16 @@ export default function LoginScreen() {
               className="h-24 w-24 items-center justify-center rounded-full bg-white"
               style={{
                 shadowColor: COLORS.focus,
-                shadowOpacity: 1,
+                shadowOpacity: 0.35,
                 shadowRadius: 22,
-                shadowOffset: { width: 10, height: 18 },
+                shadowOffset: { width: 0, height: 18 },
                 elevation: 10,
               }}
             >
               <Text className="text-5xl">🍽️</Text>
             </View>
-            <Text className="mt-5 text-3xl font-extrabold text-pink-600">Welcome</Text>
-            <Text className="mt-2 text-center text-base text-pink-900/70">
+            <Text className="mt-5 text-3xl font-extrabold text-[#4e5c4a]">Welcome</Text>
+            <Text className="mt-2 text-center text-base text-[#4e5c4a]/70">
               Log in or sign up with your phone number or email
             </Text>
           </Animated.View>
@@ -101,20 +101,20 @@ export default function LoginScreen() {
           {/* White card */}
           <Animated.View
             entering={FadeInDown.delay(200).duration(600).springify()}
-            className="rounded-3xl bg-white p-6"
+            className="rounded-3xl bg-gray-100 p-6"
             style={{
               shadowColor: COLORS.focus,
-              shadowOpacity: 0.25,
-              shadowRadius: 24,
-              shadowOffset: { width: 0, height: 12 },
-              elevation: 12,
+              shadowOpacity: 0.55,
+              shadowRadius: 35,
+              shadowOffset: { width: 0, height: 16 },
+              elevation: 22,
             }}
           >
             {/* Input */}
-            <Text className="mb-2 text-sm font-semibold text-gray-700">Phone or Email</Text>
+            <Text className="mb-2 text-base font-semibold text-gray-800">Phone or Email</Text>
             <View
               className={`flex-row items-center rounded-2xl mb-4 border-2 px-4 ${
-                focused ? "bg-pink-50" : "bg-gray-50"
+                focused ? "bg-[#e0e1df]" : "bg-gray-50"
               }`}
               style={{
                 borderColor,
@@ -149,7 +149,7 @@ export default function LoginScreen() {
             </View>
 
             {!!error && (
-              <Animated.Text entering={FadeInDown.duration(250)} className="mt-2 text-sm text-red-500">
+              <Animated.Text entering={FadeInDown.duration(250)} className="mt-2 mb-2 text-sm text-red-500">
                 {error}
               </Animated.Text>
             )}
