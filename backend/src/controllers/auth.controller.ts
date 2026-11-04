@@ -10,6 +10,7 @@ import {
     parseIdentifier,
 } from "../utils/otp.js";
 import { sendOtp } from "../utils/sendOtp.js";
+import { uploadAvatarImage } from "../utils/cloudinary.js";
 
 const OTP_EXPIRES_MINUTES = Number(process.env.OTP_EXPIRES_MINUTES) || 5;
 const OTP_RESEND_SECONDS = Number(process.env.OTP_RESEND_SECONDS) || 60;
@@ -203,7 +204,6 @@ export const verifyOtp = async (req: Request, res: Response) => {
   res.status(isNewUser ? 201 : 200).json({ token, user, isNewUser });
 };
 
-// ---------- Everyone ----------
 /** PATCH /api/auth/complete-profile   { firstName, lastName, dob, email?, phone? } */
 export const completeProfile = async (req: Request, res: Response) => {
   const parsed = completeProfileSchema.safeParse(req.body);
@@ -253,6 +253,28 @@ export const completeProfile = async (req: Request, res: Response) => {
   await user.save();
   res.json({ user });
 };
+
+
+export const uploadAvatar = async (req: Request, res: Response) => {
+  if (!req.file) {
+    return res.status(400).json({ message: "Please choose an image" });
+  }
+
+  const user = req.user!;
+
+  try {
+    const result = await uploadAvatarImage(req.file.buffer, user.id);
+    // ?v= forces apps to load the new image instead of a cached old one
+    user.avatar = `${result.secure_url}?v=${result.version}`;
+    await user.save();
+    res.json({ user });
+  } catch (error) {
+    console.error("❌ Avatar upload failed:", (error as Error).message);
+    res.status(502).json({ message: "Couldn't upload the image. Please try again." });
+  }
+};
+
+// ---------- Everyone ----------
 
 /** GET /api/auth/me */
 export const getMe = async (req: Request, res: Response) => {
