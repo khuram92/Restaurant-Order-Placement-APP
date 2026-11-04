@@ -1,3 +1,5 @@
+import { LinearGradient } from "expo-linear-gradient";
+import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -10,20 +12,18 @@ import {
   type TextInputInstance,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { LinearGradient } from "expo-linear-gradient";
-import { router, useLocalSearchParams } from "expo-router";
-import { requestOtp, verifyOtp } from "../../services/authApi";
-import { getErrorMessage } from "../../lib/api";
 import { useAuth } from "../../context/AuthContext";
+import { getErrorMessage } from "../../lib/api";
+import { requestOtp, verifyOtp } from "../../services/authApi";
 
-const RESEND_SECONDS = 60; 
+const RESEND_SECONDS = 60;
 const CODE_LENGTH = 6;
 
 // Same palette as the login screen
 const COLORS = {
   bg: ["#e0e1df", "#e0e1df", "#F9A8D4"] as const,
-  button: ["#4e5c4a", "#EC4899"] as const,
-  buttonDisabled: ["#F9C6DC", "#F5B5D0"] as const,
+  button: ["#4e5c4a", "#F9A8D4"] as const,
+  buttonDisabled: ["#4e5c4a", "#F9A8D4"] as const,
   focus: "#4e5c4a",
 };
 
@@ -118,25 +118,28 @@ export default function VerifyOtpScreen() {
   const activeIndex = Math.min(code.length, CODE_LENGTH - 1);
 
   return (
-    <LinearGradient colors={COLORS.bg} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ flex: 1 }}>
-      
+    <LinearGradient
+      colors={COLORS.bg}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={{ flex: 1 }}>
       <View className="absolute -right-16 -top-12 h-56 w-56 rounded-full bg-pink-300 opacity-40" />
       <View className="absolute -left-16 -bottom-12 h-56 w-56 rounded-full bg-rose-400 opacity-50" />
 
       <SafeAreaView className="flex-1">
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : undefined}
-          className="flex-1 justify-center px-6"
-        >
+          className="flex-1 justify-center px-6">
           {/* Header */}
           <View className="mb-6 items-center">
             <View
               className="h-20 w-20 items-center justify-center rounded-full bg-gray-100"
-              style={pShadow(0.35, 26, 16)}
-            >
+              style={pShadow(0.35, 26, 16)}>
               <Text className="text-4xl">🔐</Text>
             </View>
-            <Text className="mt-4 text-3xl font-extrabold text-[#4e5c4a]">Verify it's you</Text>
+            <Text className="mt-4 text-3xl font-extrabold text-[#4e5c4a]">
+              Verify it's you
+            </Text>
             <Text className="mt-1 text-center text-base text-[#4e5c4a]/80">
               Enter the 6-digit code we sent to
             </Text>
@@ -154,10 +157,12 @@ export default function VerifyOtpScreen() {
             </View>
           </View>
 
-          
-          <View className="rounded-3xl bg-gray-100 p-6" style={pShadow(0.25, 26, 18)}>
-            {/* Code boxes */}
-            <Text className="mb-3 text-sm font-semibold text-gray-700">Verification code</Text>
+          <View
+            className="rounded-3xl bg-gray-100 p-6"
+            style={pShadow(0.25, 26, 18)}>
+            <Text className="mb-3 text-base font-semibold text-gray-700">
+              Verification code
+            </Text>
             <Pressable onPress={() => codeInputRef.current?.focus()}>
               <View className="flex-row justify-between">
                 {Array.from({ length: CODE_LENGTH }).map((_, i) => {
@@ -178,11 +183,14 @@ export default function VerifyOtpScreen() {
                       className={`h-14 w-12 items-center justify-center rounded-2xl border-2 ${
                         digit ? "bg-pink-50" : "bg-gray-50"
                       }`}
-                      style={{ borderColor }}
-                    >
-                      <Text className="text-2xl font-bold text-pink-600">{digit ?? ""}</Text>
-                      {/* Small bar in the next empty box */}
-                      {isActive && !digit && <View className="h-0.5 w-4 rounded-full bg-pink-500" />}
+                      style={{ borderColor }}>
+                      <Text className="text-2xl font-bold text-pink-600">
+                        {digit ?? ""}
+                      </Text>
+
+                      {isActive && !digit && (
+                        <View className="h-0.5 w-4 rounded-full bg-pink-500" />
+                      )}
                     </View>
                   );
                 })}
@@ -202,19 +210,25 @@ export default function VerifyOtpScreen() {
                 autoComplete="sms-otp" // Android: autofill from SMS
                 editable={!loading}
                 caretHidden
-                style={{ position: "absolute", width: 1, height: 1, opacity: 0 }}
+                style={{
+                  position: "absolute",
+                  width: 1,
+                  height: 1,
+                  opacity: 0,
+                }}
               />
             </Pressable>
 
-            {/* Messages */}
-            {!!error && <Text className="mt-3 text-sm text-red-500">{error}</Text>}
-            {!!info && <Text className="mt-3 text-sm text-green-600">{info}</Text>}
-            {__DEV__ && !!devOtp && (
-              <Text className="mt-3 text-xs text-gray-400">Dev code: {devOtp}</Text>
+            {!!error && (
+              <Text className="mt-3 text-sm text-red-500">{error}</Text>
+            )}
+            {!!info && (
+              <Text className="mt-3 text-sm text-[#4e5c4a]">{info}</Text>
             )}
 
             {/* Verify button */}
             <Pressable
+              className="mt-4"
               onPress={() => handleVerify()}
               disabled={!canSubmit}
               style={({ pressed }) => ({
@@ -222,18 +236,22 @@ export default function VerifyOtpScreen() {
                 borderRadius: 16,
                 opacity: pressed ? 0.85 : 1,
                 ...pShadow(canSubmit ? 0.4 : 0, 12, canSubmit ? 6 : 0),
-              })}
-            >
+              })}>
               <LinearGradient
                 colors={canSubmit ? COLORS.button : COLORS.buttonDisabled}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
-                style={{ borderRadius: 16, paddingVertical: 16, alignItems: "center" }}
-              >
+                style={{
+                  borderRadius: 16,
+                  paddingVertical: 16,
+                  alignItems: "center",
+                }}>
                 {loading ? (
                   <ActivityIndicator color="#fff" />
                 ) : (
-                  <Text className="text-base font-bold tracking-wide text-white">Verify</Text>
+                  <Text className="text-base font-bold tracking-wide text-white">
+                    Verify
+                  </Text>
                 )}
               </LinearGradient>
             </Pressable>
@@ -242,13 +260,17 @@ export default function VerifyOtpScreen() {
             <View className="mt-5 items-center">
               {secondsLeft > 0 ? (
                 <View className="rounded-full bg-pink-50 px-4 py-2">
-                  <Text className="text-sm text-pink-700">
-                    Resend code in <Text className="font-bold">{secondsLeft}s</Text>
+                  <Text className="text-sm text-[#4e5c4a]">
+                    Resend code in{" "}
+                    <Text className="font-bold">{secondsLeft}s</Text>
                   </Text>
                 </View>
               ) : (
-                <Pressable onPress={handleResend} disabled={resending} hitSlop={8}>
-                  <Text className="text-sm font-bold text-pink-600">
+                <Pressable
+                  onPress={handleResend}
+                  disabled={resending}
+                  hitSlop={8}>
+                  <Text className="text-sm font-bold text-[#4e5c4a]">
                     {resending ? "Sending..." : "Didn't get it? Resend code"}
                   </Text>
                 </Pressable>
