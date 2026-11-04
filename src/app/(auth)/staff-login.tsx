@@ -23,7 +23,7 @@ const COLORS = {
   focus: "#4e5c4a",
 }
 
-const pinkShadow = (opacity: number, radius: number, elevation: number) => ({
+const pShadow = (opacity: number, radius: number, elevation: number) => ({
   shadowColor: COLORS.focus,
   shadowOpacity: opacity,
   shadowRadius: radius,
@@ -77,19 +77,19 @@ export default function StaffLoginScreen() {
           {/* Header */}
           <View className="mb-8 items-center">
             <View
-              className="h-20 w-20 items-center justify-center rounded-full bg-white"
-              style={pinkShadow(0.35, 16, 10)}
+              className="h-20 w-20 items-center justify-center rounded-full bg-gray-100"
+              style={pShadow(0.35, 22, 18)}
             >
               <Text className="text-4xl">🛡️</Text>
             </View>
-            <Text className="mt-4 text-3xl font-extrabold text-pink-600">Staff Login</Text>
-            <Text className="mt-1 text-center text-base text-pink-900/70">
+            <Text className="mt-4 text-3xl font-extrabold text-[#4e5c4a]">Staff Login</Text>
+            <Text className="mt-1 text-center text-base text-[#4e5c4a]70">
               For admins and restaurant managers
             </Text>
           </View>
 
           {/* White card */}
-          <View className="rounded-3xl bg-white p-6" style={pinkShadow(0.25, 24, 12)}>
+          <View className="rounded-3xl bg-white p-6" style={pShadow(0.25, 24, 12)}>
             {/* Email */}
             <Text className="mb-2 text-sm font-semibold text-gray-700">Email</Text>
             <View
@@ -163,7 +163,7 @@ export default function StaffLoginScreen() {
                 marginTop: 24,
                 borderRadius: 16,
                 opacity: pressed ? 0.85 : 1,
-                ...pinkShadow(canSubmit ? 0.4 : 0, 12, canSubmit ? 6 : 0),
+                ...pShadow(canSubmit ? 0.4 : 0, 12, canSubmit ? 6 : 0),
               })}
             >
               <LinearGradient
