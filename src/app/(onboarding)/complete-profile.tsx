@@ -15,12 +15,12 @@ import {
   type KeyboardTypeOptions,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import AvatarPicker from "../../components/AvatarPicker";
 import { useAuth } from "../../context/AuthContext";
 import { getErrorMessage } from "../../lib/api";
 import { completeProfile } from "../../services/authApi";
 import type { CompleteProfileInput } from "../../types/auth";
 import { parseIdentifier } from "../../utils/identifier";
+import AvatarPicker from "@/components/AvatarPicker";
 
 // Same palette as the auth screens
 const COLORS = {
@@ -55,6 +55,7 @@ const hundredYearsAgo = new Date(
   today.getMonth(),
   today.getDate(),
 );
+
 
 type FieldProps = {
   label: string;
@@ -114,6 +115,7 @@ function Field({
     </View>
   );
 }
+
 
 export default function CompleteProfileScreen() {
   const { user, updateUser, signOut } = useAuth();

@@ -38,7 +38,6 @@ export const completeProfile = async (input: CompleteProfileInput) => {
  * reliable this way (fetch sets the multipart boundary itself).
  */
 export const uploadAvatar = async (image: { uri: string; mimeType?: string; fileName?: string }) => {
-  const token = await getToken();
   const type = image.mimeType ?? "image/jpeg";
   const extension = type.split("/")[1] ?? "jpg";
 
@@ -49,13 +48,10 @@ export const uploadAvatar = async (image: { uri: string; mimeType?: string; file
     name: image.fileName ?? `avatar.${extension}`,
   } as unknown as Blob); // React Native accepts { uri, type, name } for files
 
-  const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/auth/avatar`, {
-    method: "PATCH",
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-    body: form,
+  const { data } = await api.patch<{ user: User }>("/auth/avatar", form, {
+    headers: { "Content-Type": "multipart/form-data" },
+    transformRequest: (body) => body, // send FormData as-is (don't turn it into JSON)
+    timeout: 60000, // uploads can take longer than normal requests
   });
-
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(data.message ?? "Couldn't upload the image");
-  return (data as { user: User }).user;
+  return data.user;
 };

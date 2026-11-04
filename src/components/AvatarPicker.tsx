@@ -1,14 +1,15 @@
-import { Image } from "expo-image";
-import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
 import { ActivityIndicator, Alert, Pressable, Text, View } from "react-native";
+import { Image } from "expo-image";
+import * as ImagePicker from "expo-image-picker";
 import { useAuth } from "../context/AuthContext";
-import { getErrorMessage } from "../lib/api";
 import { uploadAvatar } from "../services/authApi";
+import { getErrorMessage } from "../lib/api";
 
 const PINK = "#EC4899";
 
 type Props = {
+  /** Initials shown when there is no photo (e.g. "AK") */
   initials?: string;
   size?: number;
 };
@@ -59,15 +60,11 @@ export default function AvatarPicker({ initials, size = 104 }: Props) {
   };
 
   const openOptions = () => {
-    Alert.alert(
-      "Profile photo",
-      "Add a photo so restaurants can recognise you",
-      [
-        { text: "Take photo", onPress: takePhoto },
-        { text: "Choose from gallery", onPress: chooseFromGallery },
-        { text: "Cancel", style: "cancel" },
-      ],
-    );
+    Alert.alert("Profile photo", "Add a photo so restaurants can recognise you", [
+      { text: "Take photo", onPress: takePhoto },
+      { text: "Choose from gallery", onPress: chooseFromGallery },
+      { text: "Cancel", style: "cancel" },
+    ]);
   };
 
   return (
@@ -83,17 +80,12 @@ export default function AvatarPicker({ initials, size = 104 }: Props) {
             shadowRadius: 16,
             shadowOffset: { width: 0, height: 8 },
             elevation: 10,
-          }}>
+          }}
+        >
           {user?.avatar ? (
-            <Image
-              source={{ uri: user.avatar }}
-              style={{ width: "100%", height: "100%" }}
-              contentFit="cover"
-            />
+            <Image source={{ uri: user.avatar }} style={{ width: "100%", height: "100%" }} contentFit="cover" />
           ) : initials ? (
-            <Text className="text-3xl font-extrabold text-[#4e5c4a]">
-              {initials}
-            </Text>
+            <Text className="text-3xl font-extrabold text-pink-500">{initials}</Text>
           ) : (
             <Text className="text-4xl">📷</Text>
           )}
@@ -111,13 +103,11 @@ export default function AvatarPicker({ initials, size = 104 }: Props) {
         </View>
       </Pressable>
 
-      <Text className="mt-3 text-sm font-semibold text-[#4e5c4a]">
+      <Text className="mt-3 text-sm font-semibold text-pink-600">
         {user?.avatar ? "Change photo" : "Add photo"}
         <Text className="font-normal text-gray-400"> · optional</Text>
       </Text>
-      {!!error && (
-        <Text className="mt-1 text-center text-sm text-red-500">{error}</Text>
-      )}
+      {!!error && <Text className="mt-1 text-center text-sm text-red-500">{error}</Text>}
     </View>
   );
 }
