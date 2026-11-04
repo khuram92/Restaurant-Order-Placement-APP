@@ -1,7 +1,7 @@
-import { useEffect } from "react";
 import { SplashScreen, Stack, router, useSegments } from "expo-router";
-import { AuthProvider, useAuth } from "../context/AuthContext";
+import { useEffect } from "react";
 import "../../global.css";
+import { AuthProvider, useAuth } from "../context/AuthContext";
 
 // Keep the splash screen visible until we know if the user is logged in
 SplashScreen.preventAutoHideAsync();
@@ -32,7 +32,7 @@ function RootNavigator() {
     if (!user && group !== "(auth)") {
       router.replace("/login");
     } else if (isSuperAdmin && group !== "(admin)") {
-      router.replace("/dashboard");
+      router.replace("/admin");
     } else if (needsProfile && group !== "(onboarding)") {
       router.replace("/complete-profile");
     } else if (isCustomer && !needsProfile && group !== "(customer)") {
