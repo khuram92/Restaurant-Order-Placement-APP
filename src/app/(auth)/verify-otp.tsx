@@ -154,8 +154,8 @@ export default function VerifyOtpScreen() {
             </View>
           </View>
 
-          {/* White card */}
-          <View className="rounded-3xl bg-white p-6" style={pShadow(0.25, 24, 12)}>
+          
+          <View className="rounded-3xl bg-gray-100 p-6" style={pShadow(0.25, 26, 18)}>
             {/* Code boxes */}
             <Text className="mb-3 text-sm font-semibold text-gray-700">Verification code</Text>
             <Pressable onPress={() => codeInputRef.current?.focus()}>
