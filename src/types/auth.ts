@@ -28,3 +28,11 @@ export interface AuthResponse {
   user: User;
   isNewUser?: boolean;
 }
+
+export interface CompleteProfileInput {
+  firstName: string;
+  lastName: string;
+  dob: string;     // YYYY-MM-DD
+  email?: string;  // only if the user logged in with phone
+  phone?: string;  // only if the user logged in with email
+}

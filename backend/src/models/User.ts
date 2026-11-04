@@ -1,20 +1,27 @@
-import { Schema, model, Types, type HydratedDocument, type Model } from "mongoose";
 import bcrypt from "bcryptjs";
+import {
+  model,
+  Schema,
+  Types,
+  type HydratedDocument,
+  type Model,
+} from "mongoose";
 
 export const ROLES = ["superadmin", "manager", "customer"] as const;
 export type Role = (typeof ROLES)[number];
 
 export interface IUser {
-  firstName?: string;            
+  firstName?: string;
   lastName?: string;
   dob?: Date;
+  avatar?: string;
   email?: string;
   phone?: string;
-  password?: string;            
+  password?: string;
   role: Role;
-  restaurantId?: Types.ObjectId; 
+  restaurantId?: Types.ObjectId;
   isActive: boolean;
-  profileCompleted: boolean;     
+  profileCompleted: boolean;
 }
 
 interface IUserMethods {
@@ -23,28 +30,44 @@ interface IUserMethods {
 
 export type UserDoc = HydratedDocument<IUser, IUserMethods>;
 
-const userSchema = new Schema<IUser, Model<IUser, {}, IUserMethods>, IUserMethods>(
+const userSchema = new Schema<
+  IUser,
+  Model<IUser, {}, IUserMethods>,
+  IUserMethods
+>(
   {
     firstName: { type: String, trim: true, maxlength: 40 },
     lastName: { type: String, trim: true, maxlength: 40 },
     dob: { type: Date },
+    avatar: { type: String },
     email: { type: String, trim: true, lowercase: true },
-    phone: { type: String, trim: true, match: [/^03\d{9}$/, "Phone must be 03XXXXXXXXX"] },
+    phone: {
+      type: String,
+      trim: true,
+      match: [/^03\d{9}$/, "Phone must be 03XXXXXXXXX"],
+    },
     password: { type: String, select: false, minlength: 8 },
     role: { type: String, enum: ROLES, default: "customer" },
     restaurantId: { type: Schema.Types.ObjectId, ref: "Restaurant" },
     isActive: { type: Boolean, default: true },
     profileCompleted: { type: Boolean, default: false },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // Unique only when the field exists (a customer may have only email OR only phone)
-userSchema.index({ email: 1 }, { unique: true, partialFilterExpression: { email: { $type: "string" } } });
-userSchema.index({ phone: 1 }, { unique: true, partialFilterExpression: { phone: { $type: "string" } } });
+userSchema.index(
+  { email: 1 },
+  { unique: true, partialFilterExpression: { email: { $type: "string" } } },
+);
+userSchema.index(
+  { phone: 1 },
+  { unique: true, partialFilterExpression: { phone: { $type: "string" } } },
+);
 
 userSchema.pre("validate", function () {
-  if (!this.email && !this.phone) this.invalidate("email", "Email or phone is required");
+  if (!this.email && !this.phone)
+    this.invalidate("email", "Email or phone is required");
   if (this.role !== "customer" && this.isNew && !this.password) {
     this.invalidate("password", "Password is required for staff accounts");
   }
@@ -59,7 +82,9 @@ userSchema.pre("save", async function () {
 });
 
 userSchema.methods.comparePassword = function (candidate: string) {
-  return this.password ? bcrypt.compare(candidate, this.password) : Promise.resolve(false);
+  return this.password
+    ? bcrypt.compare(candidate, this.password)
+    : Promise.resolve(false);
 };
 
 // Never send password in responses
@@ -70,4 +95,7 @@ userSchema.set("toJSON", {
   },
 });
 
-export const User = model<IUser, Model<IUser, {}, IUserMethods>>("User", userSchema);
+export const User = model<IUser, Model<IUser, {}, IUserMethods>>(
+  "User",
+  userSchema,
+);
