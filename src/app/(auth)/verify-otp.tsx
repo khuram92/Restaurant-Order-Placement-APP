@@ -23,7 +23,7 @@ const CODE_LENGTH = 6;
 const COLORS = {
   bg: ["#e0e1df", "#e0e1df", "#F9A8D4"] as const,
   button: ["#4e5c4a", "#F9A8D4"] as const,
-  buttonDisabled: ["#4e5c4a", "#F9A8D4"] as const,
+  buttonDisabled: ["#F9C6DC", "#F5B5D0"] as const,
   focus: "#4e5c4a",
 };
 
