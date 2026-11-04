@@ -14,7 +14,7 @@ import { listRestaurants } from "../../../../services/adminRestaurantApi";
 import { getErrorMessage } from "../../../../lib/api";
 import type { Restaurant, RestaurantStatusFilter } from "../../../../types/restaurant";
 
-const PINK = "#EC4899";
+const PINK = "#e0e1df";
 
 const FILTERS: { key: RestaurantStatusFilter; label: string }[] = [
   { key: "all", label: "All" },
@@ -153,13 +153,13 @@ export default function AdminRestaurantsScreen() {
   };
 
   return (
-    <View className="flex-1 bg-pink-50">
+    <View className="flex-1 bg-gray-100">
       <Stack.Screen
         options={{
           title: "Restaurants",
           headerRight: () => (
             <Pressable onPress={() => router.push("/admin/restaurants/new")} hitSlop={8}>
-              <Text className="text-base font-bold text-pink-600">+ Add</Text>
+              <Text className="text-base font-bold text-[#4e5c4a]">+ Add</Text>
             </Pressable>
           ),
         }}
@@ -167,7 +167,7 @@ export default function AdminRestaurantsScreen() {
 
       {/* Search */}
       <View className="px-4 pt-2">
-        <View className="flex-row items-center rounded-2xl border-2 border-pink-100 bg-white px-4">
+        <View className="flex-row items-center rounded-full border-2 border-[#e0e1df] bg-white px-4">
           <Text className="mr-2">🔍</Text>
           <TextInput
             value={search}
