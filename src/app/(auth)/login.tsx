@@ -184,7 +184,7 @@ export default function LoginScreen() {
             </Pressable>
 
             <Text className="mt-5 text-center text-xs text-gray-400">
-              We'll send you a 6-digit code to verify it's you 💗
+              We'll send you a 6-digit code to verify it's you.
             </Text>
           </Animated.View>
         </KeyboardAvoidingView>
