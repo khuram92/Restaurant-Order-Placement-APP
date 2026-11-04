@@ -1,3 +1,5 @@
+import { LinearGradient } from "expo-linear-gradient";
+import { router } from "expo-router";
 import { useState } from "react";
 import {
   ActivityIndicator,
@@ -8,18 +10,15 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { LinearGradient } from "expo-linear-gradient";
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
-import { router } from "expo-router";
-import { requestOtp } from "../../services/authApi";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { getErrorMessage } from "../../lib/api";
+import { requestOtp } from "../../services/authApi";
 import { parseIdentifier } from "../../utils/identifier";
 
-// Pink palette
 const COLORS = {
-  bg: ["#e0e1df", "#e0e1df", "#F9A8D4"] as const,      
-  button: ["#4e5c4a", "#EC4899"] as const,             
+  bg: ["#e0e1df", "#e0e1df", "#F9A8D4"] as const,
+  button: ["#4e5c4a", "#EC4899"] as const,
   buttonDisabled: ["#F9C6DC", "#F5B5D0"] as const,
   focus: "#4e5c4a",
 };
@@ -62,24 +61,31 @@ export default function LoginScreen() {
   const canSubmit = input.trim().length > 0 && !loading;
 
   // Icon changes based on what the user is typing
-  const inputIcon = input.includes("@") ? "✉️" : /^\+?\d/.test(input.trim()) ? "📱" : "👤";
+  const inputIcon = input.includes("@")
+    ? "✉️"
+    : /^\+?\d/.test(input.trim())
+      ? "📱"
+      : "👤";
 
   const borderColor = error ? "#EF4444" : focused ? COLORS.focus : "#F3D1DE";
 
   return (
-    <LinearGradient colors={COLORS.bg} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ flex: 1 }}>
-      
+    <LinearGradient
+      colors={COLORS.bg}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={{ flex: 1 }}>
       <View className="absolute -left-16 -top-10 h-56 w-56 rounded-full bg-pink-300 opacity-40" />
       <View className="absolute -right-20 top-40 h-64 w-64 rounded-full bg-rose-200 opacity-50" />
-      
 
       <SafeAreaView className="flex-1">
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : undefined}
-          className="flex-1 justify-center px-6"
-        >
+          className="flex-1 justify-center px-6">
           {/* Header */}
-          <Animated.View entering={FadeInUp.duration(600)} className="mb-10 items-center">
+          <Animated.View
+            entering={FadeInUp.duration(600)}
+            className="mb-10 items-center">
             <View
               className="h-24 w-24 items-center justify-center rounded-full bg-white"
               style={{
@@ -88,11 +94,12 @@ export default function LoginScreen() {
                 shadowRadius: 22,
                 shadowOffset: { width: 0, height: 18 },
                 elevation: 10,
-              }}
-            >
+              }}>
               <Text className="text-5xl">🍽️</Text>
             </View>
-            <Text className="mt-5 text-3xl font-extrabold text-[#4e5c4a]">Welcome</Text>
+            <Text className="mt-5 text-3xl font-extrabold text-[#4e5c4a]">
+              Welcome
+            </Text>
             <Text className="mt-2 text-center text-base text-[#4e5c4a]/70">
               Log in or sign up with your phone number or email
             </Text>
@@ -108,24 +115,24 @@ export default function LoginScreen() {
               shadowRadius: 35,
               shadowOffset: { width: 0, height: 16 },
               elevation: 22,
-            }}
-          >
+            }}>
             {/* Input */}
-            <Text className="mb-2 text-base font-semibold text-gray-800">Phone or Email</Text>
+            <Text className="mb-2 text-base font-semibold text-gray-800">
+              Phone or Email
+            </Text>
             <View
               className={`flex-row items-center rounded-2xl mb-4 border-2 px-4 ${
                 focused ? "bg-[#e0e1df]" : "bg-gray-50"
               }`}
               style={{
                 borderColor,
-                // Pink glow while focused
+
                 shadowColor: COLORS.focus,
                 shadowOpacity: focused ? 0.25 : 0,
                 shadowRadius: 8,
                 shadowOffset: { width: 0, height: 0 },
                 elevation: focused ? 4 : 0,
-              }}
-            >
+              }}>
               <Text className="mr-2 text-lg">{inputIcon}</Text>
               <TextInput
                 value={input}
@@ -149,7 +156,9 @@ export default function LoginScreen() {
             </View>
 
             {!!error && (
-              <Animated.Text entering={FadeInDown.duration(250)} className="mt-2 mb-2 text-sm text-red-500">
+              <Animated.Text
+                entering={FadeInDown.duration(250)}
+                className="mt-2 mb-2 text-sm text-red-500">
                 {error}
               </Animated.Text>
             )}
@@ -167,18 +176,22 @@ export default function LoginScreen() {
                 shadowRadius: 12,
                 shadowOffset: { width: 0, height: 6 },
                 elevation: canSubmit ? 6 : 0,
-              })}
-            >
+              })}>
               <LinearGradient
                 colors={canSubmit ? COLORS.button : COLORS.buttonDisabled}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
-                style={{ borderRadius: 16, paddingVertical: 16, alignItems: "center" }}
-              >
+                style={{
+                  borderRadius: 16,
+                  paddingVertical: 16,
+                  alignItems: "center",
+                }}>
                 {loading ? (
                   <ActivityIndicator color="#fff" />
                 ) : (
-                  <Text className="text-base font-bold tracking-wide text-white">Continue</Text>
+                  <Text className="text-base font-bold tracking-wide text-white">
+                    Continue
+                  </Text>
                 )}
               </LinearGradient>
             </Pressable>
