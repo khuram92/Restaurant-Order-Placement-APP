@@ -4,7 +4,7 @@ export interface User {
   _id: string;
   firstName?: string;
   lastName?: string;
-  dob?: string;              // ISO date string from the backend
+  dob?: string; // ISO date string from the backend
   email?: string;
   phone?: string;
   role: Role;
@@ -32,7 +32,8 @@ export interface AuthResponse {
 export interface CompleteProfileInput {
   firstName: string;
   lastName: string;
-  dob: string;     // YYYY-MM-DD
-  email?: string;  // only if the user logged in with phone
-  phone?: string;  // only if the user logged in with email
+  dob: string; // YYYY-MM-DD
+  email?: string; // only if the user logged in with phone
+  phone?: string; // only if the user logged in with email
+  avatar?: string; // Cloudinary image URL
 }
