@@ -1,15 +1,23 @@
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import axios from "axios";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
 import { getToken, removeToken, saveToken } from "../lib/storage";
 import { getMe } from "../services/authApi";
 import type { User } from "../types/auth";
 
 interface AuthContextValue {
   user: User | null;
-  isLoading: boolean;                           // true while restoring the session on app start
+  isLoading: boolean; // true while restoring the session on app start
   signIn: (token: string, user: User) => Promise<void>;
   signOut: () => Promise<void>;
-  refreshUser: () => Promise<void>;             // re-fetch user (e.g. after profile update)
+  refreshUser: () => Promise<void>;
+  updateUser: (user: User) => void; // re-fetch user (e.g. after profile update)
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -23,9 +31,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const restore = async () => {
       try {
         const token = await getToken();
-        if (!token) return;                     // never logged in
+        if (!token) return; // never logged in
 
-        const me = await getMe();               // token attached automatically by api.ts
+        const me = await getMe(); // token attached automatically by api.ts
         setUser(me);
       } catch (error) {
         // Only log out if the token is invalid/expired, not on network errors
@@ -54,9 +62,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const me = await getMe();
     setUser(me);
   }, []);
-
+  const updateUser = useCallback((updated: User) => {
+    setUser(updated);
+  }, []);
   return (
-    <AuthContext.Provider value={{ user, isLoading, signIn, signOut, refreshUser }}>
+    <AuthContext.Provider
+      value={{ user, isLoading, signIn, signOut, refreshUser, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

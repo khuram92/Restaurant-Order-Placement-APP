@@ -1,5 +1,5 @@
 import { api } from "../lib/api";
-import type { AuthResponse, RequestOtpResponse, User } from "../types/auth";
+import type { AuthResponse, CompleteProfileInput, RequestOtpResponse, User } from "../types/auth";
 
 /** Customer: send OTP to phone or email */
 export const requestOtp = async (identifier: string) => {
@@ -23,5 +23,10 @@ export const staffLogin = async (email: string, password: string) => {
 /** Any logged-in user: get current user (token is attached automatically) */
 export const getMe = async () => {
   const { data } = await api.get<{ user: User }>("/auth/me");
+  return data.user;
+};
+/** Customer: save first/last name, DOB and the optional second contact */
+export const completeProfile = async (input: CompleteProfileInput) => {
+  const { data } = await api.patch<{ user: User }>("/auth/complete-profile", input);
   return data.user;
 };

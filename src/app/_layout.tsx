@@ -19,15 +19,21 @@ function SplashScreenController() {
 function RootNavigator() {
   const { user } = useAuth();
   const isCustomer = user?.role === "customer";
+  const needsProfile = isCustomer && !user?.profileCompleted;
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
-      {/* Logged-in customers only */}
-      <Stack.Protected guard={isCustomer}>
+      {/* Customers with a complete profile */}
+      <Stack.Protected guard={isCustomer && !needsProfile}>
         <Stack.Screen name="(customer)" />
       </Stack.Protected>
 
-      {/* Logged-out users only */}
+      {/* Customers who still need to fill their profile */}
+      <Stack.Protected guard={needsProfile}>
+        <Stack.Screen name="(onboarding)" />
+      </Stack.Protected>
+
+      {/* Logged-out users */}
       <Stack.Protected guard={!user}>
         <Stack.Screen name="(auth)" />
       </Stack.Protected>
