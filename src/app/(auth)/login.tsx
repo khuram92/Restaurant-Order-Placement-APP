@@ -18,10 +18,10 @@ import { parseIdentifier } from "../../utils/identifier";
 
 // Pink palette
 const COLORS = {
-  bg: ["#FFF1F5", "#FFD1DC", "#F9A8D4"] as const,      // baby pink → pink
-  button: ["#F472B6", "#EC4899"] as const,             // pink → hot pink
+  bg: ["#e0e1df", "#e0e1df", "#F9A8D4"] as const,      // baby pink → pink
+  button: ["#4e5c4a", "#EC4899"] as const,             // pink → hot pink
   buttonDisabled: ["#F9C6DC", "#F5B5D0"] as const,
-  pink: "#EC4899",
+  focus: "#4e5c4a",
 };
 
 export default function LoginScreen() {
@@ -64,7 +64,7 @@ export default function LoginScreen() {
   // Icon changes based on what the user is typing
   const inputIcon = input.includes("@") ? "✉️" : /^\+?\d/.test(input.trim()) ? "📱" : "👤";
 
-  const borderColor = error ? "#EF4444" : focused ? COLORS.pink : "#F3D1DE";
+  const borderColor = error ? "#EF4444" : focused ? COLORS.focus : "#F3D1DE";
 
   return (
     <LinearGradient colors={COLORS.bg} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ flex: 1 }}>
@@ -83,7 +83,7 @@ export default function LoginScreen() {
             <View
               className="h-24 w-24 items-center justify-center rounded-full bg-white"
               style={{
-                shadowColor: COLORS.pink,
+                shadowColor: COLORS.focus,
                 shadowOpacity: 0.35,
                 shadowRadius: 16,
                 shadowOffset: { width: 0, height: 8 },
@@ -103,7 +103,7 @@ export default function LoginScreen() {
             entering={FadeInDown.delay(150).duration(600).springify()}
             className="rounded-3xl bg-white p-6"
             style={{
-              shadowColor: COLORS.pink,
+              shadowColor: COLORS.focus,
               shadowOpacity: 0.25,
               shadowRadius: 24,
               shadowOffset: { width: 0, height: 12 },
@@ -119,7 +119,7 @@ export default function LoginScreen() {
               style={{
                 borderColor,
                 // Pink glow while focused
-                shadowColor: COLORS.pink,
+                shadowColor: COLORS.focus,
                 shadowOpacity: focused ? 0.25 : 0,
                 shadowRadius: 8,
                 shadowOffset: { width: 0, height: 0 },
@@ -143,7 +143,7 @@ export default function LoginScreen() {
                 returnKeyType="done"
                 onSubmitEditing={handleContinue}
                 editable={!loading}
-                selectionColor={COLORS.pink}
+                selectionColor={COLORS.focus}
                 className="flex-1 py-4 text-base text-gray-900"
               />
             </View>
@@ -162,7 +162,7 @@ export default function LoginScreen() {
                 marginTop: 24,
                 borderRadius: 16,
                 transform: [{ scale: pressed ? 0.97 : 1 }],
-                shadowColor: COLORS.pink,
+                shadowColor: COLORS.focus,
                 shadowOpacity: canSubmit ? 0.4 : 0,
                 shadowRadius: 12,
                 shadowOffset: { width: 0, height: 6 },
