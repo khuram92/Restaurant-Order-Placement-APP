@@ -36,49 +36,49 @@ const findRestaurantOr404 = async (req: Request, res: Response) => {
   return restaurant;
 };
 
-// // ---------- Controllers ----------
+// ---------- Controllers ----------
 
-// /** POST /api/admin/restaurants */
-// export const createRestaurant = async (req: Request, res: Response) => {
-//   const parsed = createRestaurantSchema.safeParse(req.body);
-//   if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
+/** POST /api/admin/restaurants */
+export const createRestaurant = async (req: Request, res: Response) => {
+  const parsed = createRestaurantSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
 
-//   const { location, ...data } = parsed.data;
+  const { location, ...data } = parsed.data;
 
-//   const restaurant = new Restaurant({ createdBy: req.user!._id });
-//   restaurant.set(data);
-//   if (location) restaurant.set("location", toGeoPoint(location));
-//   await restaurant.save(); // runs model validation (e.g. at least one service)
+  const restaurant = new Restaurant({ createdBy: req.user!._id });
+  restaurant.set(data);
+  if (location) restaurant.set("location", toGeoPoint(location));
+  await restaurant.save(); // runs model validation (e.g. at least one service)
 
-//   res.status(201).json({ restaurant });
-// };
+  res.status(201).json({ restaurant });
+};
 
-// /** GET /api/admin/restaurants?search=&city=&status=active|inactive|all&page=1&limit=20 */
-// export const listRestaurants = async (req: Request, res: Response) => {
-//   const parsed = listQuerySchema.safeParse(req.query);
-//   if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
+/** GET /api/admin/restaurants?search=&city=&status=active|inactive|all&page=1&limit=20 */
+export const listRestaurants = async (req: Request, res: Response) => {
+  const parsed = listQuerySchema.safeParse(req.query);
+  if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
 
-//   const { search, city, status, page, limit } = parsed.data;
-//   const filter: Record<string, unknown> = {};
+  const { search, city, status, page, limit } = parsed.data;
+  const filter: Record<string, unknown> = {};
 
-//   if (status === "active") filter.isActive = true;
-//   if (status === "inactive") filter.isActive = false;
-//   if (city) filter["address.city"] = new RegExp(`^${escapeRegex(city)}$`, "i");
-//   if (search) {
-//     const term = new RegExp(escapeRegex(search), "i");
-//     filter.$or = [{ name: term }, { "address.area": term }, { "address.city": term }, { cuisines: term }];
-//   }
+  if (status === "active") filter.isActive = true;
+  if (status === "inactive") filter.isActive = false;
+  if (city) filter["address.city"] = new RegExp(`^${escapeRegex(city)}$`, "i");
+  if (search) {
+    const term = new RegExp(escapeRegex(search), "i");
+    filter.$or = [{ name: term }, { "address.area": term }, { "address.city": term }, { cuisines: term }];
+  }
 
-//   const [restaurants, total] = await Promise.all([
-//     Restaurant.find(filter)
-//       .sort({ createdAt: -1 })
-//       .skip((page - 1) * limit)
-//       .limit(limit),
-//     Restaurant.countDocuments(filter),
-//   ]);
+  const [restaurants, total] = await Promise.all([
+    Restaurant.find(filter)
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit),
+    Restaurant.countDocuments(filter),
+  ]);
 
-//   res.json({ restaurants, total, page, pages: Math.max(1, Math.ceil(total / limit)) });
-// };
+  res.json({ restaurants, total, page, pages: Math.max(1, Math.ceil(total / limit)) });
+};
 
 // /** GET /api/admin/restaurants/:id */
 // export const getRestaurant = async (req: Request, res: Response) => {
