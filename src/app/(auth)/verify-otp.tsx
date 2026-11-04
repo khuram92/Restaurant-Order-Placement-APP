@@ -144,7 +144,6 @@ export default function VerifyOtpScreen() {
               Enter the 6-digit code we sent to
             </Text>
 
-            {/* Identifier pill */}
             <View className="mt-3 flex-row items-center rounded-full bg-gray-100 px-4 py-2">
               <Text className="mr-2">{channelIcon}</Text>
               <Text className="font-semibold text-gray-900" numberOfLines={1}>
@@ -256,7 +255,6 @@ export default function VerifyOtpScreen() {
               </LinearGradient>
             </Pressable>
 
-            {/* Resend */}
             <View className="mt-5 items-center">
               {secondsLeft > 0 ? (
                 <View className="rounded-full bg-pink-50 px-4 py-2">
