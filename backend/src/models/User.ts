@@ -5,13 +5,16 @@ export const ROLES = ["superadmin", "manager", "customer"] as const;
 export type Role = (typeof ROLES)[number];
 
 export interface IUser {
-  name: string;
+  firstName?: string;            
+  lastName?: string;
+  dob?: Date;
   email?: string;
   phone?: string;
   password?: string;            
   role: Role;
   restaurantId?: Types.ObjectId; 
   isActive: boolean;
+  profileCompleted: boolean;     
 }
 
 interface IUserMethods {
@@ -22,13 +25,16 @@ export type UserDoc = HydratedDocument<IUser, IUserMethods>;
 
 const userSchema = new Schema<IUser, Model<IUser, {}, IUserMethods>, IUserMethods>(
   {
-    name: { type: String, required: true, trim: true },
+    firstName: { type: String, trim: true, maxlength: 40 },
+    lastName: { type: String, trim: true, maxlength: 40 },
+    dob: { type: Date },
     email: { type: String, trim: true, lowercase: true },
     phone: { type: String, trim: true, match: [/^03\d{9}$/, "Phone must be 03XXXXXXXXX"] },
     password: { type: String, select: false, minlength: 8 },
     role: { type: String, enum: ROLES, default: "customer" },
     restaurantId: { type: Schema.Types.ObjectId, ref: "Restaurant" },
     isActive: { type: Boolean, default: true },
+    profileCompleted: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

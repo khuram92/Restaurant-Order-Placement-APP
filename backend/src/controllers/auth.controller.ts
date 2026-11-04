@@ -39,12 +39,6 @@ const verifyOtpSchema = z.object({
   code: z
     .string({ error: "OTP is required" })
     .regex(/^\d{6}$/, "OTP must be 6 digits"),
-  name: z
-    .string()
-    .trim()
-    .min(2, "Name must be at least 2 characters")
-    .max(80)
-    .optional(),
 });
 
 // ---------- Staff ----------
@@ -142,7 +136,7 @@ export const requestOtp = async (req: Request, res: Response) => {
   });
 };
 
-// /** POST /api/auth/otp/verify   { identifier, code, name? } */
+/** POST /api/auth/otp/verify   { identifier, code } */
 export const verifyOtp = async (req: Request, res: Response) => {
   const parsed = verifyOtpSchema.safeParse(req.body);
   if (!parsed.success) {
@@ -151,49 +145,36 @@ export const verifyOtp = async (req: Request, res: Response) => {
 
   const result = parseIdentifier(parsed.data.identifier);
   if (!result) {
-    return res
-      .status(400)
-      .json({ message: "Enter a valid email or phone (03XXXXXXXXX)" });
+    return res.status(400).json({ message: "Enter a valid email or phone (03XXXXXXXXX)" });
   }
   const { identifier, channel } = result;
-  const { code, name } = parsed.data;
+  const { code } = parsed.data;
 
   const otp = await Otp.findOne({ identifier });
   if (!otp || otp.expiresAt < new Date()) {
-    return res
-      .status(400)
-      .json({ message: "Code expired, please request a new one" });
+    return res.status(400).json({ message: "Code expired, please request a new one" });
   }
   if (otp.attempts >= OTP_MAX_ATTEMPTS) {
     await otp.deleteOne();
-    return res
-      .status(429)
-      .json({ message: "Too many wrong attempts, request a new code" });
+    return res.status(429).json({ message: "Too many wrong attempts, request a new code" });
   }
   if (!otpMatches(code, otp.codeHash)) {
     otp.attempts += 1;
     await otp.save();
     const left = OTP_MAX_ATTEMPTS - otp.attempts;
-    return res
-      .status(400)
-      .json({ message: `Incorrect code. ${left} attempt(s) left` });
+    return res.status(400).json({ message: `Incorrect code. ${left} attempt(s) left` });
   }
 
   let user = await User.findOne({ [channel]: identifier });
   let isNewUser = false;
 
   if (!user) {
-    if (!name) {
-      return res
-        .status(400)
-        .json({ message: "Name is required to create your account" });
-    }
-    user = await User.create({ name, [channel]: identifier, role: "customer" });
+    // New customer: create with only the verified email/phone.
+    // Name, DOB etc. are filled on the "Complete profile" screen.
+    user = await User.create({ [channel]: identifier, role: "customer", profileCompleted: false });
     isNewUser = true;
   } else if (user.role !== "customer") {
-    return res
-      .status(403)
-      .json({ message: "Staff must log in with email and password" });
+    return res.status(403).json({ message: "Staff must log in with email and password" });
   } else if (!user.isActive) {
     return res.status(403).json({ message: "Account is deactivated" });
   }
