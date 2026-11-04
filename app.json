@@ -24,6 +24,13 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow access to your photos to set a profile picture.",
+          "cameraPermission": "Allow camera access to take a profile picture."
+        }
+      ],
       "expo-router",
       [
         "expo-splash-screen",
@@ -38,6 +45,7 @@
       "expo-build-properties",
       "@react-native-community/datetimepicker"
     ],
+    
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true

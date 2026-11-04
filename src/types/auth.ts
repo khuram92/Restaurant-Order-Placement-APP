@@ -9,6 +9,7 @@ export interface User {
   phone?: string;
   role: Role;
   restaurantId?: string;
+  avatar?: string; 
   isActive: boolean;
   profileCompleted: boolean; // false → must fill the Complete Profile screen
   createdAt: string;
