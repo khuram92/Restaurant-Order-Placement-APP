@@ -9,7 +9,7 @@ import { getErrorMessage } from "../lib/api";
 const PINK = "#EC4899";
 
 type Props = {
-  /** Initials shown when there is no photo (e.g. "AK") */
+  
   initials?: string;
   size?: number;
 };
@@ -85,7 +85,7 @@ export default function AvatarPicker({ initials, size = 104 }: Props) {
           {user?.avatar ? (
             <Image source={{ uri: user.avatar }} style={{ width: "100%", height: "100%" }} contentFit="cover" />
           ) : initials ? (
-            <Text className="text-3xl font-extrabold text-pink-500">{initials}</Text>
+            <Text className="text-3xl font-extrabold text-[#4e5c4a]">{initials}</Text>
           ) : (
             <Text className="text-4xl">📷</Text>
           )}
@@ -103,7 +103,7 @@ export default function AvatarPicker({ initials, size = 104 }: Props) {
         </View>
       </Pressable>
 
-      <Text className="mt-3 text-sm font-semibold text-pink-600">
+      <Text className="mt-3 text-sm font-semibold text-[#4e5c4a]">
         {user?.avatar ? "Change photo" : "Add photo"}
         <Text className="font-normal text-gray-400"> · optional</Text>
       </Text>
