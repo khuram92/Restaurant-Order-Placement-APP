@@ -2,12 +2,15 @@ export type Role = "superadmin" | "manager" | "customer";
 
 export interface User {
   _id: string;
-  name: string;
+  firstName?: string;
+  lastName?: string;
+  dob?: string;              // ISO date string from the backend
   email?: string;
   phone?: string;
   role: Role;
   restaurantId?: string;
   isActive: boolean;
+  profileCompleted: boolean; // false → must fill the Complete Profile screen
   createdAt: string;
   updatedAt: string;
 }
