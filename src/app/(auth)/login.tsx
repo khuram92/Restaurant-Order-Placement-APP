@@ -18,8 +18,8 @@ import { parseIdentifier } from "../../utils/identifier";
 
 // Pink palette
 const COLORS = {
-  bg: ["#e0e1df", "#e0e1df", "#F9A8D4"] as const,      // baby pink → pink
-  button: ["#4e5c4a", "#EC4899"] as const,             // pink → hot pink
+  bg: ["#e0e1df", "#e0e1df", "#F9A8D4"] as const,      
+  button: ["#4e5c4a", "#EC4899"] as const,             
   buttonDisabled: ["#F9C6DC", "#F5B5D0"] as const,
   focus: "#4e5c4a",
 };
@@ -68,10 +68,10 @@ export default function LoginScreen() {
 
   return (
     <LinearGradient colors={COLORS.bg} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ flex: 1 }}>
-      {/* Soft decorative blobs */}
+      
       <View className="absolute -left-16 -top-10 h-56 w-56 rounded-full bg-pink-300 opacity-40" />
       <View className="absolute -right-20 top-40 h-64 w-64 rounded-full bg-rose-200 opacity-50" />
-      <View className="absolute -bottom-16 left-10 h-48 w-48 rounded-full bg-pink-200 opacity-60" />
+      
 
       <SafeAreaView className="flex-1">
         <KeyboardAvoidingView
