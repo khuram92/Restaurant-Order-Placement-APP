@@ -84,9 +84,9 @@ export default function LoginScreen() {
               className="h-24 w-24 items-center justify-center rounded-full bg-white"
               style={{
                 shadowColor: COLORS.focus,
-                shadowOpacity: 0.35,
-                shadowRadius: 16,
-                shadowOffset: { width: 0, height: 8 },
+                shadowOpacity: 1,
+                shadowRadius: 22,
+                shadowOffset: { width: 10, height: 18 },
                 elevation: 10,
               }}
             >
@@ -100,7 +100,7 @@ export default function LoginScreen() {
 
           {/* White card */}
           <Animated.View
-            entering={FadeInDown.delay(150).duration(600).springify()}
+            entering={FadeInDown.delay(200).duration(600).springify()}
             className="rounded-3xl bg-white p-6"
             style={{
               shadowColor: COLORS.focus,
