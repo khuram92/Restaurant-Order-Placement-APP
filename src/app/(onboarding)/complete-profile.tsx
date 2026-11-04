@@ -196,8 +196,8 @@ export default function CompleteProfileScreen() {
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={{ flex: 1 }}>
-      <View className="absolute -right-16 -top-12 h-56 w-56 rounded-full bg-pink-300 opacity-40" />
-      <View className="absolute -left-20 bottom-24 h-60 w-60 rounded-full bg-rose-200 opacity-50" />
+      <View className="absolute -left-16 -top-24 h-56 w-56 rounded-full bg-rose-300 opacity-40" />
+      <View className="absolute -right-20 -bottom-24 h-60 w-60 rounded-full bg-pink-400 opacity-30" />
 
       <SafeAreaView className="flex-1">
         <KeyboardAvoidingView
