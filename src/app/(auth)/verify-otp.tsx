@@ -131,25 +131,25 @@ export default function VerifyOtpScreen() {
           {/* Header */}
           <View className="mb-6 items-center">
             <View
-              className="h-20 w-20 items-center justify-center rounded-full bg-white"
-              style={pShadow(0.35, 16, 10)}
+              className="h-20 w-20 items-center justify-center rounded-full bg-gray-100"
+              style={pShadow(0.35, 26, 16)}
             >
               <Text className="text-4xl">🔐</Text>
             </View>
-            <Text className="mt-4 text-3xl font-extrabold text-pink-600">Verify it's you</Text>
-            <Text className="mt-1 text-center text-base text-pink-900/70">
+            <Text className="mt-4 text-3xl font-extrabold text-[#4e5c4a]">Verify it's you</Text>
+            <Text className="mt-1 text-center text-base text-[#4e5c4a]/80">
               Enter the 6-digit code we sent to
             </Text>
 
             {/* Identifier pill */}
-            <View className="mt-3 flex-row items-center rounded-full bg-white/80 px-4 py-2">
+            <View className="mt-3 flex-row items-center rounded-full bg-gray-100 px-4 py-2">
               <Text className="mr-2">{channelIcon}</Text>
               <Text className="font-semibold text-gray-900" numberOfLines={1}>
                 {identifier}
               </Text>
               <View className="mx-3 h-4 w-px bg-pink-200" />
               <Pressable onPress={() => router.back()} hitSlop={8}>
-                <Text className="font-semibold text-pink-600">Change</Text>
+                <Text className="font-semibold text-[#4e5c4a]">Change</Text>
               </Pressable>
             </View>
           </View>
