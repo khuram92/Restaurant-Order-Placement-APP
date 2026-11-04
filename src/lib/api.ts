@@ -27,5 +27,12 @@ export const getErrorMessage = (error: unknown): string => {
     if (error.code === "ECONNABORTED") return "Request timed out. Please try again.";
     if (!error.response) return "Can't reach the server. Check your internet connection.";
   }
+  if (error instanceof Error && error.message) {
+    // fetch network failures say "Network request failed"
+    if (error.message.includes("Network request failed")) {
+      return "Can't reach the server. Check your internet connection.";
+    }
+    return error.message;
+  }
   return "Something went wrong. Please try again.";
 };
