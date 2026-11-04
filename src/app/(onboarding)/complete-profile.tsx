@@ -214,10 +214,10 @@ export default function CompleteProfileScreen() {
             {/* Header */}
             <View className="mb-6 items-center">
               <AvatarPicker initials={initials} />
-              <Text className="mt-4 text-3xl font-extrabold text-pink-600">
+              <Text className="mt-4 text-3xl font-extrabold text-[#4e5c4a]">
                 Almost there!
               </Text>
-              <Text className="mt-1 text-center text-base text-pink-900/70">
+              <Text className="mt-1 text-center text-base text-[#4e5c4a]/80">
                 Tell us a bit about yourself to finish setting up your account
               </Text>
             </View>
