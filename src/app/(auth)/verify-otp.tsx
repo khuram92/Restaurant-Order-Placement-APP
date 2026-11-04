@@ -27,7 +27,7 @@ const COLORS = {
   focus: "#4e5c4a",
 };
 
-const pinkShadow = (opacity: number, radius: number, elevation: number) => ({
+const pShadow = (opacity: number, radius: number, elevation: number) => ({
   shadowColor: COLORS.focus,
   shadowOpacity: opacity,
   shadowRadius: radius,
@@ -119,9 +119,9 @@ export default function VerifyOtpScreen() {
 
   return (
     <LinearGradient colors={COLORS.bg} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ flex: 1 }}>
-      {/* Soft decorative circles */}
+      
       <View className="absolute -right-16 -top-12 h-56 w-56 rounded-full bg-pink-300 opacity-40" />
-      <View className="absolute -left-20 bottom-24 h-60 w-60 rounded-full bg-rose-200 opacity-50" />
+      <View className="absolute -left-16 -bottom-12 h-56 w-56 rounded-full bg-rose-400 opacity-50" />
 
       <SafeAreaView className="flex-1">
         <KeyboardAvoidingView
@@ -132,7 +132,7 @@ export default function VerifyOtpScreen() {
           <View className="mb-6 items-center">
             <View
               className="h-20 w-20 items-center justify-center rounded-full bg-white"
-              style={pinkShadow(0.35, 16, 10)}
+              style={pShadow(0.35, 16, 10)}
             >
               <Text className="text-4xl">🔐</Text>
             </View>
@@ -155,7 +155,7 @@ export default function VerifyOtpScreen() {
           </View>
 
           {/* White card */}
-          <View className="rounded-3xl bg-white p-6" style={pinkShadow(0.25, 24, 12)}>
+          <View className="rounded-3xl bg-white p-6" style={pShadow(0.25, 24, 12)}>
             {/* Code boxes */}
             <Text className="mb-3 text-sm font-semibold text-gray-700">Verification code</Text>
             <Pressable onPress={() => codeInputRef.current?.focus()}>
@@ -221,7 +221,7 @@ export default function VerifyOtpScreen() {
                 marginTop: 24,
                 borderRadius: 16,
                 opacity: pressed ? 0.85 : 1,
-                ...pinkShadow(canSubmit ? 0.4 : 0, 12, canSubmit ? 6 : 0),
+                ...pShadow(canSubmit ? 0.4 : 0, 12, canSubmit ? 6 : 0),
               })}
             >
               <LinearGradient
