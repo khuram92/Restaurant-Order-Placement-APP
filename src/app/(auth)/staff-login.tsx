@@ -67,7 +67,7 @@ export default function StaffLoginScreen() {
   return (
     <LinearGradient colors={COLORS.bg} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ flex: 1 }}>
       <View className="absolute -left-16 -top-10 h-56 w-56 rounded-full bg-pink-300 opacity-40" />
-      <View className="absolute -right-20 bottom-32 h-64 w-64 rounded-full bg-rose-200 opacity-50" />
+      <View className="absolute -right-20 bottom-32 h-64 w-64 rounded-full bg-rose-300 opacity-50" />
 
       <SafeAreaView className="flex-1">
         <KeyboardAvoidingView
