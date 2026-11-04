@@ -19,13 +19,16 @@ const seedSuperAdmin = async () => {
   if (existing) {
     console.log(`ℹ️  Super Admin already exists: ${email}`);
   } else {
+        const [firstName = "Super", ...rest] = (SUPERADMIN_NAME || "Super Admin").trim().split(" ");
+
     await User.create({
-      name: SUPERADMIN_NAME || "Super Admin",
+      firstName,
+      lastName: rest.join(" ") || "Admin",
       email,
       password: SUPERADMIN_PASSWORD, // hashed automatically by the model
       role: "superadmin",
+      profileCompleted: true,       // staff don't use the customer profile screen
     });
-    console.log(`✅ Super Admin created: ${email}`);
   }
 
   await mongoose.disconnect();
