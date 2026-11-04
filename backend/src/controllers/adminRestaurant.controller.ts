@@ -1,40 +1,40 @@
-// import type { Request, Response } from "express";
-// import mongoose from "mongoose";
-// import { Restaurant } from "../models/Restaurant.js";
-// import {
-//   createRestaurantSchema,
-//   listQuerySchema,
-//   statusSchema,
-//   updateRestaurantSchema,
-// } from "../validators/restaurant.validators.js";
+import type { Request, Response } from "express";
+import mongoose from "mongoose";
+import { Restaurant } from "../models/Restaurant.js";
+import {
+  createRestaurantSchema,
+  listQuerySchema,
+  statusSchema,
+  updateRestaurantSchema,
+} from "../validators/restaurant.validators.js";
 
-// // ---------- Helpers ----------
+// ---------- Helpers ----------
 
-// /** { lat, lng } from the app → GeoJSON { type: "Point", coordinates: [lng, lat] } */
-// const toGeoPoint = (loc: { lat: number; lng: number }) => ({
-//   type: "Point" as const,
-//   coordinates: [loc.lng, loc.lat] as [number, number],
-// });
+/** { lat, lng } from the app → GeoJSON { type: "Point", coordinates: [lng, lat] } */
+const toGeoPoint = (loc: { lat: number; lng: number }) => ({
+  type: "Point" as const,
+  coordinates: [loc.lng, loc.lat] as [number, number],
+});
 
-// /** Escape user text before using it in a RegExp */
-// const escapeRegex = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+/** Escape user text before using it in a RegExp */
+const escapeRegex = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-// const firstIssue = (error: { issues: { message: string }[] }) => error.issues[0]?.message ?? "Invalid input";
+const firstIssue = (error: { issues: { message: string }[] }) => error.issues[0]?.message ?? "Invalid input";
 
-// /** Loads a restaurant by :id, or sends 400/404 and returns null */
-// const findRestaurantOr404 = async (req: Request, res: Response) => {
-//   const id = String(req.params.id);
-//   if (!mongoose.isValidObjectId(id)) {
-//     res.status(400).json({ message: "Invalid restaurant id" });
-//     return null;
-//   }
-//   const restaurant = await Restaurant.findById(id);
-//   if (!restaurant) {
-//     res.status(404).json({ message: "Restaurant not found" });
-//     return null;
-//   }
-//   return restaurant;
-// };
+/** Loads a restaurant by :id, or sends 400/404 and returns null */
+const findRestaurantOr404 = async (req: Request, res: Response) => {
+  const id = String(req.params.id);
+  if (!mongoose.isValidObjectId(id)) {
+    res.status(400).json({ message: "Invalid restaurant id" });
+    return null;
+  }
+  const restaurant = await Restaurant.findById(id);
+  if (!restaurant) {
+    res.status(404).json({ message: "Restaurant not found" });
+    return null;
+  }
+  return restaurant;
+};
 
 // // ---------- Controllers ----------
 
