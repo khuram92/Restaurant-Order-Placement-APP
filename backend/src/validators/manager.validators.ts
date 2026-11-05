@@ -1,5 +1,5 @@
-import { z } from "zod";
 import mongoose from "mongoose";
+import { z } from "zod";
 
 const name = (label: string) =>
   z
@@ -42,7 +42,9 @@ export const updateManagerSchema = z
     restaurantId,
   })
   .partial()
-  .refine((data) => Object.keys(data).length > 0, { message: "Nothing to update" });
+  .refine((data) => Object.keys(data).length > 0, {
+    message: "Nothing to update",
+  });
 
 export const managerStatusSchema = z.object({
   isActive: z.boolean({ error: "isActive must be true or false" }),
