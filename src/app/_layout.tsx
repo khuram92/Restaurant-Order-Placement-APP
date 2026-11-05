@@ -22,6 +22,7 @@ function RootNavigator() {
 
   const isSuperAdmin = user?.role === "superadmin";
   const isCustomer = user?.role === "customer";
+  const isManager = user?.role === "manager";
   const needsProfile = isCustomer && !user?.profileCompleted;
 
   // Send the user to the right group whenever their state changes
@@ -33,12 +34,14 @@ function RootNavigator() {
       router.replace("/login");
     } else if (isSuperAdmin && group !== "(admin)") {
       router.replace("/admin");
+    } else if (isManager && group !== "(manager)") {
+      router.replace("/manager");
     } else if (needsProfile && group !== "(onboarding)") {
       router.replace("/complete-profile");
     } else if (isCustomer && !needsProfile && group !== "(customer)") {
       router.replace("/");
     }
-  }, [user, isLoading, isSuperAdmin, needsProfile, isCustomer, segments]);
+  }, [user, isLoading, isSuperAdmin,isManager, needsProfile, isCustomer, segments]);
 
   return (
     <Stack screenOptions={{ headerShown: true }}>
@@ -62,7 +65,10 @@ function RootNavigator() {
         <Stack.Screen name="(auth)" />
       </Stack.Protected>
 
-      {/* Later: (manager) group with its own guard */}
+            {/* Restaurant Manager */}
+      <Stack.Protected guard={isManager}>
+        <Stack.Screen name="(manager)" />
+      </Stack.Protected>
     </Stack>
   );
 }

@@ -11,7 +11,8 @@ export interface User {
   restaurantId?: string;
   avatar?: string;
   isActive: boolean;
-  profileCompleted: boolean; // false → must fill the Complete Profile screen
+  profileCompleted: boolean;
+  mustChangePassword?: boolean; 
   createdAt: string;
   updatedAt: string;
 }
