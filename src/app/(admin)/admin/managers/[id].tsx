@@ -319,7 +319,6 @@ export default function ManagerDetailScreen() {
             <Text className="text-brand-light">No restaurant assigned</Text>
           )}
         </Card>
-
         {/* Contact */}
         <Card title="Contact" icon="person">
           <InfoRow icon="mail" label="Email (login)" value={m.email} onPress={() => Linking.openURL(`mailto:${m.email}`)} />
