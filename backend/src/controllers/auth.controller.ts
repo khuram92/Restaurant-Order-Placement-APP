@@ -3,6 +3,7 @@ import { z } from "zod";
 import { Otp } from "../models/Otp.js";
 import { User } from "../models/User.js";
 import { signToken } from "../utils/jwt.js";
+import { PASSWORD_REGEX, PASSWORD_RULE_MESSAGE } from "../utils/password.js";
 import {
     generateOtp,
     hashOtp,
@@ -59,7 +60,10 @@ const completeProfileSchema = z.object({
   email: z.string().trim().optional(),
   phone: z.string().trim().optional(),
 });
-
+const changePasswordSchema = z.object({
+  currentPassword: z.string({ error: "Enter your current password" }).min(1, "Enter your current password"),
+  newPassword: z.string({ error: "Enter a new password" }).regex(PASSWORD_REGEX, PASSWORD_RULE_MESSAGE),
+});
 // ---------- Staff ----------
 
 /** POST /api/auth/login: Super Admin & Managers */
@@ -273,7 +277,31 @@ export const uploadAvatar = async (req: Request, res: Response) => {
     res.status(502).json({ message: "Couldn't upload the image. Please try again." });
   }
 };
+/**
+ * PATCH /api/auth/change-password   { currentPassword, newPassword }
+ * Super Admin & Managers. Clears mustChangePassword.
+ */
+export const changePassword = async (req: Request, res: Response) => {
+  const parsed = changePasswordSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ message: parsed.error.issues[0]?.message });
+  }
+  const { currentPassword, newPassword } = parsed.data;
 
+  const user = await User.findById(req.user!._id).select("+password");
+  if (!user || !(await user.comparePassword(currentPassword))) {
+    return res.status(400).json({ message: "Current password is incorrect" });
+  }
+  if (currentPassword === newPassword) {
+    return res.status(400).json({ message: "Choose a password different from the current one" });
+  }
+
+  user.password = newPassword; // hashed by the model
+  user.mustChangePassword = false;
+  await user.save();
+
+  res.json({ message: "Password changed", user });
+};
 // ---------- Everyone ----------
 
 /** GET /api/auth/me */
