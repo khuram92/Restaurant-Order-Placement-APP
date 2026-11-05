@@ -74,3 +74,11 @@ export const uploadAvatar = async (image: {
   });
   return data.user;
 };
+/** Super Admin & Manager: change own password (clears mustChangePassword) */
+export const changePassword = async (currentPassword: string, newPassword: string) => {
+  const { data } = await api.patch<{ message: string; user: User }>(
+    "/auth/change-password",
+    { currentPassword, newPassword },
+  );
+  return data.user;
+};
