@@ -44,7 +44,11 @@ export const updateRestaurant = async (id: string, changes: Partial<RestaurantIn
   const { data } = await api.patch<{ restaurant: Restaurant }>(`/admin/restaurants/${id}`, changes);
   return data.restaurant;
 };
-
+/** Permanent delete (blocked by the backend while a manager is assigned) */
+export const deleteRestaurant = async (id: string) => {
+  const { data } = await api.delete<{ message: string }>(`/admin/restaurants/${id}`);
+  return data;
+};
 export const setRestaurantStatus = async (id: string, isActive: boolean) => {
   const { data } = await api.patch<{ restaurant: Restaurant; message: string }>(
     `/admin/restaurants/${id}/status`,
