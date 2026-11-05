@@ -91,28 +91,28 @@ export const listManagers = async (req: Request, res: Response) => {
   res.json({ managers, total, page, pages: Math.max(1, Math.ceil(total / limit)) });
 };
 
-// /**
-//  * GET /api/admin/managers/restaurant-options
-//  * Every restaurant + who manages it, so the app can show only free ones.
-//  */
-// export const restaurantOptions = async (_req: Request, res: Response) => {
-//   const [restaurants, managers] = await Promise.all([
-//     Restaurant.find().select(RESTAURANT_FIELDS).sort({ name: 1 }),
-//     User.find({ role: "manager", restaurantId: { $exists: true } }).select("firstName lastName restaurantId"),
-//   ]);
+/**
+ * GET /api/admin/managers/restaurant-options
+ * Every restaurant + who manages it, so the app can show only free ones.
+ */
+export const restaurantOptions = async (_req: Request, res: Response) => {
+  const [restaurants, managers] = await Promise.all([
+    Restaurant.find().select(RESTAURANT_FIELDS).sort({ name: 1 }),
+    User.find({ role: "manager", restaurantId: { $exists: true } }).select("firstName lastName restaurantId"),
+  ]);
 
-//   const managerByRestaurant = new Map(managers.map((m) => [String(m.restaurantId), m]));
+  const managerByRestaurant = new Map(managers.map((m) => [String(m.restaurantId), m]));
 
-//   res.json({
-//     restaurants: restaurants.map((r) => {
-//       const m = managerByRestaurant.get(r.id);
-//       return {
-//         ...r.toJSON(),
-//         manager: m ? { _id: m.id, name: `${m.firstName ?? ""} ${m.lastName ?? ""}`.trim() } : null,
-//       };
-//     }),
-//   });
-// };
+  res.json({
+    restaurants: restaurants.map((r) => {
+      const m = managerByRestaurant.get(r.id);
+      return {
+        ...r.toJSON(),
+        manager: m ? { _id: m.id, name: `${m.firstName ?? ""} ${m.lastName ?? ""}`.trim() } : null,
+      };
+    }),
+  });
+};
 
 // /** GET /api/admin/managers/:id */
 // export const getManager = async (req: Request, res: Response) => {
