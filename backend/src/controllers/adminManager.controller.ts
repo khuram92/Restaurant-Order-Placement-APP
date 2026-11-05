@@ -164,49 +164,49 @@ export const createManager = async (req: Request, res: Response) => {
   });
 };
 
-// /** PATCH /api/admin/managers/:id   (send only what changes; phone "" removes it) */
-// export const updateManager = async (req: Request, res: Response) => {
-//   const parsed = updateManagerSchema.safeParse(req.body);
-//   if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
+/** PATCH /api/admin/managers/:id   (send only what changes; phone "" removes it) */
+export const updateManager = async (req: Request, res: Response) => {
+  const parsed = updateManagerSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
 
-//   const manager = await findManagerOr404(req, res);
-//   if (!manager) return;
-//   const { firstName, lastName, email, phone, restaurantId } = parsed.data;
+  const manager = await findManagerOr404(req, res);
+  if (!manager) return;
+  const { firstName, lastName, email, phone, restaurantId } = parsed.data;
 
-//   if (email !== undefined && email !== manager.email) {
-//     if (await User.exists({ email, _id: { $ne: manager._id } })) {
-//       return res.status(409).json({ message: "This email is already registered" });
-//     }
-//     manager.email = email;
-//   }
+  if (email !== undefined && email !== manager.email) {
+    if (await User.exists({ email, _id: { $ne: manager._id } })) {
+      return res.status(409).json({ message: "This email is already registered" });
+    }
+    manager.email = email;
+  }
 
-//   if (phone !== undefined) {
-//     if (phone === "") {
-//       manager.set("phone", undefined);
-//     } else if (phone !== manager.phone) {
-//       if (await User.exists({ phone, _id: { $ne: manager._id } })) {
-//         return res.status(409).json({ message: "This phone number is already registered" });
-//       }
-//       manager.phone = phone;
-//     }
-//   }
+  if (phone !== undefined) {
+    if (phone === "") {
+      manager.set("phone", undefined);
+    } else if (phone !== manager.phone) {
+      if (await User.exists({ phone, _id: { $ne: manager._id } })) {
+        return res.status(409).json({ message: "This phone number is already registered" });
+      }
+      manager.phone = phone;
+    }
+  }
 
-//   if (restaurantId !== undefined && restaurantId !== String(manager.restaurantId)) {
-//     if (!(await Restaurant.exists({ _id: restaurantId }))) {
-//       return res.status(404).json({ message: "Restaurant not found" });
-//     }
-//     if (await restaurantHasOtherManager(restaurantId, manager.id)) {
-//       return res.status(409).json({ message: "That restaurant already has a manager" });
-//     }
-//     manager.restaurantId = new mongoose.Types.ObjectId(restaurantId);
-//   }
+  if (restaurantId !== undefined && restaurantId !== String(manager.restaurantId)) {
+    if (!(await Restaurant.exists({ _id: restaurantId }))) {
+      return res.status(404).json({ message: "Restaurant not found" });
+    }
+    if (await restaurantHasOtherManager(restaurantId, manager.id)) {
+      return res.status(409).json({ message: "That restaurant already has a manager" });
+    }
+    manager.restaurantId = new mongoose.Types.ObjectId(restaurantId);
+  }
 
-//   if (firstName !== undefined) manager.firstName = firstName;
-//   if (lastName !== undefined) manager.lastName = lastName;
+  if (firstName !== undefined) manager.firstName = firstName;
+  if (lastName !== undefined) manager.lastName = lastName;
 
-//   await manager.save();
-//   res.json({ manager: await withRestaurant(manager) });
-// };
+  await manager.save();
+  res.json({ manager: await withRestaurant(manager) });
+};
 
 // /** PATCH /api/admin/managers/:id/status   { isActive } — inactive managers can't log in */
 // export const setManagerStatus = async (req: Request, res: Response) => {
