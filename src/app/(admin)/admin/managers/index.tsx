@@ -13,7 +13,6 @@ const FILTERS: { key: ManagerStatusFilter; label: string }[] = [
   { key: "active", label: "Active" },
   { key: "inactive", label: "Inactive" },
 ];
-
 function ManagerCard({ item }: { item: Manager }) {
   const restaurant = item.restaurantId;
   return (
