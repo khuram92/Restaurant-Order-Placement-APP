@@ -348,8 +348,8 @@ export default function ManagerForm({ initialValues, managerId, submitLabel, not
         <View className="mb-4 rounded-3xl bg-white p-5" style={cardShadow}>
           <Text className="mb-4 text-base font-bold text-brand-dark">Manager details</Text>
           <View className="flex-row gap-3">
-            <Field label="First name" icon="person" required value={values.firstName} onChangeText={(t) => set("firstName", t)} placeholder="first name" />
-            <Field label="Last name" icon="person" required value={values.lastName} onChangeText={(t) => set("lastName", t)} placeholder="Raza" />
+            <Field label="First name" icon="person" required value={values.firstName} onChangeText={(t) => set("firstName", t)} placeholder="first-name" />
+            <Field label="Last name" icon="person" required value={values.lastName} onChangeText={(t) => set("lastName", t)} placeholder="last-name" />
           </View>
           <Field
             label="Email"
