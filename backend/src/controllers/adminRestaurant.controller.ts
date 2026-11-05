@@ -63,12 +63,15 @@ export const createRestaurant = async (req: Request, res: Response) => {
 
   const { address, ...rest } = data;
 
-  const restaurant = new Restaurant({ createdBy: req.user!._id });
+    const restaurant = new Restaurant({ createdBy: req.user!._id });
   applyFields(restaurant, rest);
   applyFields(restaurant, address, "address.");
   if (location) restaurant.set("location", toGeoPoint(location));
+  await restaurant.save(); // runs model validation (e.g. at least one service, seats for dine-in)
+
   res.status(201).json({ restaurant });
 };
+
 
 /** GET /api/admin/restaurants?search=&city=&status=active|inactive|all&page=1&limit=20 */
 export const listRestaurants = async (req: Request, res: Response) => {
