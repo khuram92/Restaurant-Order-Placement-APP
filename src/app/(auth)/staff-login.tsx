@@ -193,6 +193,7 @@ export default function StaffLoginScreen() {
 
             {/* Login button */}
             <Pressable
+            className="mt-6"
               onPress={handleLogin}
               disabled={!canSubmit}
               style={({ pressed }) => ({

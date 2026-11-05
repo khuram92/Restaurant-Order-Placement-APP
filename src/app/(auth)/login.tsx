@@ -147,6 +147,7 @@ export default function LoginScreen() {
 
             {/* Button with press effect */}
             <Pressable
+            className="mt-6"
               onPress={handleContinue}
               disabled={!canSubmit}
               style={({ pressed }) => ({

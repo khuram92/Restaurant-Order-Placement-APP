@@ -218,6 +218,7 @@ export default function VerifyOtpScreen() {
 
             {/* Verify button */}
             <Pressable
+            className="mt-6"
               onPress={() => handleVerify()}
               disabled={!canSubmit}
               style={({ pressed }) => ({
