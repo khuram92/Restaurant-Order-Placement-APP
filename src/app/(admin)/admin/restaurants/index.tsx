@@ -1,20 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  ActivityIndicator,
-  FlatList,
-  Pressable,
-  RefreshControl,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { ActivityIndicator, FlatList, Pressable, RefreshControl, Text, TextInput, View } from "react-native";
 import { Image } from "expo-image";
+import { Ionicons } from "@expo/vector-icons";
 import { Stack, router, useFocusEffect } from "expo-router";
 import { listRestaurants } from "../../../../services/adminRestaurantApi";
 import { getErrorMessage } from "../../../../lib/api";
+import { colors, cardShadow } from "../../../../constants/theme";
 import type { Restaurant, RestaurantStatusFilter } from "../../../../types/restaurant";
-
-const PINK = "#e0e1df";
 
 const FILTERS: { key: RestaurantStatusFilter; label: string }[] = [
   { key: "all", label: "All" },
@@ -25,59 +17,65 @@ const FILTERS: { key: RestaurantStatusFilter; label: string }[] = [
 // ---------- One restaurant card ----------
 function RestaurantCard({ item }: { item: Restaurant }) {
   const services = [
-    item.services.dineIn && "Dine-in",
-    item.services.takeaway && "Takeaway",
-    item.services.delivery && "Delivery",
-  ].filter(Boolean) as string[];
+    { on: item.services.dineIn, icon: "restaurant" as const, label: "Dine-in" },
+    { on: item.services.takeaway, icon: "bag-handle" as const, label: "Takeaway" },
+    { on: item.services.delivery, icon: "bicycle" as const, label: "Delivery" },
+  ].filter((s) => s.on);
 
   return (
     <Pressable
       onPress={() => router.push({ pathname: "/admin/restaurants/[id]", params: { id: item._id } })}
       className="mb-3 flex-row rounded-3xl bg-white p-4"
-      style={({ pressed }) => ({
-        opacity: pressed ? 0.85 : 1,
-        shadowColor: PINK,
-        shadowOpacity: 0.12,
-        shadowRadius: 10,
-        shadowOffset: { width: 0, height: 4 },
-        elevation: 3,
-      })}
+      style={cardShadow}
     >
       {/* Logo or first letter */}
-      <View className="mr-4 h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-pink-100">
+      <View
+        className="mr-4 h-16 w-16 items-center justify-center overflow-hidden rounded-2xl"
+        style={{ backgroundColor: colors.brandSoft }}
+      >
         {item.logo ? (
           <Image source={{ uri: item.logo }} style={{ width: "100%", height: "100%" }} contentFit="cover" />
         ) : (
-          <Text className="text-2xl font-extrabold text-pink-500">{item.name[0]?.toUpperCase()}</Text>
+          <Text className="text-2xl font-extrabold text-brand">{item.name[0]?.toUpperCase()}</Text>
         )}
       </View>
 
       <View className="flex-1">
         <View className="flex-row items-start justify-between">
-          <Text className="mr-2 flex-1 text-base font-bold text-gray-900" numberOfLines={1}>
+          <Text className="mr-2 flex-1 text-base font-bold text-brand-dark" numberOfLines={1}>
             {item.name}
           </Text>
-          <View className={`rounded-full px-2 py-0.5 ${item.isActive ? "bg-green-100" : "bg-gray-200"}`}>
-            <Text className={`text-xs font-bold ${item.isActive ? "text-green-700" : "text-gray-500"}`}>
-              {item.isActive ? "Active" : "Inactive"}
-            </Text>
+          <View
+            className="flex-row items-center rounded-full px-2 py-0.5"
+            style={{ backgroundColor: item.isActive ? colors.brand : colors.mistDark }}
+          >
+            <Ionicons name={item.isActive ? "checkmark-circle" : "close-circle"} size={12} color={colors.white} />
+            <Text className="ml-1 text-xs font-bold text-white">{item.isActive ? "Active" : "Inactive"}</Text>
           </View>
         </View>
 
-        <Text className="mt-0.5 text-sm text-gray-500" numberOfLines={1}>
-          📍 {[item.address.area, item.address.city].filter(Boolean).join(", ")}
-        </Text>
+        <View className="mt-1 flex-row items-center">
+          <Ionicons name="location" size={13} color={colors.brandLight} />
+          <Text className="ml-1 flex-1 text-sm text-brand-light" numberOfLines={1}>
+            {[item.address.area, item.address.city].filter(Boolean).join(", ")}
+          </Text>
+        </View>
 
         {item.cuisines.length > 0 && (
-          <Text className="mt-0.5 text-sm text-pink-700/70" numberOfLines={1}>
+          <Text className="mt-0.5 text-sm text-brand" numberOfLines={1}>
             {item.cuisines.join(" · ")}
           </Text>
         )}
 
         <View className="mt-2 flex-row flex-wrap gap-1">
           {services.map((s) => (
-            <View key={s} className="rounded-full bg-pink-50 px-2 py-0.5">
-              <Text className="text-xs font-semibold text-pink-600">{s}</Text>
+            <View
+              key={s.label}
+              className="flex-row items-center rounded-full px-2 py-0.5"
+              style={{ backgroundColor: colors.brandSoft }}
+            >
+              <Ionicons name={s.icon} size={11} color={colors.brand} />
+              <Text className="ml-1 text-xs font-semibold text-brand">{s.label}</Text>
             </View>
           ))}
         </View>
@@ -99,6 +97,7 @@ export default function AdminRestaurantsScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState("");
+  const [searchFocused, setSearchFocused] = useState(false);
 
   // Ignore answers from old requests (e.g. user typed fast)
   const requestId = useRef(0);
@@ -153,34 +152,40 @@ export default function AdminRestaurantsScreen() {
   };
 
   return (
-    <View className="flex-1 bg-gray-100">
+    <View className="flex-1" style={{ backgroundColor: colors.mist }}>
       <Stack.Screen
         options={{
           title: "Restaurants",
           headerRight: () => (
-            <Pressable onPress={() => router.push("/admin/restaurants/new")} hitSlop={8}>
-              <Text className="text-base font-bold text-[#4e5c4a]">+ Add</Text>
+            <Pressable onPress={() => router.push("/admin/restaurants/new")} hitSlop={8} className="flex-row items-center">
+              <Ionicons name="add-circle" size={22} color={colors.white} />
+              <Text className="ml-1 text-base font-bold text-white">Add</Text>
             </Pressable>
           ),
         }}
       />
 
       {/* Search */}
-      <View className="px-4 pt-2">
-        <View className="flex-row items-center rounded-full border-2 border-[#e0e1df] bg-white px-4">
-          <Text className="mr-2">🔍</Text>
+      <View className="px-4 pt-3">
+        <View
+          className="flex-row items-center rounded-2xl border-2 bg-white px-4"
+          style={{ borderColor: searchFocused ? colors.brand : colors.mistDark }}
+        >
+          <Ionicons name="search" size={18} color={colors.brandLight} />
           <TextInput
             value={search}
             onChangeText={setSearch}
+            onFocus={() => setSearchFocused(true)}
+            onBlur={() => setSearchFocused(false)}
             placeholder="Search by name, area, city or cuisine"
-            placeholderTextColor="#C9A3B5"
+            placeholderTextColor={colors.placeholder}
             autoCorrect={false}
-            selectionColor={PINK}
-            className="flex-1 py-3 text-base text-gray-900"
+            selectionColor={colors.brand}
+            className="ml-2 flex-1 py-3 text-base text-[#2c3329]"
           />
           {!!search && (
             <Pressable onPress={() => setSearch("")} hitSlop={8}>
-              <Text className="text-gray-400">✕</Text>
+              <Ionicons name="close-circle" size={18} color={colors.brandLight} />
             </Pressable>
           )}
         </View>
@@ -193,9 +198,10 @@ export default function AdminRestaurantsScreen() {
               <Pressable
                 key={f.key}
                 onPress={() => setStatus(f.key)}
-                className={`rounded-full px-4 py-2 ${selected ? "bg-pink-500" : "bg-white"}`}
+                className="rounded-full px-4 py-2"
+                style={{ backgroundColor: selected ? colors.brand : colors.white }}
               >
-                <Text className={`text-sm font-semibold ${selected ? "text-white" : "text-pink-700"}`}>
+                <Text className="text-sm font-semibold" style={{ color: selected ? colors.white : colors.brand }}>
                   {f.label}
                 </Text>
               </Pressable>
@@ -204,7 +210,7 @@ export default function AdminRestaurantsScreen() {
         </View>
 
         {!loading && !error && (
-          <Text className="mb-1 mt-3 text-xs text-gray-500">
+          <Text className="mb-1 mt-3 text-xs text-brand-light">
             {total} restaurant{total === 1 ? "" : "s"}
           </Text>
         )}
@@ -213,20 +219,21 @@ export default function AdminRestaurantsScreen() {
       {/* Content */}
       {loading ? (
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator color={PINK} size="large" />
+          <ActivityIndicator color={colors.brand} size="large" />
         </View>
       ) : error ? (
         <View className="flex-1 items-center justify-center px-8">
-          <Text className="text-4xl">😕</Text>
-          <Text className="mt-3 text-center text-gray-600">{error}</Text>
+          <Ionicons name="alert-circle" size={44} color={colors.brandLight} />
+          <Text className="mt-3 text-center text-brand-dark">{error}</Text>
           <Pressable
             onPress={() => {
               setLoading(true);
               load(1, "replace");
             }}
-            className="mt-4 rounded-2xl bg-pink-500 px-6 py-3"
+            className="mt-4 rounded-2xl px-6 py-3"
+            style={{ backgroundColor: colors.brand }}
           >
-            <Text className="font-semibold text-white">Try again</Text>
+            <Text className="font-bold text-white">Try again</Text>
           </Pressable>
         </View>
       ) : (
@@ -235,22 +242,28 @@ export default function AdminRestaurantsScreen() {
           keyExtractor={(item) => item._id}
           renderItem={({ item }) => <RestaurantCard item={item} />}
           contentContainerStyle={{ padding: 16, paddingTop: 8, flexGrow: 1 }}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={PINK} colors={[PINK]} />}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.brand} colors={[colors.brand]} />
+          }
           onEndReached={onEndReached}
           onEndReachedThreshold={0.4}
-          ListFooterComponent={loadingMore ? <ActivityIndicator color={PINK} className="my-4" /> : undefined}
+          ListFooterComponent={loadingMore ? <ActivityIndicator color={colors.brand} className="my-4" /> : undefined}
           ListEmptyComponent={
             <View className="flex-1 items-center justify-center py-16">
-              <Text className="text-5xl">🍽️</Text>
-              <Text className="mt-3 text-base font-semibold text-gray-700">
+              <View className="h-16 w-16 items-center justify-center rounded-2xl" style={{ backgroundColor: colors.brandSoft }}>
+                <Ionicons name="restaurant" size={30} color={colors.brand} />
+              </View>
+              <Text className="mt-3 text-base font-semibold text-brand-dark">
                 {debouncedSearch || status !== "all" ? "No matching restaurants" : "No restaurants yet"}
               </Text>
               {!debouncedSearch && status === "all" && (
                 <Pressable
                   onPress={() => router.push("/admin/restaurants/new")}
-                  className="mt-4 rounded-2xl bg-pink-500 px-6 py-3"
+                  className="mt-4 flex-row items-center rounded-2xl px-6 py-3"
+                  style={{ backgroundColor: colors.brand }}
                 >
-                  <Text className="font-semibold text-white">+ Add your first restaurant</Text>
+                  <Ionicons name="add" size={18} color={colors.white} />
+                  <Text className="ml-1 font-bold text-white">Add your first restaurant</Text>
                 </Pressable>
               )}
             </View>
