@@ -1,3 +1,6 @@
+import DateTimePicker, {
+  type DateTimePickerEvent,
+} from "@react-native-community/datetimepicker";
 import { useState, type ReactNode } from "react";
 import {
   ActivityIndicator,
@@ -11,10 +14,14 @@ import {
   View,
   type KeyboardTypeOptions,
 } from "react-native";
-import DateTimePicker, { type DateTimePickerEvent } from "@react-native-community/datetimepicker";
-import { colors, cardShadow } from "../../constants/theme";
-import type { Day, OpeningHour, Restaurant, RestaurantInput } from "../../types/restaurant";
-
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { cardShadow, colors } from "../../constants/theme";
+import type {
+  Day,
+  OpeningHour,
+  Restaurant,
+  RestaurantInput,
+} from "../../types/restaurant";
 // ================= Form values =================
 // Numbers are kept as strings while typing, and converted on submit.
 
@@ -65,7 +72,12 @@ export const emptyRestaurantValues = (): RestaurantFormValues => ({
   deliveryRadiusKm: "5",
   taxRate: "0",
   tableHoldMinutes: "30",
-  openingHours: DAYS.map((d) => ({ day: d.key, open: "11:00", close: "23:00", closed: false })),
+  openingHours: DAYS.map((d) => ({
+    day: d.key,
+    open: "11:00",
+    close: "23:00",
+    closed: false,
+  })),
 });
 
 /** Restaurant from the API → form values (used by the Edit screen later) */
@@ -91,13 +103,16 @@ export const restaurantToValues = (r: Restaurant): RestaurantFormValues => ({
 
 /** Checks the form and builds the API body, or returns the first error */
 export const valuesToInput = (
-  v: RestaurantFormValues
-): { input: RestaurantInput; error?: undefined } | { input?: undefined; error: string } => {
+  v: RestaurantFormValues,
+):
+  | { input: RestaurantInput; error?: undefined }
+  | { input?: undefined; error: string } => {
   if (v.name.trim().length < 2) return { error: "Enter the restaurant name" };
   if (v.street.trim().length < 3) return { error: "Enter the street address" };
   if (v.city.trim().length < 2) return { error: "Enter the city" };
 
-  if (v.email.trim() && !/^\S+@\S+\.\S+$/.test(v.email.trim())) return { error: "Enter a valid email" };
+  if (v.email.trim() && !/^\S+@\S+\.\S+$/.test(v.email.trim()))
+    return { error: "Enter a valid email" };
   if (v.phone.trim() && !/^\+?\d{10,13}$/.test(v.phone.replace(/[\s-]/g, ""))) {
     return { error: "Enter a valid phone number" };
   }
@@ -118,8 +133,13 @@ export const valuesToInput = (
     return { error: "Fees, tax and times must be positive numbers" };
   }
   if (fields.taxRate > 100) return { error: "Tax can't be over 100%" };
-  if (fields.deliveryRadiusKm > 50) return { error: "Delivery radius can be at most 50 km" };
-  if (!Number.isInteger(fields.tableHoldMinutes) || fields.tableHoldMinutes < 5 || fields.tableHoldMinutes > 240) {
+  if (fields.deliveryRadiusKm > 50)
+    return { error: "Delivery radius can be at most 50 km" };
+  if (
+    !Number.isInteger(fields.tableHoldMinutes) ||
+    fields.tableHoldMinutes < 5 ||
+    fields.tableHoldMinutes > 240
+  ) {
     return { error: "Table hold time must be 5–240 minutes" };
   }
 
@@ -128,8 +148,10 @@ export const valuesToInput = (
   if (v.lat.trim() || v.lng.trim()) {
     const lat = num(v.lat);
     const lng = num(v.lng);
-    if (Number.isNaN(lat) || lat < -90 || lat > 90) return { error: "Latitude must be between -90 and 90" };
-    if (Number.isNaN(lng) || lng < -180 || lng > 180) return { error: "Longitude must be between -180 and 180" };
+    if (Number.isNaN(lat) || lat < -90 || lat > 90)
+      return { error: "Latitude must be between -90 and 90" };
+    if (Number.isNaN(lng) || lng < -180 || lng > 180)
+      return { error: "Longitude must be between -180 and 180" };
     location = { lat, lng };
   }
 
@@ -160,11 +182,21 @@ export const valuesToInput = (
 
 // ================= Small UI pieces =================
 
-function Section({ title, subtitle, children }: { title: string; subtitle?: string; children: ReactNode }) {
+function Section({
+  title,
+  subtitle,
+  children,
+}: {
+  title: string;
+  subtitle?: string;
+  children: ReactNode;
+}) {
   return (
     <View className="mb-4 rounded-3xl bg-white p-5" style={cardShadow}>
       <Text className="text-base font-bold text-brand-dark">{title}</Text>
-      {!!subtitle && <Text className="mt-0.5 text-xs text-brand-light">{subtitle}</Text>}
+      {!!subtitle && (
+        <Text className="mt-0.5 text-xs text-brand-light">{subtitle}</Text>
+      )}
       <View className="mt-4">{children}</View>
     </View>
   );
@@ -205,8 +237,7 @@ function Field({
         style={{
           borderColor: focused ? colors.brand : colors.mistDark,
           backgroundColor: focused ? colors.white : colors.mistLight,
-        }}
-      >
+        }}>
         <TextInput
           value={value}
           onChangeText={onChangeText}
@@ -220,9 +251,15 @@ function Field({
           multiline={multiline}
           selectionColor={colors.brand}
           className="flex-1 py-3 text-base text-[#2c3329]"
-          style={multiline ? { minHeight: 80, textAlignVertical: "top" } : undefined}
+          style={
+            multiline ? { minHeight: 80, textAlignVertical: "top" } : undefined
+          }
         />
-        {!!suffix && <Text className="ml-2 text-sm font-semibold text-brand-light">{suffix}</Text>}
+        {!!suffix && (
+          <Text className="ml-2 text-sm font-semibold text-brand-light">
+            {suffix}
+          </Text>
+        )}
       </View>
     </View>
   );
@@ -245,8 +282,7 @@ function ToggleRow({
     <Pressable
       onPress={() => onChange(!value)}
       className="mb-2 flex-row items-center rounded-2xl p-3"
-      style={{ backgroundColor: value ? colors.brandSoft : colors.mistLight }}
-    >
+      style={{ backgroundColor: value ? colors.brandSoft : colors.mistLight }}>
       <Text className="mr-3 text-2xl">{icon}</Text>
       <View className="flex-1">
         <Text className="text-base font-semibold text-brand-dark">{label}</Text>
@@ -280,7 +316,15 @@ const formatTime = (time: string) => {
   return `${hour}:${String(m).padStart(2, "0")} ${suffix}`;
 };
 
-function TimeButton({ time, onPress, disabled }: { time: string; onPress: () => void; disabled?: boolean }) {
+function TimeButton({
+  time,
+  onPress,
+  disabled,
+}: {
+  time: string;
+  onPress: () => void;
+  disabled?: boolean;
+}) {
   return (
     <Pressable
       onPress={onPress}
@@ -290,9 +334,10 @@ function TimeButton({ time, onPress, disabled }: { time: string; onPress: () => 
         borderColor: colors.mistDark,
         backgroundColor: disabled ? colors.mist : colors.mistLight,
         opacity: disabled ? 0.5 : 1,
-      }}
-    >
-      <Text className="text-sm font-semibold text-brand-dark">{formatTime(time)}</Text>
+      }}>
+      <Text className="text-sm font-semibold text-brand-dark">
+        {formatTime(time)}
+      </Text>
     </Pressable>
   );
 }
@@ -306,25 +351,41 @@ type Props = {
   onSubmit: (input: RestaurantInput) => Promise<string | void>;
 };
 
-export default function RestaurantForm({ initialValues, submitLabel, onSubmit }: Props) {
-  const [values, setValues] = useState<RestaurantFormValues>(initialValues ?? emptyRestaurantValues());
+export default function RestaurantForm({
+  initialValues,
+  submitLabel,
+  onSubmit,
+}: Props) {
+  const [values, setValues] = useState<RestaurantFormValues>(
+    initialValues ?? emptyRestaurantValues(),
+  );
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
-  const [picker, setPicker] = useState<{ index: number; field: "open" | "close" } | null>(null);
-
+  const [picker, setPicker] = useState<{
+    index: number;
+    field: "open" | "close";
+  } | null>(null);
+  const insets = useSafeAreaInsets();
   // Update one top-level field
-  const set = <K extends keyof RestaurantFormValues>(key: K, value: RestaurantFormValues[K]) => {
+  const set = <K extends keyof RestaurantFormValues>(
+    key: K,
+    value: RestaurantFormValues[K],
+  ) => {
     setValues((v) => ({ ...v, [key]: value }));
     if (error) setError("");
   };
 
-  const setService = (key: keyof RestaurantFormValues["services"], on: boolean) =>
-    set("services", { ...values.services, [key]: on });
+  const setService = (
+    key: keyof RestaurantFormValues["services"],
+    on: boolean,
+  ) => set("services", { ...values.services, [key]: on });
 
   const setHour = (index: number, changes: Partial<OpeningHour>) =>
     set(
       "openingHours",
-      values.openingHours.map((h, i) => (i === index ? { ...h, ...changes } : h))
+      values.openingHours.map((h, i) =>
+        i === index ? { ...h, ...changes } : h,
+      ),
     );
 
   const copyMondayToAll = () => {
@@ -332,7 +393,12 @@ export default function RestaurantForm({ initialValues, submitLabel, onSubmit }:
     if (!monday) return;
     set(
       "openingHours",
-      values.openingHours.map((h) => ({ ...h, open: monday.open, close: monday.close, closed: monday.closed }))
+      values.openingHours.map((h) => ({
+        ...h,
+        open: monday.open,
+        close: monday.close,
+        closed: monday.closed,
+      })),
     );
   };
 
@@ -366,18 +432,35 @@ export default function RestaurantForm({ initialValues, submitLabel, onSubmit }:
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       className="flex-1"
-      keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
-    >
+      keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}>
       <ScrollView
         contentContainerStyle={{ padding: 16, paddingBottom: 120 }}
         keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-      >
+        showsVerticalScrollIndicator={false}>
         {/* 1. Basic info */}
         <Section title="Basic info" subtitle="What customers will see">
-          <Field label="Restaurant name" required value={values.name} onChangeText={(t) => set("name", t)} placeholder="e.g. Savour Foods" autoCapitalize="words" />
-          <Field label="Description" value={values.description} onChangeText={(t) => set("description", t)} placeholder="A short line about the restaurant" multiline />
-          <Field label="Cuisines" value={values.cuisines} onChangeText={(t) => set("cuisines", t)} placeholder="Pakistani, BBQ, Chinese" autoCapitalize="words" />
+          <Field
+            label="Restaurant name"
+            required
+            value={values.name}
+            onChangeText={(t) => set("name", t)}
+            placeholder="e.g. Savour Foods"
+            autoCapitalize="words"
+          />
+          <Field
+            label="Description"
+            value={values.description}
+            onChangeText={(t) => set("description", t)}
+            placeholder="A short line about the restaurant"
+            multiline
+          />
+          <Field
+            label="Cuisines"
+            value={values.cuisines}
+            onChangeText={(t) => set("cuisines", t)}
+            placeholder="Pakistani, BBQ, Chinese"
+            autoCapitalize="words"
+          />
           {!!values.cuisines.trim() && (
             <View className="-mt-1 mb-3 flex-row flex-wrap gap-1.5">
               {values.cuisines
@@ -385,90 +468,212 @@ export default function RestaurantForm({ initialValues, submitLabel, onSubmit }:
                 .map((c) => c.trim())
                 .filter(Boolean)
                 .map((c, i) => (
-                  <View key={`${c}-${i}`} className="rounded-full bg-brand-soft px-3 py-1">
-                    <Text className="text-xs font-semibold text-brand">{c}</Text>
+                  <View
+                    key={`${c}-${i}`}
+                    className="rounded-full bg-brand-soft px-3 py-1">
+                    <Text className="text-xs font-semibold text-brand">
+                      {c}
+                    </Text>
                   </View>
                 ))}
             </View>
           )}
           <View className="flex-row gap-3">
-            <Field label="Phone" value={values.phone} onChangeText={(t) => set("phone", t)} placeholder="0512345678" keyboardType="phone-pad" autoCapitalize="none" />
-            <Field label="Email" value={values.email} onChangeText={(t) => set("email", t)} placeholder="info@..." keyboardType="email-address" autoCapitalize="none" />
+            <Field
+              label="Phone"
+              value={values.phone}
+              onChangeText={(t) => set("phone", t)}
+              placeholder="0512345678"
+              keyboardType="phone-pad"
+              autoCapitalize="none"
+            />
+            <Field
+              label="Email"
+              value={values.email}
+              onChangeText={(t) => set("email", t)}
+              placeholder="info@..."
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
           </View>
         </Section>
 
         {/* 2. Address */}
         <Section title="Address" subtitle="Where the restaurant is">
-          <Field label="Street address" required value={values.street} onChangeText={(t) => set("street", t)} placeholder="Plot 12, Jinnah Avenue" autoCapitalize="words" />
+          <Field
+            label="Street address"
+            required
+            value={values.street}
+            onChangeText={(t) => set("street", t)}
+            placeholder="Plot 12, Jinnah Avenue"
+            autoCapitalize="words"
+          />
           <View className="flex-row gap-3">
-            <Field label="Area" value={values.area} onChangeText={(t) => set("area", t)} placeholder="Blue Area" autoCapitalize="words" />
-            <Field label="City" required value={values.city} onChangeText={(t) => set("city", t)} placeholder="Islamabad" autoCapitalize="words" />
+            <Field
+              label="Area"
+              value={values.area}
+              onChangeText={(t) => set("area", t)}
+              placeholder="Blue Area"
+              autoCapitalize="words"
+            />
+            <Field
+              label="City"
+              required
+              value={values.city}
+              onChangeText={(t) => set("city", t)}
+              placeholder="Islamabad"
+              autoCapitalize="words"
+            />
           </View>
           <Text className="mb-2 mt-1 text-xs text-brand-light">
-            Map coordinates (optional) — needed later for delivery distance and "near me"
+            Map coordinates (optional) — needed later for delivery distance and
+            "near me"
           </Text>
           <View className="flex-row gap-3">
-            <Field label="Latitude" value={values.lat} onChangeText={(t) => set("lat", t)} placeholder="33.7104" keyboardType="numbers-and-punctuation" autoCapitalize="none" />
-            <Field label="Longitude" value={values.lng} onChangeText={(t) => set("lng", t)} placeholder="73.0563" keyboardType="numbers-and-punctuation" autoCapitalize="none" />
+            <Field
+              label="Latitude"
+              value={values.lat}
+              onChangeText={(t) => set("lat", t)}
+              placeholder="33.7104"
+              keyboardType="numbers-and-punctuation"
+              autoCapitalize="none"
+            />
+            <Field
+              label="Longitude"
+              value={values.lng}
+              onChangeText={(t) => set("lng", t)}
+              placeholder="73.0563"
+              keyboardType="numbers-and-punctuation"
+              autoCapitalize="none"
+            />
           </View>
         </Section>
 
         {/* 3. Services */}
         <Section title="Services" subtitle="Turn on at least one">
-          <ToggleRow icon="🍽️" label="Dine-in" description="Order ahead and reserve a table" value={values.services.dineIn} onChange={(v) => setService("dineIn", v)} />
-          <ToggleRow icon="🥡" label="Takeaway" description="Customer picks up the order" value={values.services.takeaway} onChange={(v) => setService("takeaway", v)} />
-          <ToggleRow icon="🛵" label="Delivery" description="Restaurant's own riders deliver" value={values.services.delivery} onChange={(v) => setService("delivery", v)} />
+          <ToggleRow
+            icon="🍽️"
+            label="Dine-in"
+            description="Order ahead and reserve a table"
+            value={values.services.dineIn}
+            onChange={(v) => setService("dineIn", v)}
+          />
+          <ToggleRow
+            icon="🥡"
+            label="Takeaway"
+            description="Customer picks up the order"
+            value={values.services.takeaway}
+            onChange={(v) => setService("takeaway", v)}
+          />
+          <ToggleRow
+            icon="🛵"
+            label="Delivery"
+            description="Restaurant's own riders deliver"
+            value={values.services.delivery}
+            onChange={(v) => setService("delivery", v)}
+          />
         </Section>
 
         {/* 4. Settings */}
         <Section title="Settings" subtitle="Prices are in PKR">
           <View className="flex-row gap-3">
-            <Field label="Minimum order" value={values.minOrder} onChangeText={(t) => set("minOrder", t)} keyboardType="decimal-pad" suffix="Rs" />
-            <Field label="Tax" value={values.taxRate} onChangeText={(t) => set("taxRate", t)} keyboardType="decimal-pad" suffix="%" />
+            <Field
+              label="Minimum order"
+              value={values.minOrder}
+              onChangeText={(t) => set("minOrder", t)}
+              keyboardType="decimal-pad"
+              suffix="Rs"
+            />
+            <Field
+              label="Tax"
+              value={values.taxRate}
+              onChangeText={(t) => set("taxRate", t)}
+              keyboardType="decimal-pad"
+              suffix="%"
+            />
           </View>
           {values.services.delivery && (
             <View className="flex-row gap-3">
-              <Field label="Delivery fee" value={values.deliveryFee} onChangeText={(t) => set("deliveryFee", t)} keyboardType="decimal-pad" suffix="Rs" />
-              <Field label="Delivery radius" value={values.deliveryRadiusKm} onChangeText={(t) => set("deliveryRadiusKm", t)} keyboardType="decimal-pad" suffix="km" />
+              <Field
+                label="Delivery fee"
+                value={values.deliveryFee}
+                onChangeText={(t) => set("deliveryFee", t)}
+                keyboardType="decimal-pad"
+                suffix="Rs"
+              />
+              <Field
+                label="Delivery radius"
+                value={values.deliveryRadiusKm}
+                onChangeText={(t) => set("deliveryRadiusKm", t)}
+                keyboardType="decimal-pad"
+                suffix="km"
+              />
             </View>
           )}
           {values.services.dineIn && (
-            <Field label="Table hold time" value={values.tableHoldMinutes} onChangeText={(t) => set("tableHoldMinutes", t)} keyboardType="number-pad" suffix="min" />
+            <Field
+              label="Table hold time"
+              value={values.tableHoldMinutes}
+              onChangeText={(t) => set("tableHoldMinutes", t)}
+              keyboardType="number-pad"
+              suffix="min"
+            />
           )}
         </Section>
 
         {/* 5. Opening hours */}
-        <Section title="Opening hours" subtitle="Closing before opening means after midnight">
+        <Section
+          title="Opening hours"
+          subtitle="Closing before opening means after midnight">
           {values.openingHours.map((hour, index) => {
-            const label = DAYS.find((d) => d.key === hour.day)?.label ?? hour.day;
+            const label =
+              DAYS.find((d) => d.key === hour.day)?.label ?? hour.day;
             return (
               <View
                 key={hour.day}
                 className="flex-row items-center border-b py-2.5"
-                style={{ borderColor: index === 6 ? "transparent" : colors.mist }}
-              >
-                <Text className="w-24 text-sm font-semibold text-brand-dark">{label}</Text>
+                style={{
+                  borderColor: index === 6 ? "transparent" : colors.mist,
+                }}>
+                <Text className="w-24 text-sm font-semibold text-brand-dark">
+                  {label}
+                </Text>
                 {hour.closed ? (
-                  <Text className="flex-1 text-sm italic text-brand-light">Closed</Text>
+                  <Text className="flex-1 text-sm italic text-brand-light">
+                    Closed
+                  </Text>
                 ) : (
                   <View className="flex-1 flex-row items-center gap-1.5">
-                    <TimeButton time={hour.open} onPress={() => setPicker({ index, field: "open" })} />
+                    <TimeButton
+                      time={hour.open}
+                      onPress={() => setPicker({ index, field: "open" })}
+                    />
                     <Text className="text-brand-light">–</Text>
-                    <TimeButton time={hour.close} onPress={() => setPicker({ index, field: "close" })} />
+                    <TimeButton
+                      time={hour.close}
+                      onPress={() => setPicker({ index, field: "close" })}
+                    />
                   </View>
                 )}
                 <Switch
                   value={!hour.closed}
                   onValueChange={(open) => setHour(index, { closed: !open })}
-                  trackColor={{ false: colors.mistDark, true: colors.brandLight }}
+                  trackColor={{
+                    false: colors.mistDark,
+                    true: colors.brandLight,
+                  }}
                   thumbColor={!hour.closed ? colors.brand : colors.white}
                 />
               </View>
             );
           })}
 
-          <Pressable onPress={copyMondayToAll} className="mt-3 items-center rounded-2xl bg-brand-soft py-3">
-            <Text className="text-sm font-bold text-brand">Copy Monday to all days</Text>
+          <Pressable
+            onPress={copyMondayToAll}
+            className="mt-3 items-center rounded-2xl bg-brand-soft py-3">
+            <Text className="text-sm font-bold text-brand">
+              Copy Monday to all days
+            </Text>
           </Pressable>
 
           {/* Time picker */}
@@ -491,24 +696,35 @@ export default function RestaurantForm({ initialValues, submitLabel, onSubmit }:
 
       {/* Save bar */}
       <View
-        className="absolute bottom-0 left-0 right-0 border-t bg-white px-4 pb-6 pt-3"
-        style={{ borderColor: colors.mist }}
-      >
-        {!!error && <Text className="mb-2 text-center text-sm text-[#b42318]">{error}</Text>}
+        className="absolute bottom-0 left-0 right-0 border-t bg-white px-4 pt-3"
+        style={{
+          borderColor: colors.mistDark,
+          paddingBottom: Math.max(insets.bottom, 12) + 8,
+        }}>
+        {!!error && (
+          <Text className="mb-2 text-center text-sm text-[#b42318]">
+            {error}
+          </Text>
+        )}
         <Pressable
           onPress={handleSubmit}
           disabled={saving}
-          className="items-center rounded-2xl py-4"
-          style={({ pressed }) => ({
-            backgroundColor: pressed ? colors.brandDark : colors.brand,
-            opacity: saving ? 0.7 : 1,
-          })}
-        >
-          {saving ? (
-            <ActivityIndicator color={colors.white} />
-          ) : (
-            <Text className="text-base font-bold text-white">{submitLabel}</Text>
-          )}
+          android_ripple={{ color: colors.brandDark }}
+          className="overflow-hidden rounded-2xl">
+          <View
+            className="items-center rounded-2xl py-4"
+            style={{
+              backgroundColor: colors.brand,
+              opacity: saving ? 0.7 : 1,
+            }}>
+            {saving ? (
+              <ActivityIndicator color={colors.white} />
+            ) : (
+              <Text className="text-base font-bold text-white">
+                {submitLabel}
+              </Text>
+            )}
+          </View>
         </Pressable>
       </View>
     </KeyboardAvoidingView>
