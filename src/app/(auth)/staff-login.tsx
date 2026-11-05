@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { useState } from "react";
@@ -11,20 +12,17 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { colors } from "../../constants/theme";
 import { useAuth } from "../../context/AuthContext";
 import { getErrorMessage } from "../../lib/api";
 import { staffLogin } from "../../services/authApi";
 
-// Same palette as the other auth screens
-const COLORS = {
-  bg: ["#e0e1df", "#e0e1df", "#4e5c4a"] as const,
-  button: ["#4e5c4a", "#EC4899"] as const,
-  buttonDisabled: ["#F9C6DC", "#F5B5D0"] as const,
-  focus: "#4e5c4a",
-};
+const BG = [colors.mist, colors.mist, colors.brand] as const;
+const BUTTON = [colors.brand, colors.brandDark] as const;
+const BUTTON_DISABLED = [colors.mistDark, colors.mistDark] as const;
 
-const pShadow = (opacity: number, radius: number, elevation: number) => ({
-  shadowColor: COLORS.focus,
+const shadow = (opacity: number, radius: number, elevation: number) => ({
+  shadowColor: colors.brandDark,
   shadowOpacity: opacity,
   shadowRadius: radius,
   shadowOffset: { width: 0, height: radius / 2 },
@@ -45,8 +43,7 @@ export default function StaffLoginScreen() {
     setError("");
 
     const cleanEmail = email.trim().toLowerCase();
-    if (!/^\S+@\S+\.\S+$/.test(cleanEmail))
-      return setError("Enter a valid email");
+    if (!/^\S+@\S+\.\S+$/.test(cleanEmail)) return setError("Enter a valid email");
     if (!password) return setError("Enter your password");
 
     setLoading(true);
@@ -62,17 +59,23 @@ export default function StaffLoginScreen() {
 
   const canSubmit = email.trim().length > 0 && password.length > 0 && !loading;
 
-  const fieldBorder = (name: "email" | "password") =>
-    error ? "#EF4444" : focused === name ? COLORS.focus : "#F3D1DE";
+  const fieldStyle = (name: "email" | "password") => ({
+    borderColor: error ? colors.danger : focused === name ? colors.brand : colors.mistDark,
+    backgroundColor: focused === name ? colors.white : colors.mist,
+  });
+  const iconColor = (name: "email" | "password") => (focused === name ? colors.brand : colors.brandLight);
 
   return (
-    <LinearGradient
-      colors={COLORS.bg}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      style={{ flex: 1 }}>
-      <View className="absolute -left-16 -top-10 h-56 w-56 rounded-full bg-pink-300 opacity-40" />
-      <View className="absolute -right-20 bottom-32 h-64 w-64 rounded-full bg-rose-300 opacity-50" />
+    <LinearGradient colors={BG} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ flex: 1 }}>
+      {/* Soft olive circles */}
+      <View
+        className="absolute -left-16 -top-10 h-56 w-56 rounded-full"
+        style={{ backgroundColor: colors.brandLight, opacity: 0.18 }}
+      />
+      <View
+        className="absolute -right-20 bottom-32 h-64 w-64 rounded-full"
+        style={{ backgroundColor: colors.brand, opacity: 0.12 }}
+      />
 
       <SafeAreaView className="flex-1">
         <KeyboardAvoidingView
@@ -81,32 +84,20 @@ export default function StaffLoginScreen() {
           {/* Header */}
           <View className="mb-8 items-center">
             <View
-              className="h-20 w-20 items-center justify-center rounded-full bg-gray-100"
-              style={pShadow(0.35, 22, 18)}>
-              <Text className="text-4xl">🛡️</Text>
+              className="h-20 w-20 items-center justify-center rounded-full"
+              style={{ backgroundColor: colors.brand, ...shadow(0.35, 22, 10) }}>
+              <Ionicons name="shield-checkmark" size={38} color={colors.white} />
             </View>
-            <Text className="mt-4 text-3xl font-extrabold text-[#4e5c4a]">
-              Staff Login
-            </Text>
-            <Text className="mt-1 text-center text-base text-[#4e5c4a]/70">
-              For admins and restaurant managers
-            </Text>
+            <Text className="mt-4 text-3xl font-extrabold text-brand-dark">Staff Login</Text>
+            <Text className="mt-1 text-center text-base text-brand-light">For admins and restaurant managers</Text>
           </View>
 
-          {/* White card */}
-          <View
-            className="rounded-3xl bg-gray-100 p-6"
-            style={pShadow(0.35, 34, 18)}>
+          {/* Card */}
+          <View className="rounded-3xl p-6" style={{ backgroundColor: colors.mistLight, ...shadow(0.3, 30, 14) }}>
             {/* Email */}
-            <Text className="mb-2 text-sm font-semibold text-gray-800">
-              Email
-            </Text>
-            <View
-              className={`mb-4 flex-row items-center rounded-2xl border-2 px-4 ${
-                focused === "email" ? "bg-[#e0e1df]" : "bg-gray-50"
-              }`}
-              style={{ borderColor: fieldBorder("email") }}>
-              <Text className="mr-2 text-lg">✉️</Text>
+            <Text className="mb-2 text-sm font-semibold text-brand-dark">Email</Text>
+            <View className="mb-4 flex-row items-center rounded-2xl border-2 px-4" style={fieldStyle("email")}>
+              <Ionicons name="mail" size={18} color={iconColor("email")} />
               <TextInput
                 value={email}
                 onChangeText={(t) => {
@@ -116,26 +107,20 @@ export default function StaffLoginScreen() {
                 onFocus={() => setFocused("email")}
                 onBlur={() => setFocused(null)}
                 placeholder="admin@example.com"
-                placeholderTextColor="#C9A3B5"
+                placeholderTextColor={colors.placeholder}
                 autoCapitalize="none"
                 autoCorrect={false}
                 keyboardType="email-address"
                 editable={!loading}
-                selectionColor={COLORS.focus}
-                className="flex-1 py-4 text-base text-gray-900"
+                selectionColor={colors.brand}
+                className="ml-3 flex-1 py-4 text-base text-[#2c3329]"
               />
             </View>
 
             {/* Password */}
-            <Text className="mb-2 text-sm font-semibold text-gray-700">
-              Password
-            </Text>
-            <View
-              className={`flex-row items-center rounded-2xl border-2 px-4 ${
-                focused === "password" ? "bg-[#e0e1df]" : "bg-gray-50"
-              }`}
-              style={{ borderColor: fieldBorder("password") }}>
-              <Text className="mr-2 text-lg">🔑</Text>
+            <Text className="mb-2 text-sm font-semibold text-brand-dark">Password</Text>
+            <View className="flex-row items-center rounded-2xl border-2 px-4" style={fieldStyle("password")}>
+              <Ionicons name="key" size={18} color={iconColor("password")} />
               <TextInput
                 value={password}
                 onChangeText={(t) => {
@@ -145,66 +130,55 @@ export default function StaffLoginScreen() {
                 onFocus={() => setFocused("password")}
                 onBlur={() => setFocused(null)}
                 placeholder="Your password"
-                placeholderTextColor="#C9A3B5"
+                placeholderTextColor={colors.placeholder}
                 secureTextEntry={!showPassword}
                 autoCapitalize="none"
                 autoCorrect={false}
                 returnKeyType="done"
                 onSubmitEditing={handleLogin}
                 editable={!loading}
-                selectionColor={COLORS.focus}
-                className="flex-1 py-4 text-base text-gray-900"
+                selectionColor={colors.brand}
+                className="ml-3 flex-1 py-4 text-base text-[#2c3329]"
               />
-              <Pressable onPress={() => setShowPassword((s) => !s)} hitSlop={8}>
-                <Text className="text-sm font-semibold text-[#4e5c4a]">
-                  {showPassword ? "Hide" : "Show"}
-                </Text>
+              <Pressable onPress={() => setShowPassword((s) => !s)} hitSlop={10}>
+                <Ionicons name={showPassword ? "eye-off" : "eye"} size={20} color={colors.brandLight} />
               </Pressable>
             </View>
 
             {!!error && (
-              <Text className="mt-3 text-sm text-red-500">{error}</Text>
+              <Text className="mt-3 text-sm" style={{ color: colors.danger }}>
+                {error}
+              </Text>
             )}
 
             {/* Login button */}
             <Pressable
-              className="mt-6"
               onPress={handleLogin}
               disabled={!canSubmit}
               style={({ pressed }) => ({
                 marginTop: 24,
                 borderRadius: 16,
                 opacity: pressed ? 0.85 : 1,
-                ...pShadow(canSubmit ? 0.4 : 0, 12, canSubmit ? 6 : 0),
+                ...shadow(canSubmit ? 0.35 : 0, 12, canSubmit ? 6 : 0),
               })}>
               <LinearGradient
-                colors={canSubmit ? COLORS.button : COLORS.buttonDisabled}
+                colors={canSubmit ? BUTTON : BUTTON_DISABLED}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
-                style={{
-                  borderRadius: 16,
-                  paddingVertical: 16,
-                  alignItems: "center",
-                }}>
+                style={{ borderRadius: 16, paddingVertical: 16, alignItems: "center" }}>
                 {loading ? (
-                  <ActivityIndicator color="#fff" />
+                  <ActivityIndicator color={colors.white} />
                 ) : (
-                  <Text className="text-base font-bold tracking-wide text-white">
-                    Log in
-                  </Text>
+                  <Text className="text-base font-bold tracking-wide text-white">Log in</Text>
                 )}
               </LinearGradient>
             </Pressable>
           </View>
 
           {/* Back to customer login */}
-          <Pressable
-            onPress={() => router.back()}
-            className="mt-6 items-center"
-            hitSlop={8}>
-            <Text className="text-sm text-[#4e5c4a]">
-              Not staff?{" "}
-              <Text className="font-bold text-pink-600">Customer login</Text>
+          <Pressable onPress={() => router.back()} className="mt-6 items-center" hitSlop={8}>
+            <Text className="text-sm" style={{ color: colors.brandDark }}>
+              Not staff? <Text className="font-bold text-white">Customer login</Text>
             </Text>
           </Pressable>
         </KeyboardAvoidingView>
