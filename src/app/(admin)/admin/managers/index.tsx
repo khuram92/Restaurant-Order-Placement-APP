@@ -151,7 +151,6 @@ export default function AdminManagersScreen() {
             </Pressable>
           )}
         </View>
-
         <View className="mt-3 flex-row gap-2">
           {FILTERS.map((f) => {
             const selected = status === f.key;
