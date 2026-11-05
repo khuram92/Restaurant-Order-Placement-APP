@@ -306,7 +306,6 @@ export default function RestaurantDetailScreen() {
               }
             />
           </Card>
-
           {/* Opening hours */}
           <Card title="Opening hours" icon="time">
             {r.openingHours.map((h) => {
