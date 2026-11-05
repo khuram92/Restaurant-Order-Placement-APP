@@ -84,3 +84,13 @@ export const uploadRestaurantImage = (
     stream.end(buffer);
   });
 };
+
+/** Deletes a restaurant's logo and cover from Cloudinary (missing images are ignored) */
+export const deleteRestaurantImages = async (restaurantId: string): Promise<void> => {
+  const cloud = getCloudinary();
+  await Promise.allSettled(
+    (["logo", "cover"] as const).map((kind) =>
+      cloud.uploader.destroy(`food-app/restaurants/${restaurantId}-${kind}`, { invalidate: true })
+    )
+  );
+};
