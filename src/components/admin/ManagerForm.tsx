@@ -380,6 +380,7 @@ export default function ManagerForm({ initialValues, managerId, submitLabel, not
             <Text className="ml-2 flex-1 text-sm text-brand-dark">{note}</Text>
           </View>
         )}
+        
       </ScrollView>
 
       {/* Save bar */}
