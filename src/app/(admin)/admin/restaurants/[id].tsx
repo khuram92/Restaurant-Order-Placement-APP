@@ -245,7 +245,6 @@ export default function RestaurantDetailScreen() {
               ))}
             </View>
           )}
-
           {/* Status switch */}
           <View className="my-4 flex-row items-center rounded-3xl bg-white p-4" style={cardShadow}>
             <View
