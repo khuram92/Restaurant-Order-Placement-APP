@@ -79,7 +79,6 @@ export default function EditRestaurantScreen() {
       </View>
     );
   }
-
   return (
     <View className="flex-1" style={{ backgroundColor: colors.mist }}>
       {header}
