@@ -2,6 +2,7 @@ import { Router } from "express";
 import { protect, authorize } from "../middleware/auth.middleware.js";
 import {
   createRestaurant,
+  deleteRestaurant,
   getRestaurant,
   listRestaurants,
   setRestaurantStatus,
@@ -21,4 +22,5 @@ router.get("/restaurants/:id", getRestaurant);
 router.patch("/restaurants/:id", updateRestaurant);
 router.patch("/restaurants/:id/status", setRestaurantStatus);
 router.patch("/restaurants/:id/images", restaurantImagesUpload, uploadRestaurantImages);
+router.delete("/restaurants/:id", deleteRestaurant);
 export default router;
