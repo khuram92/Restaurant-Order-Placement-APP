@@ -35,31 +35,31 @@ const findManagerOr404 = async (req: Request, res: Response) => {
   return manager;
 };
 
-// /** Is this restaurant free (no manager, or only `exceptManagerId`)? */
-// const restaurantHasOtherManager = (restaurantId: string, exceptManagerId?: string) =>
-//   User.exists({
-//     role: "manager",
-//     restaurantId,
-//     ...(exceptManagerId && { _id: { $ne: exceptManagerId } }),
-//   });
+/** Is this restaurant free (no manager, or only `exceptManagerId`)? */
+const restaurantHasOtherManager = (restaurantId: string, exceptManagerId?: string) =>
+  User.exists({
+    role: "manager",
+    restaurantId,
+    ...(exceptManagerId && { _id: { $ne: exceptManagerId } }),
+  });
 
-// /** Emails the password; returns true if sent. If sending fails the admin gets the password once instead. */
-// const deliverPassword = async (manager: UserDoc, password: string, kind: "welcome" | "reset") => {
-//   const restaurant = await Restaurant.findById(manager.restaurantId).select("name");
-//   try {
-//     await sendManagerCredentials({
-//       to: manager.email!,
-//       firstName: manager.firstName ?? "there",
-//       password,
-//       restaurantName: restaurant?.name ?? "your restaurant",
-//       kind,
-//     });
-//     return true;
-//   } catch (error) {
-//     console.error("❌ Manager email failed:", (error as Error).message);
-//     return false;
-//   }
-// };
+/** Emails the password; returns true if sent. If sending fails the admin gets the password once instead. */
+const deliverPassword = async (manager: UserDoc, password: string, kind: "welcome" | "reset") => {
+  const restaurant = await Restaurant.findById(manager.restaurantId).select("name");
+  try {
+    await sendManagerCredentials({
+      to: manager.email!,
+      firstName: manager.firstName ?? "there",
+      password,
+      restaurantName: restaurant?.name ?? "your restaurant",
+      kind,
+    });
+    return true;
+  } catch (error) {
+    console.error("❌ Manager email failed:", (error as Error).message);
+    return false;
+  }
+};
 
 // const withRestaurant = (manager: UserDoc) => manager.populate("restaurantId", RESTAURANT_FIELDS);
 
