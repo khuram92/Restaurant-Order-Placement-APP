@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { ActivityIndicator, Alert, Pressable, Text, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
+import { colors } from "../constants/theme";
 import { useAuth } from "../context/AuthContext";
 import { uploadAvatar } from "../services/authApi";
 import { getErrorMessage } from "../lib/api";
-
-const PINK = "#EC4899";
 
 type Props = {
   /** Initials shown when there is no photo (e.g. "AK") */
@@ -71,12 +71,13 @@ export default function AvatarPicker({ initials, size = 104 }: Props) {
     <View className="items-center">
       <Pressable onPress={openOptions} disabled={uploading}>
         <View
-          className="items-center justify-center overflow-hidden rounded-full border-4 border-white bg-pink-100"
+          className="items-center justify-center overflow-hidden rounded-full border-4 border-white"
           style={{
             width: size,
             height: size,
-            shadowColor: PINK,
-            shadowOpacity: 0.35,
+            backgroundColor: colors.brandSoft,
+            shadowColor: colors.brandDark,
+            shadowOpacity: 0.3,
             shadowRadius: 16,
             shadowOffset: { width: 0, height: 8 },
             elevation: 10,
@@ -85,29 +86,40 @@ export default function AvatarPicker({ initials, size = 104 }: Props) {
           {user?.avatar ? (
             <Image source={{ uri: user.avatar }} style={{ width: "100%", height: "100%" }} contentFit="cover" />
           ) : initials ? (
-            <Text className="text-3xl font-extrabold text-pink-500">{initials}</Text>
+            <Text className="text-3xl font-extrabold" style={{ color: colors.brand }}>
+              {initials}
+            </Text>
           ) : (
-            <Text className="text-4xl">📷</Text>
+            <Ionicons name="person" size={size * 0.42} color={colors.brandLight} />
           )}
 
           {uploading && (
             <View className="absolute inset-0 items-center justify-center bg-black/30">
-              <ActivityIndicator color="#fff" />
+              <ActivityIndicator color={colors.white} />
             </View>
           )}
         </View>
 
         {/* Small camera badge */}
-        <View className="absolute bottom-0 right-0 h-9 w-9 items-center justify-center rounded-full border-2 border-white bg-pink-500">
-          <Text className="text-sm">📷</Text>
+        <View
+          className="absolute bottom-0 right-0 h-9 w-9 items-center justify-center rounded-full border-2 border-white"
+          style={{ backgroundColor: colors.brand }}
+        >
+          <Ionicons name="camera" size={16} color={colors.white} />
         </View>
       </Pressable>
 
-      <Text className="mt-3 text-sm font-semibold text-pink-600">
+      <Text className="mt-3 text-sm font-semibold" style={{ color: colors.brandDark }}>
         {user?.avatar ? "Change photo" : "Add photo"}
-        <Text className="font-normal text-gray-400"> · optional</Text>
+        <Text className="font-normal" style={{ color: colors.textMuted }}>
+          {" "}· optional
+        </Text>
       </Text>
-      {!!error && <Text className="mt-1 text-center text-sm text-red-500">{error}</Text>}
+      {!!error && (
+        <Text className="mt-1 text-center text-sm" style={{ color: colors.danger }}>
+          {error}
+        </Text>
+      )}
     </View>
   );
 }
