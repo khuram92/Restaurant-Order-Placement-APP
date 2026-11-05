@@ -272,6 +272,7 @@ export default function ManagerDetailScreen() {
         </View>
 
         {/* Can log in */}
+        
         <View className="mb-4 flex-row items-center rounded-3xl bg-white p-4" style={cardShadow}>
           <View className="h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor: m.isActive ? colors.brand : colors.mistDark }}>
             <Ionicons name="power" size={20} color={colors.white} />
@@ -293,7 +294,7 @@ export default function ManagerDetailScreen() {
         </View>
 
         {/* Restaurant */}
-        
+
         <Card title="Manages" icon="storefront">
           {r ? (
             <Pressable
