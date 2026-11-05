@@ -10,6 +10,13 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// API answers must always be fresh: no ETag / 304, no stored copies on the phone
+app.set("etag", false);
+app.use("/api", (_req, res, next) => {
+  res.set("Cache-Control", "no-store");
+  next();
+});
+
 // Routes
 app.get("/api/health", (_req: Request, res: Response) => {
   res.json({ status: "ok" });

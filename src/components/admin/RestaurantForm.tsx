@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useState, type ComponentProps, type ReactNode } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
+import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import DateTimePicker, { type DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { colors, cardShadow } from "../../constants/theme";
@@ -158,6 +159,7 @@ export const valuesToInput = (
   }
 
     // Optional text is always sent; "" tells the backend to remove it (so Edit can clear fields)
+    // Optional text is always sent; "" tells the backend to remove it (so Edit can clear fields)
   return {
     input: {
       name: v.name.trim(),
@@ -171,7 +173,10 @@ export const valuesToInput = (
         city: v.city.trim(),
       },
       location, // null = no coordinates
-      }
+      services: v.services,
+      ...fields,
+      openingHours: v.openingHours,
+    },
   };
 };
 
@@ -248,6 +253,8 @@ function Field({
   );
 }
 
+type IconName = ComponentProps<typeof Ionicons>["name"];
+
 function ToggleRow({
   icon,
   label,
@@ -255,7 +262,7 @@ function ToggleRow({
   value,
   onChange,
 }: {
-  icon: string;
+  icon: IconName;
   label: string;
   description: string;
   value: boolean;
@@ -267,17 +274,23 @@ function ToggleRow({
       className="mb-2 flex-row items-center rounded-2xl p-3"
       style={{ backgroundColor: value ? colors.brandSoft : colors.mistLight }}
     >
-      <Text className="mr-3 text-2xl">{icon}</Text>
+      <View
+        className="mr-3 h-10 w-10 items-center justify-center rounded-xl"
+        style={{ backgroundColor: value ? colors.brand : colors.mistDark }}
+      >
+        <Ionicons name={icon} size={20} color={colors.white} />
+      </View>
       <View className="flex-1">
         <Text className="text-base font-semibold text-brand-dark">{label}</Text>
         <Text className="text-xs text-brand-light">{description}</Text>
       </View>
-      <Switch
-        value={value}
-        onValueChange={onChange}
-        trackColor={{ false: colors.mistDark, true: colors.brandLight }}
-        thumbColor={value ? colors.brand : colors.white}
-      />
+      <View pointerEvents="none">
+        <Switch
+          value={value}
+          trackColor={{ false: colors.mistDark, true: colors.brandLight }}
+          thumbColor={value ? colors.brand : colors.white}
+        />
+      </View>
     </Pressable>
   );
 }
@@ -286,7 +299,7 @@ function ToggleRow({
 function LockedNote({ text }: { text: string }) {
   return (
     <View className="mb-3 flex-row items-center rounded-xl px-3 py-2" style={{ backgroundColor: colors.mistLight }}>
-      <Text className="mr-2">🔒</Text>
+      <Ionicons name="lock-closed" size={14} color={colors.brandLight} style={{ marginRight: 8 }} />
       <Text className="flex-1 text-xs text-brand-light">{text}</Text>
     </View>
   );
@@ -457,7 +470,7 @@ function ImagesSection({
           <Image source={{ uri: coverUri }} style={{ width: "100%", height: "100%" }} contentFit="cover" />
         ) : (
           <View className="flex-1 items-center justify-center">
-            <Text className="text-3xl">🖼️</Text>
+            <Ionicons name="image" size={36} color={colors.brand} />
             <Text className="mt-1 text-sm font-semibold text-brand">Add cover photo</Text>
           </View>
         )}
@@ -476,7 +489,11 @@ function ImagesSection({
           {logoUri ? (
             <Image source={{ uri: logoUri }} style={{ width: "100%", height: "100%" }} contentFit="cover" />
           ) : (
-            <Text className="text-2xl font-extrabold text-brand">{name.trim()[0]?.toUpperCase() ?? "📷"}</Text>
+            name.trim() ? (
+              <Text className="text-2xl font-extrabold text-brand">{name.trim()[0]?.toUpperCase()}</Text>
+            ) : (
+              <Ionicons name="camera" size={26} color={colors.brand} />
+            )
           )}
         </Pressable>
         <View className="ml-3 flex-1 pb-1">
@@ -546,9 +563,10 @@ export default function RestaurantForm({ initialValues, initialLogo, initialCove
     if (error) setError("");
   };
 
-  const setService = (key: keyof RestaurantFormValues["services"], on: boolean) =>
-    set("services", { ...values.services, [key]: on });
-
+   const setService = (key: keyof RestaurantFormValues["services"], on: boolean) => {
+    setValues((v) => ({ ...v, services: { ...v.services, [key]: on } }));
+    if (error) setError("");
+  };
   const setHour = (index: number, changes: Partial<OpeningHour>) =>
     set(
       "openingHours",
@@ -650,9 +668,9 @@ export default function RestaurantForm({ initialValues, initialLogo, initialCove
 
         {/* 3. Services */}
         <Section title="Services" subtitle="Turn on at least one">
-          <ToggleRow icon="🍽️" label="Dine-in" description="Order ahead and reserve seats" value={values.services.dineIn} onChange={(v) => setService("dineIn", v)} />
-          <ToggleRow icon="🥡" label="Takeaway" description="Customer picks up the order" value={values.services.takeaway} onChange={(v) => setService("takeaway", v)} />
-          <ToggleRow icon="🛵" label="Delivery" description="Restaurant's own riders deliver" value={values.services.delivery} onChange={(v) => setService("delivery", v)} />
+          <ToggleRow icon="restaurant" label="Dine-in" description="Order ahead and reserve seats" value={values.services.dineIn} onChange={(v) => setService("dineIn", v)} />
+          <ToggleRow icon="bag-handle" label="Takeaway" description="Customer picks up the order" value={values.services.takeaway} onChange={(v) => setService("takeaway", v)} />
+          <ToggleRow icon="bicycle" label="Delivery" description="Restaurant's own riders deliver" value={values.services.delivery} onChange={(v) => setService("delivery", v)} />
         </Section>
 
         {/* 4. Settings */}
