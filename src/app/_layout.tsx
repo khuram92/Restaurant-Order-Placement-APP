@@ -41,7 +41,7 @@ function RootNavigator() {
   }, [user, isLoading, isSuperAdmin, needsProfile, isCustomer, segments]);
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
+    <Stack screenOptions={{ headerShown: true }}>
       {/* Super Admin */}
       <Stack.Protected guard={isSuperAdmin}>
         <Stack.Screen name="(admin)" />

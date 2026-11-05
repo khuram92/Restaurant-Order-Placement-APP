@@ -142,7 +142,11 @@ export const valuesToInput = (
   if (v.services.dineIn && fields.seatingCapacity < 1) {
     return { error: "Enter the number of seats for Dine-in" };
   }
-
+  const sameTime = v.openingHours.find((h) => !h.closed && h.open === h.close);
+  if (sameTime) {
+    const label = DAYS.find((d) => d.key === sameTime.day)?.label ?? sameTime.day;
+    return { error: `${label}: opening and closing time can't be the same` };
+  }
   // Coordinates: both or none
   let location: RestaurantInput["location"] = null;
   if (v.lat.trim() || v.lng.trim()) {
@@ -153,23 +157,21 @@ export const valuesToInput = (
     location = { lat, lng };
   }
 
+    // Optional text is always sent; "" tells the backend to remove it (so Edit can clear fields)
   return {
     input: {
       name: v.name.trim(),
-      ...(v.description.trim() && { description: v.description.trim() }),
+      description: v.description.trim(),
       cuisines: v.cuisines,
-      ...(v.phone.trim() && { phone: v.phone.replace(/[\s-]/g, "") }),
-      ...(v.email.trim() && { email: v.email.trim().toLowerCase() }),
+      phone: v.phone.replace(/[\s-]/g, ""),
+      email: v.email.trim().toLowerCase(),
       address: {
         street: v.street.trim(),
-        ...(v.area.trim() && { area: v.area.trim() }),
+        area: v.area.trim(),
         city: v.city.trim(),
       },
-      ...(location && { location }),
-      services: v.services,
-      ...fields,
-      openingHours: v.openingHours,
-    },
+      location, // null = no coordinates
+      }
   };
 };
 

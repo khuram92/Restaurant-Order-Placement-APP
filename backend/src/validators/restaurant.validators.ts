@@ -5,12 +5,16 @@ const time = z
   .string()
   .regex(/^([01]\d|2[0-3]):[0-5]\d$/, "Time must be HH:mm (e.g. 09:30)");
 
-const openingHour = z.object({
-  day: z.enum(DAYS),
-  open: time,
-  close: time,
-  closed: z.boolean().default(false),
-});
+const openingHour = z
+  .object({
+    day: z.enum(DAYS),
+    open: time,
+    close: time,
+    closed: z.boolean().default(false),
+  })
+  .refine((h) => h.closed || h.open !== h.close, {
+    message: "Opening and closing time can't be the same",
+  });
 
 const openingHours = z
   .array(openingHour)
@@ -47,15 +51,20 @@ const base = {
     .array(z.string().trim().min(1).max(30))
     .max(10, "At most 10 cuisines")
     .optional(),
+  // "" = no phone / no email (lets Edit remove them)
   phone: z
     .string()
     .trim()
-    .regex(/^\+?\d{10,13}$/, "Enter a valid phone number")
+    .refine(
+      (v) => v === "" || /^\+?\d{10,13}$/.test(v),
+      "Enter a valid phone number",
+    )
     .optional(),
   email: z
-    .email({ error: "Enter a valid email" })
+    .string()
     .trim()
     .toLowerCase()
+    .refine((v) => v === "" || /^\S+@\S+\.\S+$/.test(v), "Enter a valid email")
     .optional(),
   address: z.object({
     street: z
@@ -68,7 +77,7 @@ const base = {
       .trim()
       .min(2, "City is required"),
   }),
-  location: location.optional(),
+    location: location.nullable().optional(), // null = no coordinates
   openingHours: openingHours.optional(),
   services: z
     .object({
@@ -81,12 +90,7 @@ const base = {
   minOrder: money("Minimum order").optional(),
   deliveryRadiusKm: z.number().min(0).max(50, "Radius is too large").optional(),
   taxRate: z.number().min(0).max(100, "Tax can't be over 100%").optional(),
-  tableHoldMinutes: z
-    .number()
-    .int()
-    .min(5, "At least 5 minutes")
-    .max(240, "At most 240 minutes")
-    .optional(),
+
   seatingCapacity: z
     .number()
     .int("Seats must be a whole number")
@@ -118,7 +122,7 @@ export const updateRestaurantSchema = z
       })
       .partial()
       .optional(),
-    location: location.nullable().optional(),
+    
   })
   .refine((data) => Object.keys(data).length > 0, {
     message: "Nothing to update",
