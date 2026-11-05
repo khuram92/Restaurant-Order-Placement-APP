@@ -1,13 +1,15 @@
 import type { Request, Response } from "express";
 import mongoose from "mongoose";
 import { Restaurant } from "../models/Restaurant.js";
-import { uploadRestaurantImage } from "../utils/cloudinary.js";
+import { uploadRestaurantImage, deleteRestaurantImages, } from "../utils/cloudinary.js";
 import {
   createRestaurantSchema,
   listQuerySchema,
   statusSchema,
   updateRestaurantSchema,
 } from "../validators/restaurant.validators.js";
+import { User } from "../models/User.js";
+
 
 // ---------- Helpers ----------
 
@@ -203,4 +205,31 @@ export const uploadRestaurantImages = async (req: Request, res: Response) => {
       .status(502)
       .json({ message: "Couldn't upload the image. Please try again." });
   }
+};
+
+/**
+ * DELETE /api/admin/restaurants/:id
+ * Permanent. Blocked while a manager is assigned (later also: menu items, active orders).
+ */
+export const deleteRestaurant = async (req: Request, res: Response) => {
+  const restaurant = await findRestaurantOr404(req, res);
+  if (!restaurant) return;
+
+  const hasManager = await User.exists({ role: "manager", restaurantId: restaurant._id });
+  if (hasManager) {
+    return res.status(409).json({
+      message: "This restaurant has a manager assigned. Remove or reassign the manager first.",
+    });
+  }
+
+  await restaurant.deleteOne();
+
+  // Clean up its images; a Cloudinary problem shouldn't undo the delete
+  try {
+    await deleteRestaurantImages(restaurant.id);
+  } catch (error) {
+    console.error("⚠️ Couldn't delete restaurant images:", (error as Error).message);
+  }
+
+  res.json({ message: `"${restaurant.name}" was deleted` });
 };
