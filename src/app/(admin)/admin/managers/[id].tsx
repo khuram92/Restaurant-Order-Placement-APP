@@ -248,6 +248,7 @@ export default function ManagerDetailScreen() {
       {header}
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 32 + insets.bottom }} showsVerticalScrollIndicator={false}>
         {/* Profile */}
+        
         <View className="mb-4 items-center rounded-3xl bg-white p-6" style={cardShadow}>
           <View className="h-24 w-24 items-center justify-center overflow-hidden rounded-full" style={{ backgroundColor: colors.brand }}>
             {m.avatar ? (
@@ -272,7 +273,7 @@ export default function ManagerDetailScreen() {
         </View>
 
         {/* Can log in */}
-        
+
         <View className="mb-4 flex-row items-center rounded-3xl bg-white p-4" style={cardShadow}>
           <View className="h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor: m.isActive ? colors.brand : colors.mistDark }}>
             <Ionicons name="power" size={20} color={colors.white} />
