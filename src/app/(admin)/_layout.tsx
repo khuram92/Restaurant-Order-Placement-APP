@@ -1,16 +1,17 @@
 import { Stack } from "expo-router";
+import { colors } from "../../constants/theme";
 
-// Native header with a pink back button for admin screens.
-// Screens that don't want it (e.g. the dashboard) hide it themselves.
+// Olive header with white title and back arrow for all admin screens.
+// Screens that don't want a header (e.g. the dashboard) hide it themselves.
 export default function AdminLayout() {
   return (
     <Stack
       screenOptions={{
-        headerTintColor: "#4e5c4a",
-        headerTitleStyle: { fontWeight: "700", color: "#4e5c4a" },
-        headerStyle: { backgroundColor: "#e0e1df" },
+        headerStyle: { backgroundColor: colors.brand },
+        headerTintColor: colors.white,
+        headerTitleStyle: { fontWeight: "700", color: colors.white },
         headerShadowVisible: false,
-        contentStyle: { backgroundColor: "#e0e1df" },
+        contentStyle: { backgroundColor: colors.mist },
       }}
     />
   );
