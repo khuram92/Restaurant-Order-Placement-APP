@@ -278,7 +278,6 @@ export default function RestaurantDetailScreen() {
               <ServiceBadge icon="bicycle" label="Delivery" on={r.services.delivery} />
             </View>
           </Card>
-
           {/* Settings */}
           <Card title="Settings" icon="pricetag">
             <View className="flex-row flex-wrap justify-between">
