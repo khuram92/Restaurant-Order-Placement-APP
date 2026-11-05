@@ -116,7 +116,7 @@ function Field({ label, icon, value, onChangeText, placeholder, required, keyboa
           className="ml-2 flex-1 py-3 text-base text-[#2c3329]"
         />
       </View>
-      {!!hint && <Text className="mt-1 text-xs text-brand-light">{hint}</Text>}
+      {!!hint && <Text className="mt-1 text-base text-brand-light">{hint}</Text>}
     </View>
   );
 }
