@@ -327,7 +327,6 @@ export default function RestaurantDetailScreen() {
               );
             })}
           </Card>
-
           <View className="flex-row items-center justify-center">
             <Ionicons name="calendar" size={12} color={colors.brandLight} />
             <Text className="ml-1 text-xs text-brand-light">
