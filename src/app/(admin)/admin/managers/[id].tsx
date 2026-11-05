@@ -293,6 +293,7 @@ export default function ManagerDetailScreen() {
         </View>
 
         {/* Restaurant */}
+        
         <Card title="Manages" icon="storefront">
           {r ? (
             <Pressable
