@@ -36,7 +36,7 @@ router.delete("/restaurants/:id", deleteRestaurant);
 // Managers ("restaurant-options" must come before "/:id")
 router.get("/managers/restaurant-options", restaurantOptions);
 router.get("/managers", listManagers);
-router.post("/managers", createManager);
+router.post("/managers", createManager); 
 router.get("/managers/:id", getManager);
 router.patch("/managers/:id", updateManager);
 router.patch("/managers/:id/status", setManagerStatus);
