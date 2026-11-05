@@ -47,3 +47,40 @@ export const uploadAvatarImage = (buffer: Buffer, userId: string): Promise<Uploa
     stream.end(buffer);
   });
 };
+
+
+
+export type RestaurantImageKind = "logo" | "cover";
+
+/**
+ * Uploads a restaurant's logo (400×400) or cover (1200×600).
+ * public_id = "<restaurantId>-logo" / "<restaurantId>-cover", so a new upload replaces the old one.
+ */
+export const uploadRestaurantImage = (
+  buffer: Buffer,
+  restaurantId: string,
+  kind: RestaurantImageKind
+): Promise<UploadApiResponse> => {
+  const size = kind === "logo" ? { width: 400, height: 400 } : { width: 1200, height: 600 };
+
+  return new Promise((resolve, reject) => {
+    const stream = getCloudinary().uploader.upload_stream(
+      {
+        folder: "food-app/restaurants",
+        public_id: `${restaurantId}-${kind}`,
+        overwrite: true,
+        invalidate: true,
+        resource_type: "image",
+        transformation: [
+          { ...size, crop: "fill", gravity: "auto" },
+          { quality: "auto", fetch_format: "auto" },
+        ],
+      },
+      (error, result) => {
+        if (error || !result) return reject(error ?? new Error("Upload failed"));
+        resolve(result);
+      }
+    );
+    stream.end(buffer);
+  });
+};
