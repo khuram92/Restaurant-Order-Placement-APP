@@ -214,7 +214,6 @@ export default function RestaurantDetailScreen() {
             </View>
           )}
         </View>
-
         <View className="px-4">
           <View className="flex-row items-end" style={{ marginTop: -44 }}>
             <View
