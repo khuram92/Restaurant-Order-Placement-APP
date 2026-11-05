@@ -7,6 +7,7 @@ import {
   statusSchema,
   updateRestaurantSchema,
 } from "../validators/restaurant.validators.js";
+import { uploadRestaurantImage } from "../utils/cloudinary.js";
 
 // ---------- Helpers ----------
 
@@ -131,4 +132,39 @@ export const setRestaurantStatus = async (req: Request, res: Response) => {
     message: restaurant.isActive ? "Restaurant activated" : "Restaurant deactivated",
     restaurant,
   });
+};
+
+/**
+ * PATCH /api/admin/restaurants/:id/images
+ * multipart/form-data with "logo" and/or "cover"
+ */
+export const uploadRestaurantImages = async (req: Request, res: Response) => {
+  const files = req.files as { logo?: Express.Multer.File[]; cover?: Express.Multer.File[] } | undefined;
+  const logo = files?.logo?.[0];
+  const cover = files?.cover?.[0];
+
+  if (!logo && !cover) {
+    return res.status(400).json({ message: "Choose a logo or cover image" });
+  }
+
+  const restaurant = await findRestaurantOr404(req, res);
+  if (!restaurant) return;
+
+  try {
+    // Upload both at the same time
+    const [logoResult, coverResult] = await Promise.all([
+      logo ? uploadRestaurantImage(logo.buffer, restaurant.id, "logo") : null,
+      cover ? uploadRestaurantImage(cover.buffer, restaurant.id, "cover") : null,
+    ]);
+
+    // ?v= makes apps load the new image instead of a cached old one
+    if (logoResult) restaurant.logo = `${logoResult.secure_url}?v=${logoResult.version}`;
+    if (coverResult) restaurant.coverImage = `${coverResult.secure_url}?v=${coverResult.version}`;
+
+    await restaurant.save();
+    res.json({ restaurant });
+  } catch (error) {
+    console.error("❌ Restaurant image upload failed:", (error as Error).message);
+    res.status(502).json({ message: "Couldn't upload the image. Please try again." });
+  }
 };
