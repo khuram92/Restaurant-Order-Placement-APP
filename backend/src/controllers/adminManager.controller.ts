@@ -1,10 +1,10 @@
 import type { Request, Response } from "express";
 import mongoose from "mongoose";
-import { User, type UserDoc } from "../models/User.js";
 import { Restaurant } from "../models/Restaurant.js";
+import { User, type UserDoc } from "../models/User.js";
+import { deleteAvatarImage } from "../utils/cloudinary.js";
 import { generatePassword } from "../utils/password.js";
 import { sendManagerCredentials } from "../utils/staffEmails.js";
-import { deleteAvatarImage } from "../utils/cloudinary.js";
 import {
   createManagerSchema,
   managerListQuerySchema,
@@ -14,8 +14,10 @@ import {
 
 // ---------- Helpers ----------
 
-const firstIssue = (error: { issues: { message: string }[] }) => error.issues[0]?.message ?? "Invalid input";
-const escapeRegex = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const firstIssue = (error: { issues: { message: string }[] }) =>
+  error.issues[0]?.message ?? "Invalid input";
+const escapeRegex = (text: string) =>
+  text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 /** Restaurant fields shown next to a manager */
 const RESTAURANT_FIELDS = "name logo address.city isActive";
@@ -36,7 +38,10 @@ const findManagerOr404 = async (req: Request, res: Response) => {
 };
 
 /** Is this restaurant free (no manager, or only `exceptManagerId`)? */
-const restaurantHasOtherManager = (restaurantId: string, exceptManagerId?: string) =>
+const restaurantHasOtherManager = (
+  restaurantId: string,
+  exceptManagerId?: string,
+) =>
   User.exists({
     role: "manager",
     restaurantId,
@@ -44,8 +49,14 @@ const restaurantHasOtherManager = (restaurantId: string, exceptManagerId?: strin
   });
 
 /** Emails the password; returns true if sent. If sending fails the admin gets the password once instead. */
-const deliverPassword = async (manager: UserDoc, password: string, kind: "welcome" | "reset") => {
-  const restaurant = await Restaurant.findById(manager.restaurantId).select("name");
+const deliverPassword = async (
+  manager: UserDoc,
+  password: string,
+  kind: "welcome" | "reset",
+) => {
+  const restaurant = await Restaurant.findById(manager.restaurantId).select(
+    "name",
+  );
   try {
     await sendManagerCredentials({
       to: manager.email!,
@@ -61,14 +72,16 @@ const deliverPassword = async (manager: UserDoc, password: string, kind: "welcom
   }
 };
 
-const withRestaurant = (manager: UserDoc) => manager.populate("restaurantId", RESTAURANT_FIELDS);
+const withRestaurant = (manager: UserDoc) =>
+  manager.populate("restaurantId", RESTAURANT_FIELDS);
 
 // ---------- Controllers ----------
 
 /** GET /api/admin/managers?search=&status=&page=&limit= */
 export const listManagers = async (req: Request, res: Response) => {
   const parsed = managerListQuerySchema.safeParse(req.query);
-  if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
+  if (!parsed.success)
+    return res.status(400).json({ message: firstIssue(parsed.error) });
 
   const { search, status, page, limit } = parsed.data;
   const filter: Record<string, unknown> = { role: "manager" };
@@ -76,7 +89,12 @@ export const listManagers = async (req: Request, res: Response) => {
   if (status === "inactive") filter.isActive = false;
   if (search) {
     const term = new RegExp(escapeRegex(search), "i");
-    filter.$or = [{ firstName: term }, { lastName: term }, { email: term }, { phone: term }];
+    filter.$or = [
+      { firstName: term },
+      { lastName: term },
+      { email: term },
+      { phone: term },
+    ];
   }
 
   const [managers, total] = await Promise.all([
@@ -88,7 +106,12 @@ export const listManagers = async (req: Request, res: Response) => {
     User.countDocuments(filter),
   ]);
 
-  res.json({ managers, total, page, pages: Math.max(1, Math.ceil(total / limit)) });
+  res.json({
+    managers,
+    total,
+    page,
+    pages: Math.max(1, Math.ceil(total / limit)),
+  });
 };
 
 /**
@@ -98,17 +121,26 @@ export const listManagers = async (req: Request, res: Response) => {
 export const restaurantOptions = async (_req: Request, res: Response) => {
   const [restaurants, managers] = await Promise.all([
     Restaurant.find().select(RESTAURANT_FIELDS).sort({ name: 1 }),
-    User.find({ role: "manager", restaurantId: { $exists: true } }).select("firstName lastName restaurantId"),
+    User.find({ role: "manager", restaurantId: { $exists: true } }).select(
+      "firstName lastName restaurantId",
+    ),
   ]);
 
-  const managerByRestaurant = new Map(managers.map((m) => [String(m.restaurantId), m]));
+  const managerByRestaurant = new Map(
+    managers.map((m) => [String(m.restaurantId), m]),
+  );
 
   res.json({
     restaurants: restaurants.map((r) => {
       const m = managerByRestaurant.get(r.id);
       return {
         ...r.toJSON(),
-        manager: m ? { _id: m.id, name: `${m.firstName ?? ""} ${m.lastName ?? ""}`.trim() } : null,
+        manager: m
+          ? {
+              _id: m.id,
+              name: `${m.firstName ?? ""} ${m.lastName ?? ""}`.trim(),
+            }
+          : null,
       };
     }),
   });
@@ -124,20 +156,28 @@ export const getManager = async (req: Request, res: Response) => {
 /** POST /api/admin/managers   { firstName, lastName, email, phone?, restaurantId } */
 export const createManager = async (req: Request, res: Response) => {
   const parsed = createManagerSchema.safeParse(req.body);
-  if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
+  if (!parsed.success)
+    return res.status(400).json({ message: firstIssue(parsed.error) });
   const { firstName, lastName, email, phone, restaurantId } = parsed.data;
 
   const restaurant = await Restaurant.findById(restaurantId).select("_id");
-  if (!restaurant) return res.status(404).json({ message: "Restaurant not found" });
+  if (!restaurant)
+    return res.status(404).json({ message: "Restaurant not found" });
 
   if (await restaurantHasOtherManager(restaurantId)) {
-    return res.status(409).json({ message: "This restaurant already has a manager" });
+    return res
+      .status(409)
+      .json({ message: "This restaurant already has a manager" });
   }
   if (await User.exists({ email })) {
-    return res.status(409).json({ message: "This email is already registered" });
+    return res
+      .status(409)
+      .json({ message: "This email is already registered" });
   }
   if (phone && (await User.exists({ phone }))) {
-    return res.status(409).json({ message: "This phone number is already registered" });
+    return res
+      .status(409)
+      .json({ message: "This phone number is already registered" });
   }
 
   const password = generatePassword();
@@ -167,7 +207,8 @@ export const createManager = async (req: Request, res: Response) => {
 /** PATCH /api/admin/managers/:id   (send only what changes; phone "" removes it) */
 export const updateManager = async (req: Request, res: Response) => {
   const parsed = updateManagerSchema.safeParse(req.body);
-  if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
+  if (!parsed.success)
+    return res.status(400).json({ message: firstIssue(parsed.error) });
 
   const manager = await findManagerOr404(req, res);
   if (!manager) return;
@@ -175,7 +216,9 @@ export const updateManager = async (req: Request, res: Response) => {
 
   if (email !== undefined && email !== manager.email) {
     if (await User.exists({ email, _id: { $ne: manager._id } })) {
-      return res.status(409).json({ message: "This email is already registered" });
+      return res
+        .status(409)
+        .json({ message: "This email is already registered" });
     }
     manager.email = email;
   }
@@ -185,18 +228,25 @@ export const updateManager = async (req: Request, res: Response) => {
       manager.set("phone", undefined);
     } else if (phone !== manager.phone) {
       if (await User.exists({ phone, _id: { $ne: manager._id } })) {
-        return res.status(409).json({ message: "This phone number is already registered" });
+        return res
+          .status(409)
+          .json({ message: "This phone number is already registered" });
       }
       manager.phone = phone;
     }
   }
 
-  if (restaurantId !== undefined && restaurantId !== String(manager.restaurantId)) {
+  if (
+    restaurantId !== undefined &&
+    restaurantId !== String(manager.restaurantId)
+  ) {
     if (!(await Restaurant.exists({ _id: restaurantId }))) {
       return res.status(404).json({ message: "Restaurant not found" });
     }
     if (await restaurantHasOtherManager(restaurantId, manager.id)) {
-      return res.status(409).json({ message: "That restaurant already has a manager" });
+      return res
+        .status(409)
+        .json({ message: "That restaurant already has a manager" });
     }
     manager.restaurantId = new mongoose.Types.ObjectId(restaurantId);
   }
@@ -211,7 +261,8 @@ export const updateManager = async (req: Request, res: Response) => {
 /** PATCH /api/admin/managers/:id/status   { isActive } — inactive managers can't log in */
 export const setManagerStatus = async (req: Request, res: Response) => {
   const parsed = managerStatusSchema.safeParse(req.body);
-  if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
+  if (!parsed.success)
+    return res.status(400).json({ message: firstIssue(parsed.error) });
 
   const manager = await findManagerOr404(req, res);
   if (!manager) return;
@@ -238,7 +289,9 @@ export const resetManagerPassword = async (req: Request, res: Response) => {
   const emailSent = await deliverPassword(manager, password, "reset");
 
   res.json({
-    message: emailSent ? "New password emailed to the manager" : "Password reset, but the email couldn't be sent",
+    message: emailSent
+      ? "New password emailed to the manager"
+      : "Password reset, but the email couldn't be sent",
     emailSent,
     ...(!emailSent && { temporaryPassword: password }),
   });
@@ -249,7 +302,8 @@ export const deleteManager = async (req: Request, res: Response) => {
   const manager = await findManagerOr404(req, res);
   if (!manager) return;
 
-  const name = `${manager.firstName ?? ""} ${manager.lastName ?? ""}`.trim() || "Manager";
+  const name =
+    `${manager.firstName ?? ""} ${manager.lastName ?? ""}`.trim() || "Manager";
   const hadAvatar = !!manager.avatar;
   await manager.deleteOne();
 
@@ -257,7 +311,10 @@ export const deleteManager = async (req: Request, res: Response) => {
     try {
       await deleteAvatarImage(manager.id);
     } catch (error) {
-      console.error("⚠️ Couldn't delete manager avatar:", (error as Error).message);
+      console.error(
+        "⚠️ Couldn't delete manager avatar:",
+        (error as Error).message,
+      );
     }
   }
 
