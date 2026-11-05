@@ -270,7 +270,6 @@ export default function RestaurantDetailScreen() {
               />
             )}
           </View>
-
           {/* Services */}
           <Card title="Services" icon="grid">
             <View className="flex-row gap-2">
