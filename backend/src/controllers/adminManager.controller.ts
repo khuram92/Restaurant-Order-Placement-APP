@@ -61,35 +61,35 @@ const deliverPassword = async (manager: UserDoc, password: string, kind: "welcom
   }
 };
 
-// const withRestaurant = (manager: UserDoc) => manager.populate("restaurantId", RESTAURANT_FIELDS);
+const withRestaurant = (manager: UserDoc) => manager.populate("restaurantId", RESTAURANT_FIELDS);
 
-// // ---------- Controllers ----------
+// ---------- Controllers ----------
 
-// /** GET /api/admin/managers?search=&status=&page=&limit= */
-// export const listManagers = async (req: Request, res: Response) => {
-//   const parsed = managerListQuerySchema.safeParse(req.query);
-//   if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
+/** GET /api/admin/managers?search=&status=&page=&limit= */
+export const listManagers = async (req: Request, res: Response) => {
+  const parsed = managerListQuerySchema.safeParse(req.query);
+  if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
 
-//   const { search, status, page, limit } = parsed.data;
-//   const filter: Record<string, unknown> = { role: "manager" };
-//   if (status === "active") filter.isActive = true;
-//   if (status === "inactive") filter.isActive = false;
-//   if (search) {
-//     const term = new RegExp(escapeRegex(search), "i");
-//     filter.$or = [{ firstName: term }, { lastName: term }, { email: term }, { phone: term }];
-//   }
+  const { search, status, page, limit } = parsed.data;
+  const filter: Record<string, unknown> = { role: "manager" };
+  if (status === "active") filter.isActive = true;
+  if (status === "inactive") filter.isActive = false;
+  if (search) {
+    const term = new RegExp(escapeRegex(search), "i");
+    filter.$or = [{ firstName: term }, { lastName: term }, { email: term }, { phone: term }];
+  }
 
-//   const [managers, total] = await Promise.all([
-//     User.find(filter)
-//       .sort({ createdAt: -1 })
-//       .skip((page - 1) * limit)
-//       .limit(limit)
-//       .populate("restaurantId", RESTAURANT_FIELDS),
-//     User.countDocuments(filter),
-//   ]);
+  const [managers, total] = await Promise.all([
+    User.find(filter)
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .populate("restaurantId", RESTAURANT_FIELDS),
+    User.countDocuments(filter),
+  ]);
 
-//   res.json({ managers, total, page, pages: Math.max(1, Math.ceil(total / limit)) });
-// };
+  res.json({ managers, total, page, pages: Math.max(1, Math.ceil(total / limit)) });
+};
 
 // /**
 //  * GET /api/admin/managers/restaurant-options
