@@ -234,7 +234,6 @@ export default function RestaurantDetailScreen() {
               <Text className="ml-1 text-xs font-bold text-white">{r.isActive ? "Active" : "Inactive"}</Text>
             </View>
           </View>
-
           <Text className="mt-3 text-2xl font-extrabold text-brand-dark">{r.name}</Text>
           {!!r.description && <Text className="mt-1 text-sm text-brand-light">{r.description}</Text>}
           {r.cuisines.length > 0 && (
