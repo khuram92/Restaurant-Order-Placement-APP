@@ -44,7 +44,6 @@ export interface IRestaurant {
   minOrder: number;          // PKR
   deliveryRadiusKm: number;
   taxRate: number;           // percent, e.g. 16
-  tableHoldMinutes: number;  // how long a dine-in order holds a table
   seatingCapacity: number;   // total dine-in seats
   isActive: boolean;
   createdBy?: Types.ObjectId;
@@ -107,7 +106,6 @@ const restaurantSchema = new Schema<IRestaurant>(
     minOrder: { type: Number, default: 0, min: [0, "Minimum order can't be negative"] },
     deliveryRadiusKm: { type: Number, default: 5, min: [0, "Radius can't be negative"], max: [50, "Radius is too large"] },
     taxRate: { type: Number, default: 0, min: [0, "Tax can't be negative"], max: [100, "Tax can't be over 100%"] },
-    tableHoldMinutes: { type: Number, default: 30, min: [5, "At least 5 minutes"], max: [240, "At most 240 minutes"] },
     seatingCapacity: { type: Number, default: 0, min: [0, "Seats can't be negative"], max: [2000, "At most 2000 seats"] },
     isActive: { type: Boolean, default: true },
     createdBy: { type: Schema.Types.ObjectId, ref: "User" },

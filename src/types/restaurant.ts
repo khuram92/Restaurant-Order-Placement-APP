@@ -24,7 +24,7 @@ export interface Restaurant {
   minOrder: number;
   deliveryRadiusKm: number;
   taxRate: number;
-  tableHoldMinutes: number;
+  seatingCapacity: number;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -54,5 +54,12 @@ export interface RestaurantInput {
   minOrder?: number;
   deliveryRadiusKm?: number;
   taxRate?: number;
-  tableHoldMinutes?: number;
+  seatingCapacity?: number;
+}
+
+/** An image picked on the phone, not uploaded yet */
+export interface PickedImage {
+  uri: string;
+  mimeType?: string;
+  fileName?: string;
 }
