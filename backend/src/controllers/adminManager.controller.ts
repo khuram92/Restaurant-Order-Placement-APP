@@ -208,22 +208,22 @@ export const updateManager = async (req: Request, res: Response) => {
   res.json({ manager: await withRestaurant(manager) });
 };
 
-// /** PATCH /api/admin/managers/:id/status   { isActive } — inactive managers can't log in */
-// export const setManagerStatus = async (req: Request, res: Response) => {
-//   const parsed = managerStatusSchema.safeParse(req.body);
-//   if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
+/** PATCH /api/admin/managers/:id/status   { isActive } — inactive managers can't log in */
+export const setManagerStatus = async (req: Request, res: Response) => {
+  const parsed = managerStatusSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
 
-//   const manager = await findManagerOr404(req, res);
-//   if (!manager) return;
+  const manager = await findManagerOr404(req, res);
+  if (!manager) return;
 
-//   manager.isActive = parsed.data.isActive;
-//   await manager.save();
+  manager.isActive = parsed.data.isActive;
+  await manager.save();
 
-//   res.json({
-//     message: manager.isActive ? "Manager activated" : "Manager deactivated",
-//     manager: await withRestaurant(manager),
-//   });
-// };
+  res.json({
+    message: manager.isActive ? "Manager activated" : "Manager deactivated",
+    manager: await withRestaurant(manager),
+  });
+};
 
 // /** POST /api/admin/managers/:id/reset-password — new generated password, emailed */
 // export const resetManagerPassword = async (req: Request, res: Response) => {
