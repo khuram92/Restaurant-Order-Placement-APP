@@ -292,7 +292,6 @@ export default function RestaurantDetailScreen() {
               )}
             </View>
           </Card>
-
           {/* Contact & address */}
           <Card title="Contact & address" icon="storefront">
             <InfoRow icon="call" label="Phone" value={r.phone} onPress={() => Linking.openURL(`tel:${r.phone}`)} />
