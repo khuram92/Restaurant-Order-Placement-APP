@@ -244,22 +244,22 @@ export const resetManagerPassword = async (req: Request, res: Response) => {
   });
 };
 
-// /** DELETE /api/admin/managers/:id — permanent; frees their restaurant */
-// export const deleteManager = async (req: Request, res: Response) => {
-//   const manager = await findManagerOr404(req, res);
-//   if (!manager) return;
+/** DELETE /api/admin/managers/:id — permanent; frees their restaurant */
+export const deleteManager = async (req: Request, res: Response) => {
+  const manager = await findManagerOr404(req, res);
+  if (!manager) return;
 
-//   const name = `${manager.firstName ?? ""} ${manager.lastName ?? ""}`.trim() || "Manager";
-//   const hadAvatar = !!manager.avatar;
-//   await manager.deleteOne();
+  const name = `${manager.firstName ?? ""} ${manager.lastName ?? ""}`.trim() || "Manager";
+  const hadAvatar = !!manager.avatar;
+  await manager.deleteOne();
 
-//   if (hadAvatar) {
-//     try {
-//       await deleteAvatarImage(manager.id);
-//     } catch (error) {
-//       console.error("⚠️ Couldn't delete manager avatar:", (error as Error).message);
-//     }
-//   }
+  if (hadAvatar) {
+    try {
+      await deleteAvatarImage(manager.id);
+    } catch (error) {
+      console.error("⚠️ Couldn't delete manager avatar:", (error as Error).message);
+    }
+  }
 
-//   res.json({ message: `${name} was deleted` });
-// };
+  res.json({ message: `${name} was deleted` });
+};
