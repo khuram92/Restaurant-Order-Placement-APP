@@ -43,7 +43,8 @@ export default function StaffLoginScreen() {
     setError("");
 
     const cleanEmail = email.trim().toLowerCase();
-    if (!/^\S+@\S+\.\S+$/.test(cleanEmail)) return setError("Enter a valid email");
+    if (!/^\S+@\S+\.\S+$/.test(cleanEmail))
+      return setError("Enter a valid email");
     if (!password) return setError("Enter your password");
 
     setLoading(true);
@@ -60,13 +61,22 @@ export default function StaffLoginScreen() {
   const canSubmit = email.trim().length > 0 && password.length > 0 && !loading;
 
   const fieldStyle = (name: "email" | "password") => ({
-    borderColor: error ? colors.danger : focused === name ? colors.brand : colors.mistDark,
+    borderColor: error
+      ? colors.danger
+      : focused === name
+        ? colors.brand
+        : colors.mistDark,
     backgroundColor: focused === name ? colors.white : colors.mist,
   });
-  const iconColor = (name: "email" | "password") => (focused === name ? colors.brand : colors.brandLight);
+  const iconColor = (name: "email" | "password") =>
+    focused === name ? colors.brand : colors.brandLight;
 
   return (
-    <LinearGradient colors={BG} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ flex: 1 }}>
+    <LinearGradient
+      colors={BG}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={{ flex: 1 }}>
       {/* Soft olive circles */}
       <View
         className="absolute -left-16 -top-10 h-56 w-56 rounded-full"
@@ -85,18 +95,38 @@ export default function StaffLoginScreen() {
           <View className="mb-8 items-center">
             <View
               className="h-20 w-20 items-center justify-center rounded-full"
-              style={{ backgroundColor: colors.brand, ...shadow(0.35, 22, 10) }}>
-              <Ionicons name="shield-checkmark" size={38} color={colors.white} />
+              style={{
+                backgroundColor: colors.brand,
+                ...shadow(0.35, 22, 10),
+              }}>
+              <Ionicons
+                name="shield-checkmark"
+                size={38}
+                color={colors.white}
+              />
             </View>
-            <Text className="mt-4 text-3xl font-extrabold text-brand-dark">Staff Login</Text>
-            <Text className="mt-1 text-center text-base text-brand-light">For admins and restaurant managers</Text>
+            <Text className="mt-4 text-3xl font-extrabold text-brand-dark">
+              Staff Login
+            </Text>
+            <Text className="mt-1 text-center text-base text-brand-light">
+              For admins and restaurant managers
+            </Text>
           </View>
 
           {/* Card */}
-          <View className="rounded-3xl p-6" style={{ backgroundColor: colors.mistLight, ...shadow(0.3, 30, 14) }}>
+          <View
+            className="rounded-3xl p-6"
+            style={{
+              backgroundColor: colors.mistLight,
+              ...shadow(0.3, 30, 14),
+            }}>
             {/* Email */}
-            <Text className="mb-2 text-sm font-semibold text-brand-dark">Email</Text>
-            <View className="mb-4 flex-row items-center rounded-2xl border-2 px-4" style={fieldStyle("email")}>
+            <Text className="mb-2 text-sm font-semibold text-brand-dark">
+              Email
+            </Text>
+            <View
+              className="mb-4 flex-row items-center rounded-2xl border-2 px-4"
+              style={fieldStyle("email")}>
               <Ionicons name="mail" size={18} color={iconColor("email")} />
               <TextInput
                 value={email}
@@ -118,8 +148,12 @@ export default function StaffLoginScreen() {
             </View>
 
             {/* Password */}
-            <Text className="mb-2 text-sm font-semibold text-brand-dark">Password</Text>
-            <View className="flex-row items-center rounded-2xl border-2 px-4" style={fieldStyle("password")}>
+            <Text className="mb-2 text-sm font-semibold text-brand-dark">
+              Password
+            </Text>
+            <View
+              className="flex-row items-center rounded-2xl border-2 px-4"
+              style={fieldStyle("password")}>
               <Ionicons name="key" size={18} color={iconColor("password")} />
               <TextInput
                 value={password}
@@ -140,8 +174,14 @@ export default function StaffLoginScreen() {
                 selectionColor={colors.brand}
                 className="ml-3 flex-1 py-4 text-base text-[#2c3329]"
               />
-              <Pressable onPress={() => setShowPassword((s) => !s)} hitSlop={10}>
-                <Ionicons name={showPassword ? "eye-off" : "eye"} size={20} color={colors.brandLight} />
+              <Pressable
+                onPress={() => setShowPassword((s) => !s)}
+                hitSlop={10}>
+                <Ionicons
+                  name={showPassword ? "eye-off" : "eye"}
+                  size={20}
+                  color={colors.brandLight}
+                />
               </Pressable>
             </View>
 
@@ -165,20 +205,30 @@ export default function StaffLoginScreen() {
                 colors={canSubmit ? BUTTON : BUTTON_DISABLED}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
-                style={{ borderRadius: 16, paddingVertical: 16, alignItems: "center" }}>
+                style={{
+                  borderRadius: 16,
+                  paddingVertical: 16,
+                  alignItems: "center",
+                }}>
                 {loading ? (
                   <ActivityIndicator color={colors.white} />
                 ) : (
-                  <Text className="text-base font-bold tracking-wide text-white">Log in</Text>
+                  <Text className="text-base font-bold tracking-wide text-white">
+                    Log in
+                  </Text>
                 )}
               </LinearGradient>
             </Pressable>
           </View>
 
           {/* Back to customer login */}
-          <Pressable onPress={() => router.back()} className="mt-6 items-center" hitSlop={8}>
+          <Pressable
+            onPress={() => router.back()}
+            className="mt-6 items-center"
+            hitSlop={8}>
             <Text className="text-sm" style={{ color: colors.brandDark }}>
-              Not staff? <Text className="font-bold text-white">Customer login</Text>
+              Not staff?{" "}
+              <Text className="font-bold text-white">Customer login</Text>
             </Text>
           </Pressable>
         </KeyboardAvoidingView>
