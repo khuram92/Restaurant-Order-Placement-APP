@@ -225,24 +225,24 @@ export const setManagerStatus = async (req: Request, res: Response) => {
   });
 };
 
-// /** POST /api/admin/managers/:id/reset-password — new generated password, emailed */
-// export const resetManagerPassword = async (req: Request, res: Response) => {
-//   const manager = await findManagerOr404(req, res);
-//   if (!manager) return;
+/** POST /api/admin/managers/:id/reset-password — new generated password, emailed */
+export const resetManagerPassword = async (req: Request, res: Response) => {
+  const manager = await findManagerOr404(req, res);
+  if (!manager) return;
 
-//   const password = generatePassword();
-//   manager.password = password; // hashed by the model
-//   manager.mustChangePassword = true;
-//   await manager.save();
+  const password = generatePassword();
+  manager.password = password; // hashed by the model
+  manager.mustChangePassword = true;
+  await manager.save();
 
-//   const emailSent = await deliverPassword(manager, password, "reset");
+  const emailSent = await deliverPassword(manager, password, "reset");
 
-//   res.json({
-//     message: emailSent ? "New password emailed to the manager" : "Password reset, but the email couldn't be sent",
-//     emailSent,
-//     ...(!emailSent && { temporaryPassword: password }),
-//   });
-// };
+  res.json({
+    message: emailSent ? "New password emailed to the manager" : "Password reset, but the email couldn't be sent",
+    emailSent,
+    ...(!emailSent && { temporaryPassword: password }),
+  });
+};
 
 // /** DELETE /api/admin/managers/:id — permanent; frees their restaurant */
 // export const deleteManager = async (req: Request, res: Response) => {
