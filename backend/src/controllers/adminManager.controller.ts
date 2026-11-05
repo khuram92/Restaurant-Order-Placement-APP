@@ -114,55 +114,55 @@ export const restaurantOptions = async (_req: Request, res: Response) => {
   });
 };
 
-// /** GET /api/admin/managers/:id */
-// export const getManager = async (req: Request, res: Response) => {
-//   const manager = await findManagerOr404(req, res);
-//   if (!manager) return;
-//   res.json({ manager: await withRestaurant(manager) });
-// };
+/** GET /api/admin/managers/:id */
+export const getManager = async (req: Request, res: Response) => {
+  const manager = await findManagerOr404(req, res);
+  if (!manager) return;
+  res.json({ manager: await withRestaurant(manager) });
+};
 
-// /** POST /api/admin/managers   { firstName, lastName, email, phone?, restaurantId } */
-// export const createManager = async (req: Request, res: Response) => {
-//   const parsed = createManagerSchema.safeParse(req.body);
-//   if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
-//   const { firstName, lastName, email, phone, restaurantId } = parsed.data;
+/** POST /api/admin/managers   { firstName, lastName, email, phone?, restaurantId } */
+export const createManager = async (req: Request, res: Response) => {
+  const parsed = createManagerSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
+  const { firstName, lastName, email, phone, restaurantId } = parsed.data;
 
-//   const restaurant = await Restaurant.findById(restaurantId).select("_id");
-//   if (!restaurant) return res.status(404).json({ message: "Restaurant not found" });
+  const restaurant = await Restaurant.findById(restaurantId).select("_id");
+  if (!restaurant) return res.status(404).json({ message: "Restaurant not found" });
 
-//   if (await restaurantHasOtherManager(restaurantId)) {
-//     return res.status(409).json({ message: "This restaurant already has a manager" });
-//   }
-//   if (await User.exists({ email })) {
-//     return res.status(409).json({ message: "This email is already registered" });
-//   }
-//   if (phone && (await User.exists({ phone }))) {
-//     return res.status(409).json({ message: "This phone number is already registered" });
-//   }
+  if (await restaurantHasOtherManager(restaurantId)) {
+    return res.status(409).json({ message: "This restaurant already has a manager" });
+  }
+  if (await User.exists({ email })) {
+    return res.status(409).json({ message: "This email is already registered" });
+  }
+  if (phone && (await User.exists({ phone }))) {
+    return res.status(409).json({ message: "This phone number is already registered" });
+  }
 
-//   const password = generatePassword();
-//   const manager = new User({
-//     role: "manager",
-//     firstName,
-//     lastName,
-//     email,
-//     restaurantId,
-//     password, // hashed by the model
-//     mustChangePassword: true,
-//     profileCompleted: true, // staff don't use the customer profile screen
-//   });
-//   if (phone) manager.phone = phone;
-//   await manager.save();
+  const password = generatePassword();
+  const manager = new User({
+    role: "manager",
+    firstName,
+    lastName,
+    email,
+    restaurantId,
+    password, // hashed by the model
+    mustChangePassword: true,
+    profileCompleted: true, // staff don't use the customer profile screen
+  });
+  if (phone) manager.phone = phone;
+  await manager.save();
 
-//   const emailSent = await deliverPassword(manager, password, "welcome");
+  const emailSent = await deliverPassword(manager, password, "welcome");
 
-//   res.status(201).json({
-//     manager: await withRestaurant(manager),
-//     emailSent,
-//     // Only if the email failed, so the admin can pass it on once
-//     ...(!emailSent && { temporaryPassword: password }),
-//   });
-// };
+  res.status(201).json({
+    manager: await withRestaurant(manager),
+    emailSent,
+    // Only if the email failed, so the admin can pass it on once
+    ...(!emailSent && { temporaryPassword: password }),
+  });
+};
 
 // /** PATCH /api/admin/managers/:id   (send only what changes; phone "" removes it) */
 // export const updateManager = async (req: Request, res: Response) => {
