@@ -135,7 +135,7 @@ export default function LoginScreen() {
               className="flex-row items-center rounded-2xl border-2 px-4"
               style={{
                 borderColor,
-                backgroundColor: focused ? colors.white : colors.mist,
+                backgroundColor: focused ? colors.white : colors.white,
                 ...shadow(focused ? 0.2 : 0, 8, focused ? 4 : 0),
               }}>
               <Ionicons
@@ -175,7 +175,7 @@ export default function LoginScreen() {
 
             {/* Button with press effect */}
             <Pressable
-              className="mt-6"
+              className="mt-6 "
               onPress={handleContinue}
               disabled={!canSubmit}
               style={({ pressed }) => ({
@@ -189,14 +189,19 @@ export default function LoginScreen() {
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
                 style={{
-                  borderRadius: 16,
+                  borderRadius: 50,
                   paddingVertical: 16,
                   alignItems: "center",
+                  borderWidth: 2,
+                  borderColor: canSubmit ? "transparent" : "#4e5c4a",
                 }}>
                 {loading ? (
                   <ActivityIndicator color={colors.white} />
                 ) : (
-                  <Text className="text-base font-bold tracking-wide text-white">
+                  <Text
+                    className={`text-base font-bold tracking-wide ${
+                      canSubmit ? "text-white" : "text-[#4e5c4a]"
+                    }`}>
                     Continue
                   </Text>
                 )}
@@ -222,7 +227,7 @@ export default function LoginScreen() {
             hitSlop={8}>
             <Text className="text-sm" style={{ color: colors.brandDark }}>
               Restaurant staff?{" "}
-              <Text className="font-bold text-white">Log in here</Text>
+              <Text className="font-bold text-[#0900fa]">Log in here</Text>
             </Text>
           </Pressable>
         </KeyboardAvoidingView>

@@ -13,7 +13,7 @@ export const colors = {
   white: "#ffffff",
   text: "#2c3329",
   textMuted: "#6b7466",
-  placeholder: "#9aa296",
+  placeholder: "#4e5c4a",
   danger: "#b42318",
 } as const;
 
