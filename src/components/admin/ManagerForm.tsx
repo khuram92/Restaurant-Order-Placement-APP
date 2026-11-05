@@ -209,7 +209,7 @@ function RestaurantPicker({
         <Ionicons name="chevron-down" size={18} color={colors.brandLight} />
       </Pressable>
       {options && (
-        <Text className="mt-1 text-xs text-brand-light">
+        <Text className="mt-1 text-base text-brand-light">
           {freeCount} restaurant{freeCount === 1 ? "" : "s"} without a manager
         </Text>
       )}
