@@ -1,3 +1,9 @@
+import { Ionicons } from "@expo/vector-icons";
+import DateTimePicker, {
+  type DateTimePickerEvent,
+} from "@react-native-community/datetimepicker";
+import { Image } from "expo-image";
+import * as ImagePicker from "expo-image-picker";
 import { useState, type ComponentProps, type ReactNode } from "react";
 import {
   ActivityIndicator,
@@ -13,12 +19,14 @@ import {
   type KeyboardTypeOptions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Image } from "expo-image";
-import { Ionicons } from "@expo/vector-icons";
-import * as ImagePicker from "expo-image-picker";
-import DateTimePicker, { type DateTimePickerEvent } from "@react-native-community/datetimepicker";
-import { colors, cardShadow } from "../../constants/theme";
-import type { Day, OpeningHour, PickedImage, Restaurant, RestaurantInput } from "../../types/restaurant";
+import { cardShadow, colors } from "../../constants/theme";
+import type {
+  Day,
+  OpeningHour,
+  PickedImage,
+  Restaurant,
+  RestaurantInput,
+} from "../../types/restaurant";
 
 // ================= Form values =================
 // Numbers are kept as strings while typing, and converted on submit.
@@ -39,7 +47,7 @@ export interface RestaurantFormValues {
   minOrder: string;
   deliveryRadiusKm: string;
   taxRate: string;
- 
+
   seatingCapacity: string;
   openingHours: OpeningHour[];
 }
@@ -60,7 +68,16 @@ const DAYS: { key: Day; label: string }[] = [
   { key: "sun", label: "Sunday" },
 ];
 
-const CUISINE_SUGGESTIONS = ["Pakistani", "BBQ", "Chinese", "Fast Food", "Pizza", "Desserts", "Cafe", "Seafood"];
+const CUISINE_SUGGESTIONS = [
+  "Pakistani",
+  "BBQ",
+  "Chinese",
+  "Fast Food",
+  "Pizza",
+  "Desserts",
+  "Cafe",
+  "Seafood",
+];
 const MAX_CUISINES = 10;
 
 export const emptyRestaurantValues = (): RestaurantFormValues => ({
@@ -79,9 +96,14 @@ export const emptyRestaurantValues = (): RestaurantFormValues => ({
   minOrder: "0",
   deliveryRadiusKm: "5",
   taxRate: "0",
- 
+
   seatingCapacity: "0",
-  openingHours: DAYS.map((d) => ({ day: d.key, open: "11:00", close: "23:00", closed: false })),
+  openingHours: DAYS.map((d) => ({
+    day: d.key,
+    open: "11:00",
+    close: "23:00",
+    closed: false,
+  })),
 });
 
 /** Restaurant from the API → form values (used by the Edit screen) */
@@ -107,13 +129,16 @@ export const restaurantToValues = (r: Restaurant): RestaurantFormValues => ({
 
 /** Checks the form and builds the API body, or returns the first error */
 export const valuesToInput = (
-  v: RestaurantFormValues
-): { input: RestaurantInput; error?: undefined } | { input?: undefined; error: string } => {
+  v: RestaurantFormValues,
+):
+  | { input: RestaurantInput; error?: undefined }
+  | { input?: undefined; error: string } => {
   if (v.name.trim().length < 2) return { error: "Enter the restaurant name" };
   if (v.street.trim().length < 3) return { error: "Enter the street address" };
   if (v.city.trim().length < 2) return { error: "Enter the city" };
 
-  if (v.email.trim() && !/^\S+@\S+\.\S+$/.test(v.email.trim())) return { error: "Enter a valid email" };
+  if (v.email.trim() && !/^\S+@\S+\.\S+$/.test(v.email.trim()))
+    return { error: "Enter a valid email" };
   if (v.phone.trim() && !/^\+?\d{10,13}$/.test(v.phone.replace(/[\s-]/g, ""))) {
     return { error: "Enter a valid phone number" };
   }
@@ -128,16 +153,20 @@ export const valuesToInput = (
     minOrder: num(v.minOrder),
     deliveryRadiusKm: num(v.deliveryRadiusKm),
     taxRate: num(v.taxRate),
-  
+
     seatingCapacity: num(v.seatingCapacity),
   };
   if (Object.values(fields).some((n) => Number.isNaN(n) || n < 0)) {
     return { error: "Fees, tax, seats and times must be positive numbers" };
   }
   if (fields.taxRate > 100) return { error: "Tax can't be over 100%" };
-  if (fields.deliveryRadiusKm > 50) return { error: "Delivery radius can be at most 50 km" };
-  
-  if (!Number.isInteger(fields.seatingCapacity) || fields.seatingCapacity > 2000) {
+  if (fields.deliveryRadiusKm > 50)
+    return { error: "Delivery radius can be at most 50 km" };
+
+  if (
+    !Number.isInteger(fields.seatingCapacity) ||
+    fields.seatingCapacity > 2000
+  ) {
     return { error: "Seats must be a whole number up to 2000" };
   }
   if (v.services.dineIn && fields.seatingCapacity < 1) {
@@ -145,7 +174,8 @@ export const valuesToInput = (
   }
   const sameTime = v.openingHours.find((h) => !h.closed && h.open === h.close);
   if (sameTime) {
-    const label = DAYS.find((d) => d.key === sameTime.day)?.label ?? sameTime.day;
+    const label =
+      DAYS.find((d) => d.key === sameTime.day)?.label ?? sameTime.day;
     return { error: `${label}: opening and closing time can't be the same` };
   }
   // Coordinates: both or none
@@ -153,13 +183,15 @@ export const valuesToInput = (
   if (v.lat.trim() || v.lng.trim()) {
     const lat = num(v.lat);
     const lng = num(v.lng);
-    if (Number.isNaN(lat) || lat < -90 || lat > 90) return { error: "Latitude must be between -90 and 90" };
-    if (Number.isNaN(lng) || lng < -180 || lng > 180) return { error: "Longitude must be between -180 and 180" };
+    if (Number.isNaN(lat) || lat < -90 || lat > 90)
+      return { error: "Latitude must be between -90 and 90" };
+    if (Number.isNaN(lng) || lng < -180 || lng > 180)
+      return { error: "Longitude must be between -180 and 180" };
     location = { lat, lng };
   }
 
-    // Optional text is always sent; "" tells the backend to remove it (so Edit can clear fields)
-    // Optional text is always sent; "" tells the backend to remove it (so Edit can clear fields)
+  // Optional text is always sent; "" tells the backend to remove it (so Edit can clear fields)
+  // Optional text is always sent; "" tells the backend to remove it (so Edit can clear fields)
   return {
     input: {
       name: v.name.trim(),
@@ -182,11 +214,21 @@ export const valuesToInput = (
 
 // ================= Small UI pieces =================
 
-function Section({ title, subtitle, children }: { title: string; subtitle?: string; children: ReactNode }) {
+function Section({
+  title,
+  subtitle,
+  children,
+}: {
+  title: string;
+  subtitle?: string;
+  children: ReactNode;
+}) {
   return (
     <View className="mb-4 rounded-3xl bg-white p-5" style={cardShadow}>
       <Text className="text-base font-bold text-brand-dark">{title}</Text>
-      {!!subtitle && <Text className="mt-0.5 text-xs text-brand-light">{subtitle}</Text>}
+      {!!subtitle && (
+        <Text className="mt-0.5 text-xs text-brand-light">{subtitle}</Text>
+      )}
       <View className="mt-4">{children}</View>
     </View>
   );
@@ -228,9 +270,12 @@ function Field({
         className="flex-row items-center rounded-2xl border-2 px-4"
         style={{
           borderColor: focused && !disabled ? colors.brand : colors.mistDark,
-          backgroundColor: disabled ? colors.mist : focused ? colors.white : colors.mistLight,
-        }}
-      >
+          backgroundColor: disabled
+            ? colors.mist
+            : focused
+              ? colors.white
+              : colors.mistLight,
+        }}>
         <TextInput
           value={value}
           onChangeText={onChangeText}
@@ -245,9 +290,15 @@ function Field({
           editable={!disabled}
           selectionColor={colors.brand}
           className="flex-1 py-3 text-base text-[#2c3329]"
-          style={multiline ? { minHeight: 80, textAlignVertical: "top" } : undefined}
+          style={
+            multiline ? { minHeight: 80, textAlignVertical: "top" } : undefined
+          }
         />
-        {!!suffix && <Text className="ml-2 text-sm font-semibold text-brand-light">{suffix}</Text>}
+        {!!suffix && (
+          <Text className="ml-2 text-sm font-semibold text-brand-light">
+            {suffix}
+          </Text>
+        )}
       </View>
     </View>
   );
@@ -272,12 +323,10 @@ function ToggleRow({
     <Pressable
       onPress={() => onChange(!value)}
       className="mb-2 flex-row items-center rounded-2xl p-3"
-      style={{ backgroundColor: value ? colors.brandSoft : colors.mistLight }}
-    >
+      style={{ backgroundColor: value ? colors.brandSoft : colors.mistLight }}>
       <View
         className="mr-3 h-10 w-10 items-center justify-center rounded-xl"
-        style={{ backgroundColor: value ? colors.brand : colors.mistDark }}
-      >
+        style={{ backgroundColor: value ? colors.brand : colors.mistDark }}>
         <Ionicons name={icon} size={20} color={colors.white} />
       </View>
       <View className="flex-1">
@@ -298,19 +347,33 @@ function ToggleRow({
 /** Small grey note shown when a group of settings is locked */
 function LockedNote({ text }: { text: string }) {
   return (
-    <View className="mb-3 flex-row items-center rounded-xl px-3 py-2" style={{ backgroundColor: colors.mistLight }}>
-      <Ionicons name="lock-closed" size={14} color={colors.brandLight} style={{ marginRight: 8 }} />
+    <View
+      className="mb-3 flex-row items-center rounded-xl px-3 py-2"
+      style={{ backgroundColor: colors.mistLight }}>
+      <Ionicons
+        name="lock-closed"
+        size={14}
+        color={colors.brandLight}
+        style={{ marginRight: 8 }}
+      />
       <Text className="flex-1 text-xs text-brand-light">{text}</Text>
     </View>
   );
 }
 
 // ---------- Cuisines: chips + add ----------
-function CuisinesInput({ value, onChange }: { value: string[]; onChange: (next: string[]) => void }) {
+function CuisinesInput({
+  value,
+  onChange,
+}: {
+  value: string[];
+  onChange: (next: string[]) => void;
+}) {
   const [text, setText] = useState("");
   const [focused, setFocused] = useState(false);
 
-  const has = (c: string) => value.some((v) => v.toLowerCase() === c.toLowerCase());
+  const has = (c: string) =>
+    value.some((v) => v.toLowerCase() === c.toLowerCase());
 
   const add = (raw: string) => {
     // Allow "Pakistani, BBQ" in one go
@@ -321,7 +384,8 @@ function CuisinesInput({ value, onChange }: { value: string[]; onChange: (next: 
     const next = [...value];
     for (const item of items) {
       if (next.length >= MAX_CUISINES) break;
-      if (!next.some((v) => v.toLowerCase() === item.toLowerCase())) next.push(item.slice(0, 30));
+      if (!next.some((v) => v.toLowerCase() === item.toLowerCase()))
+        next.push(item.slice(0, 30));
     }
     onChange(next);
     setText("");
@@ -348,8 +412,7 @@ function CuisinesInput({ value, onChange }: { value: string[]; onChange: (next: 
               onPress={() => remove(c)}
               className="flex-row items-center rounded-full px-3 py-1.5"
               style={{ backgroundColor: colors.brand }}
-              hitSlop={4}
-            >
+              hitSlop={4}>
               <Text className="text-xs font-semibold text-white">{c}</Text>
               <Text className="ml-1.5 text-xs text-white/80">✕</Text>
             </Pressable>
@@ -365,8 +428,7 @@ function CuisinesInput({ value, onChange }: { value: string[]; onChange: (next: 
             style={{
               borderColor: focused ? colors.brand : colors.mistDark,
               backgroundColor: focused ? colors.white : colors.mistLight,
-            }}
-          >
+            }}>
             <TextInput
               value={text}
               onChangeText={setText}
@@ -387,8 +449,9 @@ function CuisinesInput({ value, onChange }: { value: string[]; onChange: (next: 
             onPress={() => add(text)}
             disabled={!text.trim()}
             className="rounded-2xl px-4 py-3.5"
-            style={{ backgroundColor: text.trim() ? colors.brand : colors.mistDark }}
-          >
+            style={{
+              backgroundColor: text.trim() ? colors.brand : colors.mistDark,
+            }}>
             <Text className="font-bold text-white">Add</Text>
           </Pressable>
         </View>
@@ -402,8 +465,10 @@ function CuisinesInput({ value, onChange }: { value: string[]; onChange: (next: 
               key={s}
               onPress={() => add(s)}
               className="rounded-full border px-3 py-1"
-              style={{ borderColor: colors.mistDark, backgroundColor: colors.mistLight }}
-            >
+              style={{
+                borderColor: colors.mistDark,
+                backgroundColor: colors.mistLight,
+              }}>
               <Text className="text-xs font-semibold text-brand">+ {s}</Text>
             </Pressable>
           ))}
@@ -431,7 +496,7 @@ const pickImage = (aspect: [number, number]) =>
               ...(asset.mimeType && { mimeType: asset.mimeType }),
               ...(asset.fileName && { fileName: asset.fileName }),
             }
-          : null
+          : null,
       );
     };
 
@@ -444,7 +509,11 @@ const pickImage = (aspect: [number, number]) =>
           fromResult(await ImagePicker.launchCameraAsync(options));
         },
       },
-      { text: "Choose from gallery", onPress: async () => fromResult(await ImagePicker.launchImageLibraryAsync(options)) },
+      {
+        text: "Choose from gallery",
+        onPress: async () =>
+          fromResult(await ImagePicker.launchImageLibraryAsync(options)),
+      },
       { text: "Cancel", style: "cancel", onPress: () => resolve(null) },
     ]);
   });
@@ -463,19 +532,33 @@ function ImagesSection({
   onPickLogo: () => void;
 }) {
   return (
-    <View className="mb-4 overflow-hidden rounded-3xl bg-white" style={cardShadow}>
+    <View
+      className="mb-4 overflow-hidden rounded-3xl bg-white"
+      style={cardShadow}>
       {/* Cover (2:1) */}
-      <Pressable onPress={onPickCover} style={{ aspectRatio: 2, backgroundColor: colors.brandSoft }}>
+      <Pressable
+        onPress={onPickCover}
+        style={{ aspectRatio: 2, backgroundColor: colors.brandSoft }}>
         {coverUri ? (
-          <Image source={{ uri: coverUri }} style={{ width: "100%", height: "100%" }} contentFit="cover" />
+          <Image
+            source={{ uri: coverUri }}
+            style={{ width: "100%", height: "100%" }}
+            contentFit="cover"
+          />
         ) : (
           <View className="flex-1 items-center justify-center">
             <Ionicons name="image" size={36} color={colors.brand} />
-            <Text className="mt-1 text-sm font-semibold text-brand">Add cover photo</Text>
+            <Text className="mt-1 text-sm font-semibold text-brand">
+              Add cover photo
+            </Text>
           </View>
         )}
-        <View className="absolute right-3 top-3 rounded-full px-3 py-1" style={{ backgroundColor: "rgba(59,70,56,0.8)" }}>
-          <Text className="text-xs font-semibold text-white">{coverUri ? "Change cover" : "Cover"}</Text>
+        <View
+          className="absolute right-3 top-3 rounded-full px-3 py-1"
+          style={{ backgroundColor: "rgba(59,70,56,0.8)" }}>
+          <Text className="text-xs font-semibold text-white">
+            {coverUri ? "Change cover" : "Cover"}
+          </Text>
         </View>
       </Pressable>
 
@@ -484,23 +567,30 @@ function ImagesSection({
         <Pressable
           onPress={onPickLogo}
           className="h-20 w-20 items-center justify-center overflow-hidden rounded-2xl border-4 border-white"
-          style={{ backgroundColor: colors.mistLight }}
-        >
+          style={{ backgroundColor: colors.mistLight }}>
           {logoUri ? (
-            <Image source={{ uri: logoUri }} style={{ width: "100%", height: "100%" }} contentFit="cover" />
+            <Image
+              source={{ uri: logoUri }}
+              style={{ width: "100%", height: "100%" }}
+              contentFit="cover"
+            />
+          ) : name.trim() ? (
+            <Text className="text-2xl font-extrabold text-brand">
+              {name.trim()[0]?.toUpperCase()}
+            </Text>
           ) : (
-            name.trim() ? (
-              <Text className="text-2xl font-extrabold text-brand">{name.trim()[0]?.toUpperCase()}</Text>
-            ) : (
-              <Ionicons name="camera" size={26} color={colors.brand} />
-            )
+            <Ionicons name="camera" size={26} color={colors.brand} />
           )}
         </Pressable>
         <View className="ml-3 flex-1 pb-1">
           <Pressable onPress={onPickLogo} hitSlop={6}>
-            <Text className="text-sm font-bold text-brand">{logoUri ? "Change logo" : "Add logo"}</Text>
+            <Text className="text-sm font-bold text-brand">
+              {logoUri ? "Change logo" : "Add logo"}
+            </Text>
           </Pressable>
-          <Text className="text-xs text-brand-light">Square logo · wide cover · optional</Text>
+          <Text className="text-xs text-brand-light">
+            Square logo · wide cover · optional
+          </Text>
         </View>
       </View>
     </View>
@@ -530,9 +620,13 @@ function TimeButton({ time, onPress }: { time: string; onPress: () => void }) {
     <Pressable
       onPress={onPress}
       className="rounded-xl border px-3 py-2"
-      style={{ borderColor: colors.mistDark, backgroundColor: colors.mistLight }}
-    >
-      <Text className="text-sm font-semibold text-brand-dark">{formatTime(time)}</Text>
+      style={{
+        borderColor: colors.mistDark,
+        backgroundColor: colors.mistLight,
+      }}>
+      <Text className="text-sm font-semibold text-brand-dark">
+        {formatTime(time)}
+      </Text>
     </Pressable>
   );
 }
@@ -546,31 +640,53 @@ type Props = {
   initialCover?: string;
   submitLabel: string;
   /** Return an error message to show it, or nothing on success */
-  onSubmit: (input: RestaurantInput, images: RestaurantFormImages) => Promise<string | void>;
+  onSubmit: (
+    input: RestaurantInput,
+    images: RestaurantFormImages,
+  ) => Promise<string | void>;
 };
 
-export default function RestaurantForm({ initialValues, initialLogo, initialCover, submitLabel, onSubmit }: Props) {
+export default function RestaurantForm({
+  initialValues,
+  initialLogo,
+  initialCover,
+  submitLabel,
+  onSubmit,
+}: Props) {
   const insets = useSafeAreaInsets(); // space taken by Android's nav bar / iPhone home bar
-  const [values, setValues] = useState<RestaurantFormValues>(initialValues ?? emptyRestaurantValues());
+  const [values, setValues] = useState<RestaurantFormValues>(
+    initialValues ?? emptyRestaurantValues(),
+  );
   const [images, setImages] = useState<RestaurantFormImages>({});
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
-  const [picker, setPicker] = useState<{ index: number; field: "open" | "close" } | null>(null);
+  const [picker, setPicker] = useState<{
+    index: number;
+    field: "open" | "close";
+  } | null>(null);
 
   // Update one top-level field
-  const set = <K extends keyof RestaurantFormValues>(key: K, value: RestaurantFormValues[K]) => {
+  const set = <K extends keyof RestaurantFormValues>(
+    key: K,
+    value: RestaurantFormValues[K],
+  ) => {
     setValues((v) => ({ ...v, [key]: value }));
     if (error) setError("");
   };
 
-   const setService = (key: keyof RestaurantFormValues["services"], on: boolean) => {
+  const setService = (
+    key: keyof RestaurantFormValues["services"],
+    on: boolean,
+  ) => {
     setValues((v) => ({ ...v, services: { ...v.services, [key]: on } }));
     if (error) setError("");
   };
   const setHour = (index: number, changes: Partial<OpeningHour>) =>
     set(
       "openingHours",
-      values.openingHours.map((h, i) => (i === index ? { ...h, ...changes } : h))
+      values.openingHours.map((h, i) =>
+        i === index ? { ...h, ...changes } : h,
+      ),
     );
 
   const copyMondayToAll = () => {
@@ -578,7 +694,12 @@ export default function RestaurantForm({ initialValues, initialLogo, initialCove
     if (!monday) return;
     set(
       "openingHours",
-      values.openingHours.map((h) => ({ ...h, open: monday.open, close: monday.close, closed: monday.closed }))
+      values.openingHours.map((h) => ({
+        ...h,
+        open: monday.open,
+        close: monday.close,
+        closed: monday.closed,
+      })),
     );
   };
 
@@ -623,13 +744,14 @@ export default function RestaurantForm({ initialValues, initialLogo, initialCove
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       className="flex-1"
-      keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
-    >
+      keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}>
       <ScrollView
-        contentContainerStyle={{ padding: 16, paddingBottom: 140 + insets.bottom }}
+        contentContainerStyle={{
+          padding: 16,
+          paddingBottom: 140 + insets.bottom,
+        }}
         keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-      >
+        showsVerticalScrollIndicator={false}>
         {/* 0. Images */}
         <ImagesSection
           coverUri={images.cover?.uri ?? initialCover}
@@ -641,93 +763,235 @@ export default function RestaurantForm({ initialValues, initialLogo, initialCove
 
         {/* 1. Basic info */}
         <Section title="Basic info" subtitle="What customers will see">
-          <Field label="Restaurant name" required value={values.name} onChangeText={(t) => set("name", t)} placeholder="e.g. Savour Foods" autoCapitalize="words" />
-          <Field label="Description" value={values.description} onChangeText={(t) => set("description", t)} placeholder="A short line about the restaurant" multiline />
-          <CuisinesInput value={values.cuisines} onChange={(next) => set("cuisines", next)} />
+          <Field
+            label="Restaurant name"
+            required
+            value={values.name}
+            onChangeText={(t) => set("name", t)}
+            placeholder="e.g. Savour Foods"
+            autoCapitalize="words"
+          />
+          <Field
+            label="Description"
+            value={values.description}
+            onChangeText={(t) => set("description", t)}
+            placeholder="A short line about the restaurant"
+            multiline
+          />
+          <CuisinesInput
+            value={values.cuisines}
+            onChange={(next) => set("cuisines", next)}
+          />
           <View className="flex-row gap-3">
-            <Field label="Phone" value={values.phone} onChangeText={(t) => set("phone", t)} placeholder="0512345678" keyboardType="phone-pad" autoCapitalize="none" />
-            <Field label="Email" value={values.email} onChangeText={(t) => set("email", t)} placeholder="info@..." keyboardType="email-address" autoCapitalize="none" />
+            <Field
+              label="Phone"
+              value={values.phone}
+              onChangeText={(t) => set("phone", t)}
+              placeholder="0512345678"
+              keyboardType="phone-pad"
+              autoCapitalize="none"
+            />
+            <Field
+              label="Email"
+              value={values.email}
+              onChangeText={(t) => set("email", t)}
+              placeholder="info@..."
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
           </View>
         </Section>
 
         {/* 2. Address */}
         <Section title="Address" subtitle="Where the restaurant is">
-          <Field label="Street address" required value={values.street} onChangeText={(t) => set("street", t)} placeholder="Plot 12, Jinnah Avenue" autoCapitalize="words" />
+          <Field
+            label="Street address"
+            required
+            value={values.street}
+            onChangeText={(t) => set("street", t)}
+            placeholder="Plot 12, Jinnah Avenue"
+            autoCapitalize="words"
+          />
           <View className="flex-row gap-3">
-            <Field label="Area" value={values.area} onChangeText={(t) => set("area", t)} placeholder="Blue Area" autoCapitalize="words" />
-            <Field label="City" required value={values.city} onChangeText={(t) => set("city", t)} placeholder="Islamabad" autoCapitalize="words" />
+            <Field
+              label="Area"
+              value={values.area}
+              onChangeText={(t) => set("area", t)}
+              placeholder="Blue Area"
+              autoCapitalize="words"
+            />
+            <Field
+              label="City"
+              required
+              value={values.city}
+              onChangeText={(t) => set("city", t)}
+              placeholder="Islamabad"
+              autoCapitalize="words"
+            />
           </View>
           <Text className="mb-2 mt-1 text-xs text-brand-light">
-            Map coordinates (optional) — needed later for delivery distance and "near me"
+            Map coordinates (optional) — needed later for delivery distance and
+            "near me"
           </Text>
           <View className="flex-row gap-3">
-            <Field label="Latitude" value={values.lat} onChangeText={(t) => set("lat", t)} placeholder="33.7104" keyboardType="numbers-and-punctuation" autoCapitalize="none" />
-            <Field label="Longitude" value={values.lng} onChangeText={(t) => set("lng", t)} placeholder="73.0563" keyboardType="numbers-and-punctuation" autoCapitalize="none" />
+            <Field
+              label="Latitude"
+              value={values.lat}
+              onChangeText={(t) => set("lat", t)}
+              placeholder="33.7104"
+              keyboardType="numbers-and-punctuation"
+              autoCapitalize="none"
+            />
+            <Field
+              label="Longitude"
+              value={values.lng}
+              onChangeText={(t) => set("lng", t)}
+              placeholder="73.0563"
+              keyboardType="numbers-and-punctuation"
+              autoCapitalize="none"
+            />
           </View>
         </Section>
 
         {/* 3. Services */}
         <Section title="Services" subtitle="Turn on at least one">
-          <ToggleRow icon="restaurant" label="Dine-in" description="Order ahead and reserve seats" value={values.services.dineIn} onChange={(v) => setService("dineIn", v)} />
-          <ToggleRow icon="bag-handle" label="Takeaway" description="Customer picks up the order" value={values.services.takeaway} onChange={(v) => setService("takeaway", v)} />
-          <ToggleRow icon="bicycle" label="Delivery" description="Restaurant's own riders deliver" value={values.services.delivery} onChange={(v) => setService("delivery", v)} />
+          <ToggleRow
+            icon="restaurant"
+            label="Dine-in"
+            description="Order ahead and reserve seats"
+            value={values.services.dineIn}
+            onChange={(v) => setService("dineIn", v)}
+          />
+          <ToggleRow
+            icon="bag-handle"
+            label="Takeaway"
+            description="Customer picks up the order"
+            value={values.services.takeaway}
+            onChange={(v) => setService("takeaway", v)}
+          />
+          <ToggleRow
+            icon="bicycle"
+            label="Delivery"
+            description="Restaurant's own riders deliver"
+            value={values.services.delivery}
+            onChange={(v) => setService("delivery", v)}
+          />
         </Section>
 
         {/* 4. Settings */}
         <Section title="Settings" subtitle="Prices are in PKR">
           {/* Always editable */}
-          <Field label="Tax" value={values.taxRate} onChangeText={(t) => set("taxRate", t)} keyboardType="decimal-pad" suffix="%" />
+          <Field
+            label="Tax"
+            value={values.taxRate}
+            onChangeText={(t) => set("taxRate", t)}
+            keyboardType="decimal-pad"
+            suffix="%"
+          />
 
           {/* Delivery settings */}
-          <Text className="mb-2 mt-1 text-xs font-bold uppercase tracking-wide text-brand-light">Delivery</Text>
+          <Text className="mb-2 mt-1 text-xs font-bold uppercase tracking-wide text-brand-light">
+            Delivery
+          </Text>
           {deliveryOff && <LockedNote text="Turn on Delivery to edit these" />}
           <View className="flex-row gap-3">
-            <Field label="Minimum order" value={values.minOrder} onChangeText={(t) => set("minOrder", t)} keyboardType="decimal-pad" suffix="Rs" disabled={deliveryOff} />
-            <Field label="Delivery fee" value={values.deliveryFee} onChangeText={(t) => set("deliveryFee", t)} keyboardType="decimal-pad" suffix="Rs" disabled={deliveryOff} />
+            <Field
+              label="Minimum order"
+              value={values.minOrder}
+              onChangeText={(t) => set("minOrder", t)}
+              keyboardType="decimal-pad"
+              suffix="Rs"
+              disabled={deliveryOff}
+            />
+            <Field
+              label="Delivery fee"
+              value={values.deliveryFee}
+              onChangeText={(t) => set("deliveryFee", t)}
+              keyboardType="decimal-pad"
+              suffix="Rs"
+              disabled={deliveryOff}
+            />
           </View>
-          <Field label="Delivery radius" value={values.deliveryRadiusKm} onChangeText={(t) => set("deliveryRadiusKm", t)} keyboardType="decimal-pad" suffix="km" disabled={deliveryOff} />
+          <Field
+            label="Delivery radius"
+            value={values.deliveryRadiusKm}
+            onChangeText={(t) => set("deliveryRadiusKm", t)}
+            keyboardType="decimal-pad"
+            suffix="km"
+            disabled={deliveryOff}
+          />
 
           {/* Dine-in settings */}
-          <Text className="mb-2 mt-1 text-xs font-bold uppercase tracking-wide text-brand-light">Dine-in</Text>
+          <Text className="mb-2 mt-1 text-xs font-bold uppercase tracking-wide text-brand-light">
+            Dine-in
+          </Text>
           {dineInOff && <LockedNote text="Turn on Dine-in to edit these" />}
           <View className="flex-row gap-3">
-            <Field label="Number of seats" required={!dineInOff} value={values.seatingCapacity} onChangeText={(t) => set("seatingCapacity", t)} keyboardType="number-pad" suffix="seats" disabled={dineInOff} />
-            
+            <Field
+              label="Number of seats"
+              required={!dineInOff}
+              value={values.seatingCapacity}
+              onChangeText={(t) => set("seatingCapacity", t)}
+              keyboardType="number-pad"
+              suffix="seats"
+              disabled={dineInOff}
+            />
           </View>
         </Section>
 
         {/* 5. Opening hours */}
-        <Section title="Opening hours" subtitle="Closing before opening means after midnight">
+        <Section
+          title="Opening hours"
+          subtitle="Closing before opening means after midnight">
           {values.openingHours.map((hour, index) => {
-            const label = DAYS.find((d) => d.key === hour.day)?.label ?? hour.day;
+            const label =
+              DAYS.find((d) => d.key === hour.day)?.label ?? hour.day;
             return (
               <View
                 key={hour.day}
                 className="flex-row items-center border-b py-2.5"
-                style={{ borderColor: index === 6 ? "transparent" : colors.mist }}
-              >
-                <Text className="w-24 text-sm font-semibold text-brand-dark">{label}</Text>
+                style={{
+                  borderColor: index === 6 ? "transparent" : colors.mist,
+                }}>
+                <Text className="w-24 text-sm font-semibold text-brand-dark">
+                  {label}
+                </Text>
                 {hour.closed ? (
-                  <Text className="flex-1 text-sm italic text-brand-light">Closed</Text>
+                  <Text className="flex-1 text-sm italic text-brand-light">
+                    Closed
+                  </Text>
                 ) : (
                   <View className="flex-1 flex-row items-center gap-1.5">
-                    <TimeButton time={hour.open} onPress={() => setPicker({ index, field: "open" })} />
+                    <TimeButton
+                      time={hour.open}
+                      onPress={() => setPicker({ index, field: "open" })}
+                    />
                     <Text className="text-brand-light">–</Text>
-                    <TimeButton time={hour.close} onPress={() => setPicker({ index, field: "close" })} />
+                    <TimeButton
+                      time={hour.close}
+                      onPress={() => setPicker({ index, field: "close" })}
+                    />
                   </View>
                 )}
                 <Switch
                   value={!hour.closed}
                   onValueChange={(open) => setHour(index, { closed: !open })}
-                  trackColor={{ false: colors.mistDark, true: colors.brandLight }}
+                  trackColor={{
+                    false: colors.mistDark,
+                    true: colors.brandLight,
+                  }}
                   thumbColor={!hour.closed ? colors.brand : colors.white}
                 />
               </View>
             );
           })}
 
-          <Pressable onPress={copyMondayToAll} className="mt-3 items-center rounded-2xl bg-brand-soft py-3">
-            <Text className="text-sm font-bold text-brand">Copy Monday to all days</Text>
+          <Pressable
+            onPress={copyMondayToAll}
+            className="mt-3 items-center rounded-2xl bg-brand-soft py-3">
+            <Text className="text-sm font-bold text-brand">
+              Copy Monday to all days
+            </Text>
           </Pressable>
 
           {/* Time picker */}
@@ -751,23 +1015,32 @@ export default function RestaurantForm({ initialValues, initialLogo, initialCove
       {/* Save bar */}
       <View
         className="absolute bottom-0 left-0 right-0 border-t bg-white px-4 pt-3"
-        style={{ borderColor: colors.mistDark, paddingBottom: Math.max(insets.bottom, 12) + 8 }}
-      >
-        {!!error && <Text className="mb-2 text-center text-sm text-[#b42318]">{error}</Text>}
+        style={{
+          borderColor: colors.mistDark,
+          paddingBottom: Math.max(insets.bottom, 12) + 8,
+        }}>
+        {!!error && (
+          <Text className="mb-2 text-center text-sm text-[#b42318]">
+            {error}
+          </Text>
+        )}
         <Pressable
           onPress={handleSubmit}
           disabled={saving}
           android_ripple={{ color: colors.brandDark }}
-          className="overflow-hidden rounded-2xl"
-        >
+          className="overflow-hidden rounded-2xl">
           <View
             className="items-center rounded-2xl py-4"
-            style={{ backgroundColor: colors.brand, opacity: saving ? 0.7 : 1 }}
-          >
+            style={{
+              backgroundColor: colors.brand,
+              opacity: saving ? 0.7 : 1,
+            }}>
             {saving ? (
               <ActivityIndicator color={colors.white} />
             ) : (
-              <Text className="text-base font-bold text-white">{submitLabel}</Text>
+              <Text className="text-base font-bold text-white">
+                {submitLabel}
+              </Text>
             )}
           </View>
         </Pressable>

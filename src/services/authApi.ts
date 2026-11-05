@@ -1,23 +1,35 @@
-import { api, } from "../lib/api";
-import type { AuthResponse, CompleteProfileInput, RequestOtpResponse, User } from "../types/auth";
-import { getToken } from "../lib/storage";
+import { api } from "../lib/api";
+import type {
+  AuthResponse,
+  CompleteProfileInput,
+  RequestOtpResponse,
+  User,
+} from "../types/auth";
 
 /** Customer: send OTP to phone or email */
 export const requestOtp = async (identifier: string) => {
-  const { data } = await api.post<RequestOtpResponse>("/auth/otp/request", { identifier });
+  const { data } = await api.post<RequestOtpResponse>("/auth/otp/request", {
+    identifier,
+  });
   return data;
 };
 
 /** Customer: verify OTP (name only needed for new customers) */
 /** Customer: verify OTP and log in (creates the account if new) */
 export const verifyOtp = async (identifier: string, code: string) => {
-  const { data } = await api.post<AuthResponse>("/auth/otp/verify", { identifier, code });
+  const { data } = await api.post<AuthResponse>("/auth/otp/verify", {
+    identifier,
+    code,
+  });
   return data;
 };
 
 /** Super Admin & Manager: email + password */
 export const staffLogin = async (email: string, password: string) => {
-  const { data } = await api.post<AuthResponse>("/auth/login", { email, password });
+  const { data } = await api.post<AuthResponse>("/auth/login", {
+    email,
+    password,
+  });
   return data;
 };
 
@@ -28,7 +40,10 @@ export const getMe = async () => {
 };
 /** Customer: save first/last name, DOB and the optional second contact */
 export const completeProfile = async (input: CompleteProfileInput) => {
-  const { data } = await api.patch<{ user: User }>("/auth/complete-profile", input);
+  const { data } = await api.patch<{ user: User }>(
+    "/auth/complete-profile",
+    input,
+  );
   return data.user;
 };
 
@@ -37,7 +52,11 @@ export const completeProfile = async (input: CompleteProfileInput) => {
  * Uses fetch instead of axios: React Native's FormData file uploads are more
  * reliable this way (fetch sets the multipart boundary itself).
  */
-export const uploadAvatar = async (image: { uri: string; mimeType?: string; fileName?: string }) => {
+export const uploadAvatar = async (image: {
+  uri: string;
+  mimeType?: string;
+  fileName?: string;
+}) => {
   const type = image.mimeType ?? "image/jpeg";
   const extension = type.split("/")[1] ?? "jpg";
 

@@ -524,7 +524,7 @@ export default function RestaurantDetailScreen() {
               );
             })}
           </Card>
-          
+
           {/* Danger zone */}
           <Pressable
             onPress={onDelete}

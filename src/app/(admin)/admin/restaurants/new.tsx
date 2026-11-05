@@ -1,13 +1,21 @@
-import { Alert, View } from "react-native";
 import { Stack, router } from "expo-router";
-import RestaurantForm, { type RestaurantFormImages } from "../../../../components/admin/RestaurantForm";
-import { createRestaurant, uploadRestaurantImages } from "../../../../services/adminRestaurantApi";
-import { getErrorMessage } from "../../../../lib/api";
+import { Alert, View } from "react-native";
+import RestaurantForm, {
+  type RestaurantFormImages,
+} from "../../../../components/admin/RestaurantForm";
 import { colors } from "../../../../constants/theme";
+import { getErrorMessage } from "../../../../lib/api";
+import {
+  createRestaurant,
+  uploadRestaurantImages,
+} from "../../../../services/adminRestaurantApi";
 import type { RestaurantInput } from "../../../../types/restaurant";
 
 export default function NewRestaurantScreen() {
-  const handleCreate = async (input: RestaurantInput, images: RestaurantFormImages) => {
+  const handleCreate = async (
+    input: RestaurantInput,
+    images: RestaurantFormImages,
+  ) => {
     // 1. Create the restaurant (we need its id for the images)
     let restaurantId: string;
     try {
@@ -23,12 +31,18 @@ export default function NewRestaurantScreen() {
         await uploadRestaurantImages(restaurantId, images);
       } catch (err) {
         // The restaurant exists; images can be added again from its page
-        Alert.alert("Restaurant created", `But the images couldn't be uploaded: ${getErrorMessage(err)}`);
+        Alert.alert(
+          "Restaurant created",
+          `But the images couldn't be uploaded: ${getErrorMessage(err)}`,
+        );
       }
     }
 
     // 3. Open the new restaurant; Back from there returns to the list
-    router.replace({ pathname: "/admin/restaurants/[id]", params: { id: restaurantId } });
+    router.replace({
+      pathname: "/admin/restaurants/[id]",
+      params: { id: restaurantId },
+    });
   };
 
   return (

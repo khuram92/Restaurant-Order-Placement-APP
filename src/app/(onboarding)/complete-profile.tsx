@@ -1,5 +1,8 @@
-import DateTimePicker, { type DateTimePickerEvent } from "@react-native-community/datetimepicker";
+import AvatarPicker from "@/components/AvatarPicker";
 import { Ionicons } from "@expo/vector-icons";
+import DateTimePicker, {
+  type DateTimePickerEvent,
+} from "@react-native-community/datetimepicker";
 import { LinearGradient } from "expo-linear-gradient";
 import { useState, type ComponentProps } from "react";
 import {
@@ -14,7 +17,6 @@ import {
   type KeyboardTypeOptions,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import AvatarPicker from "@/components/AvatarPicker";
 import { colors } from "../../constants/theme";
 import { useAuth } from "../../context/AuthContext";
 import { getErrorMessage } from "../../lib/api";
@@ -41,10 +43,19 @@ const toYMD = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 
 // 15 May 2000
-const formatDate = (d: Date) => d.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+const formatDate = (d: Date) =>
+  d.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
 
 const today = new Date();
-const hundredYearsAgo = new Date(today.getFullYear() - 100, today.getMonth(), today.getDate());
+const hundredYearsAgo = new Date(
+  today.getFullYear() - 100,
+  today.getMonth(),
+  today.getDate(),
+);
 
 // ---------- Reusable input field ----------
 type FieldProps = {
@@ -80,7 +91,9 @@ function Field({
         {locked && (
           <View className="flex-row items-center">
             <Ionicons name="lock-closed" size={11} color={colors.brand} />
-            <Text className="ml-1 text-xs font-semibold text-brand">Verified</Text>
+            <Text className="ml-1 text-xs font-semibold text-brand">
+              Verified
+            </Text>
           </View>
         )}
         {optional && <Text className="text-xs text-brand-light">Optional</Text>}
@@ -89,9 +102,17 @@ function Field({
         className="flex-row items-center rounded-2xl border-2 px-4"
         style={{
           borderColor: active ? colors.brand : colors.mistDark,
-          backgroundColor: locked ? colors.brandSoft : active ? colors.white : colors.mist,
+          backgroundColor: locked
+            ? colors.brandSoft
+            : active
+              ? colors.white
+              : colors.mist,
         }}>
-        <Ionicons name={icon} size={18} color={active ? colors.brand : colors.brandLight} />
+        <Ionicons
+          name={icon}
+          size={18}
+          color={active ? colors.brand : colors.brandLight}
+        />
         <TextInput
           value={value}
           onChangeText={onChangeText}
@@ -118,7 +139,9 @@ export default function CompleteProfileScreen() {
 
   const [firstName, setFirstName] = useState(user?.firstName ?? "");
   const [lastName, setLastName] = useState(user?.lastName ?? "");
-  const [dob, setDob] = useState<Date | null>(user?.dob ? new Date(user.dob) : null);
+  const [dob, setDob] = useState<Date | null>(
+    user?.dob ? new Date(user.dob) : null,
+  );
   const [email, setEmail] = useState(user?.email ?? "");
   const [phone, setPhone] = useState(user?.phone ?? "");
   const [showPicker, setShowPicker] = useState(false);
@@ -130,7 +153,8 @@ export default function CompleteProfileScreen() {
   const phoneLocked = !!user?.phone;
 
   // Initials from what the user is typing (e.g. "AK")
-  const initials = `${firstName.trim()[0] ?? ""}${lastName.trim()[0] ?? ""}`.toUpperCase();
+  const initials =
+    `${firstName.trim()[0] ?? ""}${lastName.trim()[0] ?? ""}`.toUpperCase();
 
   const onDobChange = (event: DateTimePickerEvent, date?: Date) => {
     if (Platform.OS === "android") setShowPicker(false); // Android shows a dialog
@@ -143,8 +167,10 @@ export default function CompleteProfileScreen() {
   const handleSave = async () => {
     setError("");
 
-    if (firstName.trim().length < 2) return setError("Enter your first name (at least 2 characters)");
-    if (lastName.trim().length < 2) return setError("Enter your last name (at least 2 characters)");
+    if (firstName.trim().length < 2)
+      return setError("Enter your first name (at least 2 characters)");
+    if (lastName.trim().length < 2)
+      return setError("Enter your last name (at least 2 characters)");
     if (!dob) return setError("Select your date of birth");
 
     const input: CompleteProfileInput = {
@@ -156,12 +182,14 @@ export default function CompleteProfileScreen() {
     // Optional second contact (only the one that isn't locked)
     if (!emailLocked && email.trim()) {
       const parsed = parseIdentifier(email);
-      if (!parsed || parsed.channel !== "email") return setError("Enter a valid email");
+      if (!parsed || parsed.channel !== "email")
+        return setError("Enter a valid email");
       input.email = parsed.identifier;
     }
     if (!phoneLocked && phone.trim()) {
       const parsed = parseIdentifier(phone);
-      if (!parsed || parsed.channel !== "phone") return setError("Enter a valid phone number (03XXXXXXXXX)");
+      if (!parsed || parsed.channel !== "phone")
+        return setError("Enter a valid phone number (03XXXXXXXXX)");
       input.phone = parsed.identifier;
     }
 
@@ -175,10 +203,18 @@ export default function CompleteProfileScreen() {
     }
   };
 
-  const canSubmit = firstName.trim().length >= 2 && lastName.trim().length >= 2 && !!dob && !loading;
+  const canSubmit =
+    firstName.trim().length >= 2 &&
+    lastName.trim().length >= 2 &&
+    !!dob &&
+    !loading;
 
   return (
-    <LinearGradient colors={BG} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ flex: 1 }}>
+    <LinearGradient
+      colors={BG}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={{ flex: 1 }}>
       {/* Soft olive circles */}
       <View
         className="absolute -left-16 -top-24 h-56 w-56 rounded-full"
@@ -190,35 +226,62 @@ export default function CompleteProfileScreen() {
       />
 
       <SafeAreaView className="flex-1">
-        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} className="flex-1">
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          className="flex-1">
           <ScrollView
-            contentContainerStyle={{ flexGrow: 1, justifyContent: "center", padding: 24 }}
+            contentContainerStyle={{
+              flexGrow: 1,
+              justifyContent: "center",
+              padding: 24,
+            }}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}>
             {/* Header */}
             <View className="mb-6 items-center">
               <AvatarPicker initials={initials} />
-              <Text className="mt-4 text-3xl font-extrabold text-brand-dark">Almost there!</Text>
+              <Text className="mt-4 text-3xl font-extrabold text-brand-dark">
+                Almost there!
+              </Text>
               <Text className="mt-1 text-center text-base text-brand-light">
                 Tell us a bit about yourself to finish setting up your account
               </Text>
             </View>
 
             {/* Card */}
-            <View className="rounded-3xl p-6" style={{ backgroundColor: colors.mistLight, ...shadow(0.3, 30, 14) }}>
+            <View
+              className="rounded-3xl p-6"
+              style={{
+                backgroundColor: colors.mistLight,
+                ...shadow(0.3, 30, 14),
+              }}>
               {/* Names side by side */}
               <View className="flex-row gap-3">
                 <View className="flex-1">
-                  <Field label="First name" icon="person" value={firstName} onChangeText={setFirstName} placeholder="Ali" />
+                  <Field
+                    label="First name"
+                    icon="person"
+                    value={firstName}
+                    onChangeText={setFirstName}
+                    placeholder="Ali"
+                  />
                 </View>
                 <View className="flex-1">
-                  <Field label="Last name" icon="person" value={lastName} onChangeText={setLastName} placeholder="Khan" />
+                  <Field
+                    label="Last name"
+                    icon="person"
+                    value={lastName}
+                    onChangeText={setLastName}
+                    placeholder="Khan"
+                  />
                 </View>
               </View>
 
               {/* Date of birth */}
               <View className="mb-4">
-                <Text className="mb-2 text-sm font-semibold text-brand-dark">Date of birth</Text>
+                <Text className="mb-2 text-sm font-semibold text-brand-dark">
+                  Date of birth
+                </Text>
                 <Pressable
                   onPress={() => setShowPicker(true)}
                   className="flex-row items-center rounded-2xl border-2 px-4 py-4"
@@ -226,11 +289,21 @@ export default function CompleteProfileScreen() {
                     borderColor: showPicker ? colors.brand : colors.mistDark,
                     backgroundColor: showPicker ? colors.white : colors.mist,
                   }}>
-                  <Ionicons name="calendar" size={18} color={showPicker ? colors.brand : colors.brandLight} />
-                  <Text className="ml-3 flex-1 text-base" style={{ color: dob ? colors.text : colors.placeholder }}>
+                  <Ionicons
+                    name="calendar"
+                    size={18}
+                    color={showPicker ? colors.brand : colors.brandLight}
+                  />
+                  <Text
+                    className="ml-3 flex-1 text-base"
+                    style={{ color: dob ? colors.text : colors.placeholder }}>
                     {dob ? formatDate(dob) : "Select your date of birth"}
                   </Text>
-                  <Ionicons name="chevron-down" size={18} color={colors.brandLight} />
+                  <Ionicons
+                    name="chevron-down"
+                    size={18}
+                    color={colors.brandLight}
+                  />
                 </Pressable>
 
                 {showPicker && (
@@ -246,7 +319,9 @@ export default function CompleteProfileScreen() {
 
                 {/* iOS spinner stays inline, so it needs a Done button */}
                 {showPicker && Platform.OS === "ios" && (
-                  <Pressable onPress={() => setShowPicker(false)} className="items-end">
+                  <Pressable
+                    onPress={() => setShowPicker(false)}
+                    className="items-end">
                     <Text className="font-bold text-brand">Done</Text>
                   </Pressable>
                 )}
@@ -296,18 +371,27 @@ export default function CompleteProfileScreen() {
                   colors={canSubmit ? BUTTON : BUTTON_DISABLED}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 0 }}
-                  style={{ borderRadius: 16, paddingVertical: 16, alignItems: "center" }}>
+                  style={{
+                    borderRadius: 16,
+                    paddingVertical: 16,
+                    alignItems: "center",
+                  }}>
                   {loading ? (
                     <ActivityIndicator color={colors.white} />
                   ) : (
-                    <Text className="text-base font-bold tracking-wide text-white">Save & continue</Text>
+                    <Text className="text-base font-bold tracking-wide text-white">
+                      Save & continue
+                    </Text>
                   )}
                 </LinearGradient>
               </Pressable>
             </View>
 
             {/* Escape hatch */}
-            <Pressable onPress={signOut} className="mt-6 flex-row items-center justify-center" hitSlop={8}>
+            <Pressable
+              onPress={signOut}
+              className="mt-6 flex-row items-center justify-center"
+              hitSlop={8}>
               <Text className="text-sm" style={{ color: colors.brandDark }}>
                 Not you?{" "}
               </Text>

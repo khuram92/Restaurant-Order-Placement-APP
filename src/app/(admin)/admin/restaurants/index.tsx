@@ -1,12 +1,23 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { ActivityIndicator, FlatList, Pressable, RefreshControl, Text, TextInput, View } from "react-native";
-import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import { Stack, router, useFocusEffect } from "expo-router";
-import { listRestaurants } from "../../../../services/adminRestaurantApi";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  ActivityIndicator,
+  FlatList,
+  Pressable,
+  RefreshControl,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
+import { cardShadow, colors } from "../../../../constants/theme";
 import { getErrorMessage } from "../../../../lib/api";
-import { colors, cardShadow } from "../../../../constants/theme";
-import type { Restaurant, RestaurantStatusFilter } from "../../../../types/restaurant";
+import { listRestaurants } from "../../../../services/adminRestaurantApi";
+import type {
+  Restaurant,
+  RestaurantStatusFilter,
+} from "../../../../types/restaurant";
 
 const FILTERS: { key: RestaurantStatusFilter; label: string }[] = [
   { key: "all", label: "All" },
@@ -18,45 +29,69 @@ const FILTERS: { key: RestaurantStatusFilter; label: string }[] = [
 function RestaurantCard({ item }: { item: Restaurant }) {
   const services = [
     { on: item.services.dineIn, icon: "restaurant" as const, label: "Dine-in" },
-    { on: item.services.takeaway, icon: "bag-handle" as const, label: "Takeaway" },
+    {
+      on: item.services.takeaway,
+      icon: "bag-handle" as const,
+      label: "Takeaway",
+    },
     { on: item.services.delivery, icon: "bicycle" as const, label: "Delivery" },
   ].filter((s) => s.on);
 
   return (
     <Pressable
-      onPress={() => router.push({ pathname: "/admin/restaurants/[id]", params: { id: item._id } })}
+      onPress={() =>
+        router.push({
+          pathname: "/admin/restaurants/[id]",
+          params: { id: item._id },
+        })
+      }
       className="mb-3 flex-row rounded-3xl bg-white p-4"
-      style={cardShadow}
-    >
+      style={cardShadow}>
       {/* Logo or first letter */}
       <View
         className="mr-4 h-16 w-16 items-center justify-center overflow-hidden rounded-2xl"
-        style={{ backgroundColor: colors.brandSoft }}
-      >
+        style={{ backgroundColor: colors.brandSoft }}>
         {item.logo ? (
-          <Image source={{ uri: item.logo }} style={{ width: "100%", height: "100%" }} contentFit="cover" />
+          <Image
+            source={{ uri: item.logo }}
+            style={{ width: "100%", height: "100%" }}
+            contentFit="cover"
+          />
         ) : (
-          <Text className="text-2xl font-extrabold text-brand">{item.name[0]?.toUpperCase()}</Text>
+          <Text className="text-2xl font-extrabold text-brand">
+            {item.name[0]?.toUpperCase()}
+          </Text>
         )}
       </View>
 
       <View className="flex-1">
         <View className="flex-row items-start justify-between">
-          <Text className="mr-2 flex-1 text-base font-bold text-brand-dark" numberOfLines={1}>
+          <Text
+            className="mr-2 flex-1 text-base font-bold text-brand-dark"
+            numberOfLines={1}>
             {item.name}
           </Text>
           <View
             className="flex-row items-center rounded-full px-2 py-0.5"
-            style={{ backgroundColor: item.isActive ? colors.brand : colors.mistDark }}
-          >
-            <Ionicons name={item.isActive ? "checkmark-circle" : "close-circle"} size={12} color={colors.white} />
-            <Text className="ml-1 text-xs font-bold text-white">{item.isActive ? "Active" : "Inactive"}</Text>
+            style={{
+              backgroundColor: item.isActive ? colors.brand : colors.mistDark,
+            }}>
+            <Ionicons
+              name={item.isActive ? "checkmark-circle" : "close-circle"}
+              size={12}
+              color={colors.white}
+            />
+            <Text className="ml-1 text-xs font-bold text-white">
+              {item.isActive ? "Active" : "Inactive"}
+            </Text>
           </View>
         </View>
 
         <View className="mt-1 flex-row items-center">
           <Ionicons name="location" size={13} color={colors.brandLight} />
-          <Text className="ml-1 flex-1 text-sm text-brand-light" numberOfLines={1}>
+          <Text
+            className="ml-1 flex-1 text-sm text-brand-light"
+            numberOfLines={1}>
             {[item.address.area, item.address.city].filter(Boolean).join(", ")}
           </Text>
         </View>
@@ -72,10 +107,11 @@ function RestaurantCard({ item }: { item: Restaurant }) {
             <View
               key={s.label}
               className="flex-row items-center rounded-full px-2 py-0.5"
-              style={{ backgroundColor: colors.brandSoft }}
-            >
+              style={{ backgroundColor: colors.brandSoft }}>
               <Ionicons name={s.icon} size={11} color={colors.brand} />
-              <Text className="ml-1 text-xs font-semibold text-brand">{s.label}</Text>
+              <Text className="ml-1 text-xs font-semibold text-brand">
+                {s.label}
+              </Text>
             </View>
           ))}
         </View>
@@ -113,9 +149,15 @@ export default function AdminRestaurantsScreen() {
       const id = ++requestId.current;
       setError("");
       try {
-        const res = await listRestaurants({ search: debouncedSearch, status, page: pageToLoad });
+        const res = await listRestaurants({
+          search: debouncedSearch,
+          status,
+          page: pageToLoad,
+        });
         if (id !== requestId.current) return; // a newer request started
-        setRestaurants((prev) => (mode === "append" ? [...prev, ...res.restaurants] : res.restaurants));
+        setRestaurants((prev) =>
+          mode === "append" ? [...prev, ...res.restaurants] : res.restaurants,
+        );
         setPage(res.page);
         setPages(res.pages);
         setTotal(res.total);
@@ -129,7 +171,7 @@ export default function AdminRestaurantsScreen() {
         }
       }
     },
-    [debouncedSearch, status]
+    [debouncedSearch, status],
   );
 
   // Reload when the search/filter changes, and when coming back to this screen
@@ -137,7 +179,7 @@ export default function AdminRestaurantsScreen() {
     useCallback(() => {
       setLoading(true);
       load(1, "replace");
-    }, [load])
+    }, [load]),
   );
 
   const onRefresh = () => {
@@ -157,7 +199,10 @@ export default function AdminRestaurantsScreen() {
         options={{
           title: "Restaurants",
           headerRight: () => (
-            <Pressable onPress={() => router.push("/admin/restaurants/new")} hitSlop={8} className="flex-row items-center">
+            <Pressable
+              onPress={() => router.push("/admin/restaurants/new")}
+              hitSlop={8}
+              className="flex-row items-center">
               <Ionicons name="add-circle" size={22} color={colors.white} />
               <Text className="ml-1 text-base font-bold text-white">Add</Text>
             </Pressable>
@@ -169,8 +214,9 @@ export default function AdminRestaurantsScreen() {
       <View className="px-4 pt-3">
         <View
           className="flex-row items-center rounded-2xl border-2 bg-white px-4"
-          style={{ borderColor: searchFocused ? colors.brand : colors.mistDark }}
-        >
+          style={{
+            borderColor: searchFocused ? colors.brand : colors.mistDark,
+          }}>
           <Ionicons name="search" size={18} color={colors.brandLight} />
           <TextInput
             value={search}
@@ -185,7 +231,11 @@ export default function AdminRestaurantsScreen() {
           />
           {!!search && (
             <Pressable onPress={() => setSearch("")} hitSlop={8}>
-              <Ionicons name="close-circle" size={18} color={colors.brandLight} />
+              <Ionicons
+                name="close-circle"
+                size={18}
+                color={colors.brandLight}
+              />
             </Pressable>
           )}
         </View>
@@ -199,9 +249,12 @@ export default function AdminRestaurantsScreen() {
                 key={f.key}
                 onPress={() => setStatus(f.key)}
                 className="rounded-full px-4 py-2"
-                style={{ backgroundColor: selected ? colors.brand : colors.white }}
-              >
-                <Text className="text-sm font-semibold" style={{ color: selected ? colors.white : colors.brand }}>
+                style={{
+                  backgroundColor: selected ? colors.brand : colors.white,
+                }}>
+                <Text
+                  className="text-sm font-semibold"
+                  style={{ color: selected ? colors.white : colors.brand }}>
                   {f.label}
                 </Text>
               </Pressable>
@@ -231,8 +284,7 @@ export default function AdminRestaurantsScreen() {
               load(1, "replace");
             }}
             className="mt-4 rounded-2xl px-6 py-3"
-            style={{ backgroundColor: colors.brand }}
-          >
+            style={{ backgroundColor: colors.brand }}>
             <Text className="font-bold text-white">Try again</Text>
           </Pressable>
         </View>
@@ -243,27 +295,41 @@ export default function AdminRestaurantsScreen() {
           renderItem={({ item }) => <RestaurantCard item={item} />}
           contentContainerStyle={{ padding: 16, paddingTop: 8, flexGrow: 1 }}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.brand} colors={[colors.brand]} />
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={colors.brand}
+              colors={[colors.brand]}
+            />
           }
           onEndReached={onEndReached}
           onEndReachedThreshold={0.4}
-          ListFooterComponent={loadingMore ? <ActivityIndicator color={colors.brand} className="my-4" /> : undefined}
+          ListFooterComponent={
+            loadingMore ? (
+              <ActivityIndicator color={colors.brand} className="my-4" />
+            ) : undefined
+          }
           ListEmptyComponent={
             <View className="flex-1 items-center justify-center py-16">
-              <View className="h-16 w-16 items-center justify-center rounded-2xl" style={{ backgroundColor: colors.brandSoft }}>
+              <View
+                className="h-16 w-16 items-center justify-center rounded-2xl"
+                style={{ backgroundColor: colors.brandSoft }}>
                 <Ionicons name="restaurant" size={30} color={colors.brand} />
               </View>
               <Text className="mt-3 text-base font-semibold text-brand-dark">
-                {debouncedSearch || status !== "all" ? "No matching restaurants" : "No restaurants yet"}
+                {debouncedSearch || status !== "all"
+                  ? "No matching restaurants"
+                  : "No restaurants yet"}
               </Text>
               {!debouncedSearch && status === "all" && (
                 <Pressable
                   onPress={() => router.push("/admin/restaurants/new")}
                   className="mt-4 flex-row items-center rounded-2xl px-6 py-3"
-                  style={{ backgroundColor: colors.brand }}
-                >
+                  style={{ backgroundColor: colors.brand }}>
                   <Ionicons name="add" size={18} color={colors.white} />
-                  <Text className="ml-1 font-bold text-white">Add your first restaurant</Text>
+                  <Text className="ml-1 font-bold text-white">
+                    Add your first restaurant
+                  </Text>
                 </Pressable>
               )}
             </View>

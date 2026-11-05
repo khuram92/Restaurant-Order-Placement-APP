@@ -116,7 +116,11 @@ export default function VerifyOtpScreen() {
   const activeIndex = Math.min(code.length, CODE_LENGTH - 1);
 
   return (
-    <LinearGradient colors={BG} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ flex: 1 }}>
+    <LinearGradient
+      colors={BG}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={{ flex: 1 }}>
       {/* Soft olive circles */}
       <View
         className="absolute -right-16 -top-12 h-56 w-56 rounded-full"
@@ -135,19 +139,33 @@ export default function VerifyOtpScreen() {
           <View className="mb-6 items-center">
             <View
               className="h-20 w-20 items-center justify-center rounded-full"
-              style={{ backgroundColor: colors.brand, ...shadow(0.35, 22, 10) }}>
+              style={{
+                backgroundColor: colors.brand,
+                ...shadow(0.35, 22, 10),
+              }}>
               <Ionicons name="lock-closed" size={36} color={colors.white} />
             </View>
-            <Text className="mt-4 text-3xl font-extrabold text-brand-dark">Verify it's you</Text>
-            <Text className="mt-1 text-center text-base text-brand-light">Enter the 6-digit code we sent to</Text>
+            <Text className="mt-4 text-3xl font-extrabold text-brand-dark">
+              Verify it's you
+            </Text>
+            <Text className="mt-1 text-center text-base text-brand-light">
+              Enter the 6-digit code we sent to
+            </Text>
 
             {/* Identifier pill */}
-            <View className="mt-3 flex-row items-center rounded-full px-4 py-2" style={{ backgroundColor: colors.mistLight }}>
+            <View
+              className="mt-3 flex-row items-center rounded-full px-4 py-2"
+              style={{ backgroundColor: colors.mistLight }}>
               <Ionicons name={channelIcon} size={15} color={colors.brand} />
-              <Text className="ml-2 font-semibold text-brand-dark" numberOfLines={1}>
+              <Text
+                className="ml-2 font-semibold text-brand-dark"
+                numberOfLines={1}>
                 {identifier}
               </Text>
-              <View className="mx-3 h-4 w-px" style={{ backgroundColor: colors.mistDark }} />
+              <View
+                className="mx-3 h-4 w-px"
+                style={{ backgroundColor: colors.mistDark }}
+              />
               <Pressable onPress={() => router.back()} hitSlop={8}>
                 <Text className="font-bold text-brand">Change</Text>
               </Pressable>
@@ -155,8 +173,15 @@ export default function VerifyOtpScreen() {
           </View>
 
           {/* Card */}
-          <View className="rounded-3xl p-6" style={{ backgroundColor: colors.mistLight, ...shadow(0.3, 30, 14) }}>
-            <Text className="mb-3 text-base font-semibold text-brand-dark">Verification code</Text>
+          <View
+            className="rounded-3xl p-6"
+            style={{
+              backgroundColor: colors.mistLight,
+              ...shadow(0.3, 30, 14),
+            }}>
+            <Text className="mb-3 text-base font-semibold text-brand-dark">
+              Verification code
+            </Text>
             <Pressable onPress={() => codeInputRef.current?.focus()}>
               <View className="flex-row justify-between">
                 {Array.from({ length: CODE_LENGTH }).map((_, i) => {
@@ -175,11 +200,21 @@ export default function VerifyOtpScreen() {
                     <View
                       key={i}
                       className="h-14 w-12 items-center justify-center rounded-2xl border-2"
-                      style={{ borderColor, backgroundColor: digit ? colors.brandSoft : colors.white }}>
-                      <Text className="text-2xl font-bold text-brand-dark">{digit ?? ""}</Text>
+                      style={{
+                        borderColor,
+                        backgroundColor: digit
+                          ? colors.brandSoft
+                          : colors.white,
+                      }}>
+                      <Text className="text-2xl font-bold text-brand-dark">
+                        {digit ?? ""}
+                      </Text>
                       {/* Small bar in the next empty box */}
                       {isActive && !digit && (
-                        <View className="h-0.5 w-4 rounded-full" style={{ backgroundColor: colors.brand }} />
+                        <View
+                          className="h-0.5 w-4 rounded-full"
+                          style={{ backgroundColor: colors.brand }}
+                        />
                       )}
                     </View>
                   );
@@ -200,7 +235,12 @@ export default function VerifyOtpScreen() {
                 autoComplete="sms-otp" // Android: autofill from SMS
                 editable={!loading}
                 caretHidden
-                style={{ position: "absolute", width: 1, height: 1, opacity: 0 }}
+                style={{
+                  position: "absolute",
+                  width: 1,
+                  height: 1,
+                  opacity: 0,
+                }}
               />
             </Pressable>
 
@@ -211,14 +251,18 @@ export default function VerifyOtpScreen() {
             )}
             {!!info && (
               <View className="mt-3 flex-row items-center">
-                <Ionicons name="checkmark-circle" size={15} color={colors.brand} />
+                <Ionicons
+                  name="checkmark-circle"
+                  size={15}
+                  color={colors.brand}
+                />
                 <Text className="ml-1 text-sm text-brand">{info}</Text>
               </View>
             )}
 
             {/* Verify button */}
             <Pressable
-            className="mt-6"
+              className="mt-6"
               onPress={() => handleVerify()}
               disabled={!canSubmit}
               style={({ pressed }) => ({
@@ -231,11 +275,17 @@ export default function VerifyOtpScreen() {
                 colors={canSubmit ? BUTTON : BUTTON_DISABLED}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
-                style={{ borderRadius: 16, paddingVertical: 16, alignItems: "center" }}>
+                style={{
+                  borderRadius: 16,
+                  paddingVertical: 16,
+                  alignItems: "center",
+                }}>
                 {loading ? (
                   <ActivityIndicator color={colors.white} />
                 ) : (
-                  <Text className="text-base font-bold tracking-wide text-white">Verify</Text>
+                  <Text className="text-base font-bold tracking-wide text-white">
+                    Verify
+                  </Text>
                 )}
               </LinearGradient>
             </Pressable>
@@ -243,14 +293,21 @@ export default function VerifyOtpScreen() {
             {/* Resend */}
             <View className="mt-5 items-center">
               {secondsLeft > 0 ? (
-                <View className="flex-row items-center rounded-full px-4 py-2" style={{ backgroundColor: colors.brandSoft }}>
+                <View
+                  className="flex-row items-center rounded-full px-4 py-2"
+                  style={{ backgroundColor: colors.brandSoft }}>
                   <Ionicons name="time" size={14} color={colors.brand} />
                   <Text className="ml-1 text-sm text-brand-dark">
-                    Resend code in <Text className="font-bold">{secondsLeft}s</Text>
+                    Resend code in{" "}
+                    <Text className="font-bold">{secondsLeft}s</Text>
                   </Text>
                 </View>
               ) : (
-                <Pressable onPress={handleResend} disabled={resending} hitSlop={8} className="flex-row items-center">
+                <Pressable
+                  onPress={handleResend}
+                  disabled={resending}
+                  hitSlop={8}
+                  className="flex-row items-center">
                   <Ionicons name="refresh" size={15} color={colors.brand} />
                   <Text className="ml-1 text-sm font-bold text-brand">
                     {resending ? "Sending..." : "Didn't get it? Resend code"}

@@ -6,7 +6,7 @@ export default function CustomerHome() {
 
   return (
     <View className="flex-1 items-center justify-center gap-4 bg-orange-50 px-6">
-       <Text className="text-2xl font-bold text-orange-600">
+      <Text className="text-2xl font-bold text-orange-600">
         Welcome, {user?.firstName ?? "there"} 👋
       </Text>
       <Text className="text-gray-600">{user?.email ?? user?.phone}</Text>

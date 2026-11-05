@@ -9,7 +9,7 @@ export interface User {
   phone?: string;
   role: Role;
   restaurantId?: string;
-  avatar?: string; 
+  avatar?: string;
   isActive: boolean;
   profileCompleted: boolean; // false → must fill the Complete Profile screen
   createdAt: string;
@@ -33,8 +33,8 @@ export interface AuthResponse {
 export interface CompleteProfileInput {
   firstName: string;
   lastName: string;
-  dob: string; 
-  email?: string; 
-  phone?: string; 
-  avatar?: string; 
+  dob: string;
+  email?: string;
+  phone?: string;
+  avatar?: string;
 }

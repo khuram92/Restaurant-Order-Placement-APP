@@ -67,12 +67,24 @@ export default function LoginScreen() {
   const canSubmit = input.trim().length > 0 && !loading;
 
   // Icon changes based on what the user is typing
-  const inputIcon = input.includes("@") ? "mail" : /^\+?\d/.test(input.trim()) ? "call" : "person";
+  const inputIcon = input.includes("@")
+    ? "mail"
+    : /^\+?\d/.test(input.trim())
+      ? "call"
+      : "person";
 
-  const borderColor = error ? colors.danger : focused ? colors.brand : colors.mistDark;
+  const borderColor = error
+    ? colors.danger
+    : focused
+      ? colors.brand
+      : colors.mistDark;
 
   return (
-    <LinearGradient colors={BG} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ flex: 1 }}>
+    <LinearGradient
+      colors={BG}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={{ flex: 1 }}>
       {/* Soft olive circles */}
       <View
         className="absolute -left-16 -top-10 h-56 w-56 rounded-full"
@@ -88,13 +100,20 @@ export default function LoginScreen() {
           behavior={Platform.OS === "ios" ? "padding" : undefined}
           className="flex-1 justify-center px-6">
           {/* Header */}
-          <Animated.View entering={FadeInUp.duration(600)} className="mb-10 items-center">
+          <Animated.View
+            entering={FadeInUp.duration(600)}
+            className="mb-10 items-center">
             <View
               className="h-24 w-24 items-center justify-center rounded-full"
-              style={{ backgroundColor: colors.brand, ...shadow(0.35, 22, 10) }}>
+              style={{
+                backgroundColor: colors.brand,
+                ...shadow(0.35, 22, 10),
+              }}>
               <Ionicons name="restaurant" size={44} color={colors.white} />
             </View>
-            <Text className="mt-5 text-3xl font-extrabold text-brand-dark">Welcome</Text>
+            <Text className="mt-5 text-3xl font-extrabold text-brand-dark">
+              Welcome
+            </Text>
             <Text className="mt-2 text-center text-base text-brand-light">
               Log in or sign up with your phone number or email
             </Text>
@@ -104,9 +123,14 @@ export default function LoginScreen() {
           <Animated.View
             entering={FadeInDown.delay(200).duration(600).springify()}
             className="rounded-3xl p-6"
-            style={{ backgroundColor: colors.mistLight, ...shadow(0.3, 30, 14) }}>
+            style={{
+              backgroundColor: colors.mistLight,
+              ...shadow(0.3, 30, 14),
+            }}>
             {/* Input */}
-            <Text className="mb-2 text-base font-semibold text-brand-dark">Phone or Email</Text>
+            <Text className="mb-2 text-base font-semibold text-brand-dark">
+              Phone or Email
+            </Text>
             <View
               className="flex-row items-center rounded-2xl border-2 px-4"
               style={{
@@ -114,7 +138,11 @@ export default function LoginScreen() {
                 backgroundColor: focused ? colors.white : colors.mist,
                 ...shadow(focused ? 0.2 : 0, 8, focused ? 4 : 0),
               }}>
-              <Ionicons name={inputIcon} size={20} color={focused ? colors.brand : colors.brandLight} />
+              <Ionicons
+                name={inputIcon}
+                size={20}
+                color={focused ? colors.brand : colors.brandLight}
+              />
               <TextInput
                 value={input}
                 onChangeText={(text) => {
@@ -147,7 +175,7 @@ export default function LoginScreen() {
 
             {/* Button with press effect */}
             <Pressable
-            className="mt-6"
+              className="mt-6"
               onPress={handleContinue}
               disabled={!canSubmit}
               style={({ pressed }) => ({
@@ -160,25 +188,41 @@ export default function LoginScreen() {
                 colors={canSubmit ? BUTTON : BUTTON_DISABLED}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
-                style={{ borderRadius: 16, paddingVertical: 16, alignItems: "center" }}>
+                style={{
+                  borderRadius: 16,
+                  paddingVertical: 16,
+                  alignItems: "center",
+                }}>
                 {loading ? (
                   <ActivityIndicator color={colors.white} />
                 ) : (
-                  <Text className="text-base font-bold tracking-wide text-white">Continue</Text>
+                  <Text className="text-base font-bold tracking-wide text-white">
+                    Continue
+                  </Text>
                 )}
               </LinearGradient>
             </Pressable>
 
             <View className="mt-5 flex-row items-center justify-center">
-              <Ionicons name="shield-checkmark" size={13} color={colors.brandLight} />
-              <Text className="ml-1 text-xs text-brand-light">We'll send you a 6-digit code to verify it's you</Text>
+              <Ionicons
+                name="shield-checkmark"
+                size={13}
+                color={colors.brandLight}
+              />
+              <Text className="ml-1 text-xs text-brand-light">
+                We'll send you a 6-digit code to verify it's you
+              </Text>
             </View>
           </Animated.View>
 
           {/* Staff entry */}
-          <Pressable onPress={() => router.push("/staff-login")} className="mt-6 items-center" hitSlop={8}>
+          <Pressable
+            onPress={() => router.push("/staff-login")}
+            className="mt-6 items-center"
+            hitSlop={8}>
             <Text className="text-sm" style={{ color: colors.brandDark }}>
-              Restaurant staff? <Text className="font-bold text-white">Log in here</Text>
+              Restaurant staff?{" "}
+              <Text className="font-bold text-white">Log in here</Text>
             </Text>
           </Pressable>
         </KeyboardAvoidingView>

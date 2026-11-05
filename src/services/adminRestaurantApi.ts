@@ -5,7 +5,7 @@ import type {
   RestaurantInput,
   RestaurantListResponse,
   RestaurantStatusFilter,
-} from "../types/restaurant";;
+} from "../types/restaurant";
 
 export interface ListParams {
   search?: string;
@@ -30,29 +30,42 @@ export const listRestaurants = async (params: ListParams = {}) => {
 };
 
 export const getRestaurant = async (id: string) => {
-  const { data } = await api.get<{ restaurant: Restaurant }>(`/admin/restaurants/${id}`);
+  const { data } = await api.get<{ restaurant: Restaurant }>(
+    `/admin/restaurants/${id}`,
+  );
   return data.restaurant;
 };
 
 export const createRestaurant = async (input: RestaurantInput) => {
-  const { data } = await api.post<{ restaurant: Restaurant }>("/admin/restaurants", input);
+  const { data } = await api.post<{ restaurant: Restaurant }>(
+    "/admin/restaurants",
+    input,
+  );
   return data.restaurant;
 };
 
 /** Send only the fields that changed */
-export const updateRestaurant = async (id: string, changes: Partial<RestaurantInput>) => {
-  const { data } = await api.patch<{ restaurant: Restaurant }>(`/admin/restaurants/${id}`, changes);
+export const updateRestaurant = async (
+  id: string,
+  changes: Partial<RestaurantInput>,
+) => {
+  const { data } = await api.patch<{ restaurant: Restaurant }>(
+    `/admin/restaurants/${id}`,
+    changes,
+  );
   return data.restaurant;
 };
 /** Permanent delete (blocked by the backend while a manager is assigned) */
 export const deleteRestaurant = async (id: string) => {
-  const { data } = await api.delete<{ message: string }>(`/admin/restaurants/${id}`);
+  const { data } = await api.delete<{ message: string }>(
+    `/admin/restaurants/${id}`,
+  );
   return data;
 };
 export const setRestaurantStatus = async (id: string, isActive: boolean) => {
   const { data } = await api.patch<{ restaurant: Restaurant; message: string }>(
     `/admin/restaurants/${id}/status`,
-    { isActive }
+    { isActive },
   );
   return data;
 };
@@ -72,15 +85,22 @@ const toFormFile = (image: PickedImage, fallbackName: string) => {
  * Upload logo and/or cover. Uses axios (XMLHttpRequest) because Expo's
  * fetch doesn't accept React Native's { uri, type, name } files.
  */
-export const uploadRestaurantImages = async (id: string, images: { logo?: PickedImage; cover?: PickedImage }) => {
+export const uploadRestaurantImages = async (
+  id: string,
+  images: { logo?: PickedImage; cover?: PickedImage },
+) => {
   const form = new FormData();
   if (images.logo) form.append("logo", toFormFile(images.logo, "logo"));
   if (images.cover) form.append("cover", toFormFile(images.cover, "cover"));
 
-  const { data } = await api.patch<{ restaurant: Restaurant }>(`/admin/restaurants/${id}/images`, form, {
-    headers: { "Content-Type": "multipart/form-data" },
-    transformRequest: (body) => body, // send FormData as-is
-    timeout: 60000,
-  });
+  const { data } = await api.patch<{ restaurant: Restaurant }>(
+    `/admin/restaurants/${id}/images`,
+    form,
+    {
+      headers: { "Content-Type": "multipart/form-data" },
+      transformRequest: (body) => body, // send FormData as-is
+      timeout: 60000,
+    },
+  );
   return data.restaurant;
 };

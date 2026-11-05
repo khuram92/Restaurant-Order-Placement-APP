@@ -18,7 +18,7 @@ function SplashScreenController() {
 
 function RootNavigator() {
   const { user, isLoading } = useAuth();
-  const segments = useSegments(); 
+  const segments = useSegments();
 
   const isSuperAdmin = user?.role === "superadmin";
   const isCustomer = user?.role === "customer";
