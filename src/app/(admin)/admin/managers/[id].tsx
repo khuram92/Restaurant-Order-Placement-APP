@@ -326,10 +326,9 @@ export default function ManagerDetailScreen() {
         </Card>
 
         {/* Actions */}
-        
+
         <ActionButton icon="key" label="Reset password" onPress={onResetPassword} busy={busy === "reset"} />
         <ActionButton icon="trash" label="Delete manager" onPress={onDelete} busy={busy === "delete"} danger />
-
         <View className="flex-row items-center justify-center">
           <Ionicons name="calendar" size={12} color={colors.brandLight} />
           <Text className="ml-1 text-xs text-brand-light">
