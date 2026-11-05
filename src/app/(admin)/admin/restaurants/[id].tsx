@@ -25,7 +25,11 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { cardShadow, colors } from "../../../../constants/theme";
 import { getErrorMessage } from "../../../../lib/api";
-import { deleteRestaurant, getRestaurant, setRestaurantStatus } from "../../../../services/adminRestaurantApi";
+import {
+  deleteRestaurant,
+  getRestaurant,
+  setRestaurantStatus,
+} from "../../../../services/adminRestaurantApi";
 import type { Day, Restaurant } from "../../../../types/restaurant";
 
 type IconName = ComponentProps<typeof Ionicons>["name"];
@@ -240,7 +244,7 @@ export default function RestaurantDetailScreen() {
             }
           },
         },
-      ]
+      ],
     );
   };
   const header = (
@@ -520,19 +524,24 @@ export default function RestaurantDetailScreen() {
               );
             })}
           </Card>
-                    {/* Danger zone */}
+          {/* Danger zone */}
           <Pressable
             onPress={onDelete}
             disabled={deleting}
             className="mb-4 flex-row items-center justify-center rounded-2xl border-2 py-4"
-            style={{ borderColor: colors.danger, backgroundColor: colors.white, opacity: deleting ? 0.6 : 1 }}
-          >
+            style={{
+              borderColor: colors.danger,
+              backgroundColor: colors.white,
+              opacity: deleting ? 0.6 : 1,
+            }}>
             {deleting ? (
               <ActivityIndicator color={colors.danger} />
             ) : (
               <>
                 <Ionicons name="trash" size={18} color={colors.danger} />
-                <Text className="ml-2 text-base font-bold" style={{ color: colors.danger }}>
+                <Text
+                  className="ml-2 text-base font-bold"
+                  style={{ color: colors.danger }}>
                   Delete restaurant
                 </Text>
               </>
@@ -549,7 +558,6 @@ export default function RestaurantDetailScreen() {
               })}
             </Text>
           </View>
-          
         </View>
       </ScrollView>
     </View>
