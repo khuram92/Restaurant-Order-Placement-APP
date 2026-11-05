@@ -45,3 +45,4 @@ example
 .npmrc
 .claude/
 
+/Claude outputs/
