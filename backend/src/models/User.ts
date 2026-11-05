@@ -21,6 +21,7 @@ export interface IUser {
   role: Role;
   restaurantId?: Types.ObjectId;
   isActive: boolean;
+  mustChangePassword: boolean;
   profileCompleted: boolean;
 }
 
@@ -50,6 +51,7 @@ const userSchema = new Schema<
     role: { type: String, enum: ROLES, default: "customer" },
     restaurantId: { type: Schema.Types.ObjectId, ref: "Restaurant" },
     isActive: { type: Boolean, default: true },
+    mustChangePassword: { type: Boolean, default: false },
     profileCompleted: { type: Boolean, default: false },
   },
   { timestamps: true },
@@ -63,6 +65,11 @@ userSchema.index(
 userSchema.index(
   { phone: 1 },
   { unique: true, partialFilterExpression: { phone: { $type: "string" } } },
+);
+// One manager per restaurant (enforced by MongoDB too, not only by the API)
+userSchema.index(
+  { restaurantId: 1 },
+  { unique: true, partialFilterExpression: { role: "manager", restaurantId: { $type: "objectId" } } },
 );
 
 userSchema.pre("validate", function () {

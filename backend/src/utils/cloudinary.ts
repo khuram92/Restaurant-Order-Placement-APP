@@ -94,3 +94,8 @@ export const deleteRestaurantImages = async (restaurantId: string): Promise<void
     )
   );
 };
+
+/** Deletes a user's avatar from Cloudinary (missing image is ignored) */
+export const deleteAvatarImage = async (userId: string): Promise<void> => {
+  await getCloudinary().uploader.destroy(`food-app/avatars/${userId}`, { invalidate: true });
+};
