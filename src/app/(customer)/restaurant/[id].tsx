@@ -30,10 +30,10 @@ const DAY_LABELS: Record<Day, string> = {
   sun: "Sunday",
 };
 
-// JavaScript's getDay(): 0 = Sunday
+
 const todayKey = (): Day => (["sun", "mon", "tue", "wed", "thu", "fri", "sat"] as const)[new Date().getDay()]!;
 
-// "14:30" → "2:30 PM"
+
 const formatTime = (time: string) => {
   const [h = 0, m = 0] = time.split(":").map(Number);
   const suffix = h >= 12 ? "PM" : "AM";
@@ -48,7 +48,7 @@ const SERVICES: { key: ServiceKey; label: string; icon: IconName }[] = [
   { key: "delivery", label: "Delivery", icon: "bicycle" },
 ];
 
-// ---------- Small UI pieces ----------
+
 function SheetSection({ title, icon, children }: { title: string; icon: IconName; children: ReactNode }) {
   return (
     <View className="mb-5">
@@ -106,13 +106,13 @@ function InfoSheet({
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <View className="flex-1 justify-end">
-        {/* Dim background: tap to close */}
+        
         <Pressable className="absolute inset-0" style={{ backgroundColor: "rgba(44,51,41,0.45)" }} onPress={onClose} />
 
         <View
           className="max-h-[85%] rounded-t-3xl"
           style={{ backgroundColor: colors.white, paddingBottom: insets.bottom + 12 }}>
-          {/* Handle + title */}
+          
           <View className="items-center pt-3">
             <View className="h-1.5 w-12 rounded-full" style={{ backgroundColor: colors.mistDark }} />
           </View>
@@ -194,7 +194,7 @@ function InfoSheet({
   );
 }
 
-// ---------- Screen ----------
+
 export default function CustomerRestaurantScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const insets = useSafeAreaInsets();
@@ -221,13 +221,13 @@ export default function CustomerRestaurantScreen() {
     load();
   }, [load]);
 
-  // Floating back button (over the cover image)
+
   const backButton = (
     <Pressable
       onPress={() => router.back()}
       hitSlop={8}
-      className="absolute left-4 h-10 w-10 items-center justify-center rounded-full"
-      style={{ top: insets.top + 8, backgroundColor: "rgba(59,70,56,0.75)" }}>
+     className="absolute left-2 top-2 h-10 w-10 items-center justify-center rounded-full bg-brand-light"
+      >
       <Ionicons name="chevron-back" size={22} color={colors.white} />
     </Pressable>
   );
@@ -289,9 +289,9 @@ export default function CustomerRestaurantScreen() {
             colors={[colors.brand]}
           />
         }>
-        {/* [0] Cover + compact header */}
+        
         <View>
-          <View className="h-48 w-full" style={{ backgroundColor: colors.brandSoft }}>
+          <View className="h-44 w-full bg-brand-soft">
             {r.coverImage ? (
               <Image source={{ uri: r.coverImage }} style={{ width: "100%", height: "100%" }} contentFit="cover" />
             ) : (
