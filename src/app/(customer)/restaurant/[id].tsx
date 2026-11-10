@@ -1,7 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
-import { useCallback, useEffect, useState, type ComponentProps, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useState,
+  type ComponentProps,
+  type ReactNode,
+} from "react";
 import {
   ActivityIndicator,
   Linking,
@@ -16,7 +22,11 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { cardShadow, colors } from "../../../constants/theme";
 import { getErrorMessage } from "../../../lib/api";
 import { getCustomerRestaurant } from "../../../services/restaurantApi";
-import type { CustomerRestaurant, Day, ServiceKey } from "../../../types/restaurant";
+import type {
+  CustomerRestaurant,
+  Day,
+  ServiceKey,
+} from "../../../types/restaurant";
 
 type IconName = ComponentProps<typeof Ionicons>["name"];
 
@@ -30,9 +40,10 @@ const DAY_LABELS: Record<Day, string> = {
   sun: "Sunday",
 };
 
-
-const todayKey = (): Day => (["sun", "mon", "tue", "wed", "thu", "fri", "sat"] as const)[new Date().getDay()]!;
-
+const todayKey = (): Day =>
+  (["sun", "mon", "tue", "wed", "thu", "fri", "sat"] as const)[
+    new Date().getDay()
+  ]!;
 
 const formatTime = (time: string) => {
   const [h = 0, m = 0] = time.split(":").map(Number);
@@ -48,8 +59,15 @@ const SERVICES: { key: ServiceKey; label: string; icon: IconName }[] = [
   { key: "delivery", label: "Delivery", icon: "bicycle" },
 ];
 
-
-function SheetSection({ title, icon, children }: { title: string; icon: IconName; children: ReactNode }) {
+function SheetSection({
+  title,
+  icon,
+  children,
+}: {
+  title: string;
+  icon: IconName;
+  children: ReactNode;
+}) {
   return (
     <View className="mb-5">
       <View className="mb-2 flex-row items-center">
@@ -77,12 +95,17 @@ function InfoRow({
   onPress?: () => void;
 }) {
   return (
-    <Pressable onPress={onPress} disabled={!onPress} className="flex-row items-center py-2">
+    <Pressable
+      onPress={onPress}
+      disabled={!onPress}
+      className="flex-row items-center py-2">
       <Ionicons name={icon} size={16} color={colors.brandLight} />
       <Text className="ml-3 flex-1 text-sm" style={{ color: colors.text }}>
         {text}
       </Text>
-      {!!action && <Text className="text-sm font-bold text-brand">{action}</Text>}
+      {!!action && (
+        <Text className="text-sm font-bold text-brand">{action}</Text>
+      )}
     </Pressable>
   );
 }
@@ -100,24 +123,41 @@ function InfoSheet({
   const insets = useSafeAreaInsets();
   const today = todayKey();
   const coords = r.location?.coordinates; // [lng, lat]
-  const address = [r.address.street, r.address.area, r.address.city].filter(Boolean).join(", ");
-  const hasOrderInfo = r.services.delivery || r.minOrder > 0 || r.taxRate > 0 || r.services.dineIn;
+  const address = [r.address.street, r.address.area, r.address.city]
+    .filter(Boolean)
+    .join(", ");
+  const hasOrderInfo =
+    r.services.delivery || r.minOrder > 0 || r.taxRate > 0 || r.services.dineIn;
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="slide"
+      onRequestClose={onClose}>
       <View className="flex-1 justify-end">
-        
-        <Pressable className="absolute inset-0" style={{ backgroundColor: "rgba(44,51,41,0.45)" }} onPress={onClose} />
+        <Pressable
+          className="absolute inset-0"
+          style={{ backgroundColor: "rgba(44,51,41,0.45)" }}
+          onPress={onClose}
+        />
 
         <View
           className="max-h-[85%] rounded-t-3xl"
-          style={{ backgroundColor: colors.white, paddingBottom: insets.bottom + 12 }}>
-          
+          style={{
+            backgroundColor: colors.white,
+            paddingBottom: insets.bottom + 12,
+          }}>
           <View className="items-center pt-3">
-            <View className="h-1.5 w-12 rounded-full" style={{ backgroundColor: colors.mistDark }} />
+            <View
+              className="h-1.5 w-12 rounded-full"
+              style={{ backgroundColor: colors.mistDark }}
+            />
           </View>
           <View className="flex-row items-center justify-between px-5 pb-2 pt-3">
-            <Text className="flex-1 text-xl font-extrabold text-brand-dark" numberOfLines={1}>
+            <Text
+              className="flex-1 text-xl font-extrabold text-brand-dark"
+              numberOfLines={1}>
               {r.name}
             </Text>
             <Pressable
@@ -129,9 +169,13 @@ function InfoSheet({
             </Pressable>
           </View>
 
-          <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 8 }} showsVerticalScrollIndicator={false}>
+          <ScrollView
+            contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 8 }}
+            showsVerticalScrollIndicator={false}>
             {!!r.description && (
-              <Text className="mb-5 text-sm leading-5" style={{ color: colors.textMuted }}>
+              <Text
+                className="mb-5 text-sm leading-5"
+                style={{ color: colors.textMuted }}>
                 {r.description}
               </Text>
             )}
@@ -142,14 +186,36 @@ function InfoSheet({
                   <>
                     <InfoRow
                       icon="bicycle"
-                      text={r.deliveryFee > 0 ? `Delivery fee ${money(r.deliveryFee)}` : "Free delivery"}
+                      text={
+                        r.deliveryFee > 0
+                          ? `Delivery fee ${money(r.deliveryFee)}`
+                          : "Free delivery"
+                      }
                     />
-                    <InfoRow icon="navigate" text={`Delivers within ${r.deliveryRadiusKm} km`} />
+                    <InfoRow
+                      icon="navigate"
+                      text={`Delivers within ${r.deliveryRadiusKm} km`}
+                    />
                   </>
                 )}
-                {r.minOrder > 0 && <InfoRow icon="cart" text={`Minimum order ${money(r.minOrder)}`} />}
-                {r.taxRate > 0 && <InfoRow icon="calculator" text={`${r.taxRate}% tax added at checkout`} />}
-                {r.services.dineIn && <InfoRow icon="people" text={`${r.seatingCapacity} seats for dine-in`} />}
+                {r.minOrder > 0 && (
+                  <InfoRow
+                    icon="cart"
+                    text={`Minimum order ${money(r.minOrder)}`}
+                  />
+                )}
+                {r.taxRate > 0 && (
+                  <InfoRow
+                    icon="calculator"
+                    text={`${r.taxRate}% tax added at checkout`}
+                  />
+                )}
+                {r.services.dineIn && (
+                  <InfoRow
+                    icon="people"
+                    text={`${r.seatingCapacity} seats for dine-in`}
+                  />
+                )}
               </SheetSection>
             )}
 
@@ -160,11 +226,18 @@ function InfoSheet({
                 {...(coords && {
                   action: "Map",
                   onPress: () =>
-                    Linking.openURL(`https://www.google.com/maps/search/?api=1&query=${coords[1]},${coords[0]}`),
+                    Linking.openURL(
+                      `https://www.google.com/maps/search/?api=1&query=${coords[1]},${coords[0]}`,
+                    ),
                 })}
               />
               {!!r.phone && (
-                <InfoRow icon="call" text={r.phone} action="Call" onPress={() => Linking.openURL(`tel:${r.phone}`)} />
+                <InfoRow
+                  icon="call"
+                  text={r.phone}
+                  action="Call"
+                  onPress={() => Linking.openURL(`tel:${r.phone}`)}
+                />
               )}
             </SheetSection>
 
@@ -175,13 +248,22 @@ function InfoSheet({
                   <View
                     key={h.day}
                     className="mb-1 flex-row items-center justify-between rounded-xl px-3 py-2"
-                    style={{ backgroundColor: isToday ? colors.brandSoft : "transparent" }}>
-                    <Text className={`text-sm text-brand-dark ${isToday ? "font-bold" : ""}`}>
+                    style={{
+                      backgroundColor: isToday
+                        ? colors.brandSoft
+                        : "transparent",
+                    }}>
+                    <Text
+                      className={`text-sm text-brand-dark ${isToday ? "font-bold" : ""}`}>
                       {DAY_LABELS[h.day]}
                       {isToday ? "  · Today" : ""}
                     </Text>
-                    <Text className="text-sm" style={{ color: h.closed ? colors.danger : colors.text }}>
-                      {h.closed ? "Closed" : `${formatTime(h.open)} – ${formatTime(h.close)}`}
+                    <Text
+                      className="text-sm"
+                      style={{ color: h.closed ? colors.danger : colors.text }}>
+                      {h.closed
+                        ? "Closed"
+                        : `${formatTime(h.open)} – ${formatTime(h.close)}`}
                     </Text>
                   </View>
                 );
@@ -193,7 +275,6 @@ function InfoSheet({
     </Modal>
   );
 }
-
 
 export default function CustomerRestaurantScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -221,20 +302,20 @@ export default function CustomerRestaurantScreen() {
     load();
   }, [load]);
 
-
   const backButton = (
     <Pressable
       onPress={() => router.back()}
       hitSlop={8}
-     className="absolute left-2 top-2 h-10 w-10 items-center justify-center rounded-full bg-brand-light"
-      >
+      className="absolute left-2 top-2 h-10 w-10 items-center justify-center rounded-full bg-brand-light">
       <Ionicons name="chevron-back" size={22} color={colors.white} />
     </Pressable>
   );
 
   if (loading) {
     return (
-      <View className="flex-1 items-center justify-center" style={{ backgroundColor: colors.mist }}>
+      <View
+        className="flex-1 items-center justify-center"
+        style={{ backgroundColor: colors.mist }}>
         <ActivityIndicator color={colors.brand} size="large" />
       </View>
     );
@@ -242,10 +323,14 @@ export default function CustomerRestaurantScreen() {
 
   if (error || !restaurant) {
     return (
-      <View className="flex-1 items-center justify-center px-8" style={{ backgroundColor: colors.mist }}>
+      <View
+        className="flex-1 items-center justify-center px-8"
+        style={{ backgroundColor: colors.mist }}>
         {backButton}
         <Ionicons name="alert-circle" size={44} color={colors.brandLight} />
-        <Text className="mt-3 text-center text-brand-dark">{error || "Restaurant not found"}</Text>
+        <Text className="mt-3 text-center text-brand-dark">
+          {error || "Restaurant not found"}
+        </Text>
         <Pressable
           onPress={() => {
             setLoading(true);
@@ -275,9 +360,12 @@ export default function CustomerRestaurantScreen() {
     <View className="flex-1" style={{ backgroundColor: colors.mist }}>
       <ScrollView
         showsVerticalScrollIndicator={false}
-        // Index 1 = the category bar: it sticks to the top while the menu scrolls
+        
         stickyHeaderIndices={[1]}
-        contentContainerStyle={{ paddingBottom: insets.bottom + 24, flexGrow: 1 }}
+        contentContainerStyle={{
+          paddingBottom: insets.bottom + 24,
+          flexGrow: 1,
+        }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -289,76 +377,110 @@ export default function CustomerRestaurantScreen() {
             colors={[colors.brand]}
           />
         }>
-        
         <View>
           <View className="h-44 w-full bg-brand-soft">
             {r.coverImage ? (
-              <Image source={{ uri: r.coverImage }} style={{ width: "100%", height: "100%" }} contentFit="cover" />
+              <Image
+                source={{ uri: r.coverImage }}
+                style={{ width: "100%", height: "100%" }}
+                contentFit="cover"
+              />
             ) : (
               <View className="flex-1 items-center justify-center">
-                <Ionicons name="restaurant" size={52} color={colors.brandLight} />
+                <Ionicons
+                  name="restaurant"
+                  size={52}
+                  color={colors.brandLight}
+                />
               </View>
             )}
           </View>
 
-          <View className="-mt-10 mx-4 rounded-3xl bg-white p-4" style={cardShadow}>
+          <View
+            className="-mt-8 mx-4 rounded-3xl bg-white p-4"
+            style={cardShadow}>
             <View className="flex-row items-center">
-              <View
-                className="mr-3 h-14 w-14 items-center justify-center overflow-hidden rounded-2xl"
-                style={{ backgroundColor: colors.brandSoft }}>
+              <View className="mr-3 h-14 w-14 items-center justify-center overflow-hidden rounded-2xl bg-brand-soft">
                 {r.logo ? (
-                  <Image source={{ uri: r.logo }} style={{ width: "100%", height: "100%" }} contentFit="cover" />
+                  <Image
+                    source={{ uri: r.logo }}
+                    style={{ width: "100%", height: "100%" }}
+                    contentFit="cover"
+                  />
                 ) : (
-                  <Text className="text-xl font-extrabold text-brand">{r.name[0]?.toUpperCase()}</Text>
+                  <Text className="text-xl font-extrabold text-brand">
+                    {r.name[0]?.toUpperCase()}
+                  </Text>
                 )}
               </View>
               <View className="flex-1">
-                <Text className="text-lg font-extrabold text-brand-dark" numberOfLines={1}>
+                <Text
+                  className="text-lg mt-1 font-extrabold text-brand-dark"
+                  numberOfLines={1}>
                   {r.name}
                 </Text>
                 {r.cuisines.length > 0 && (
-                  <Text className="text-sm text-brand" numberOfLines={1}>
+                  <Text className="text-sm mt-1 text-brand" numberOfLines={1}>
                     {r.cuisines.join(" · ")}
                   </Text>
                 )}
               </View>
 
-              {/* Info button → bottom sheet */}
               <Pressable
                 onPress={() => setInfoOpen(true)}
                 hitSlop={8}
-                className="ml-2 items-center rounded-2xl px-3 py-2"
-                style={{ backgroundColor: colors.brandSoft }}>
-                <Ionicons name="information-circle" size={20} color={colors.brand} />
+                className="ml-4 items-center rounded-2xl px-3 py-2 bg-brand-soft">
+                <Ionicons
+                  name="information-circle"
+                  size={20}
+                  color={colors.brand}
+                />
                 <Text className="text-[10px] font-bold text-brand">Info</Text>
               </Pressable>
             </View>
 
-            {/* Status + services in one row */}
-            <View className="mt-3 flex-row flex-wrap items-center gap-1.5">
+            <View className="mt-4 flex-1 flex-wrap items-center gap-1.5">
               <View
                 className="flex-row items-center rounded-full px-2.5 py-1"
-                style={{ backgroundColor: r.isOpenNow ? colors.brand : colors.text }}>
-                <Ionicons name={r.isOpenNow ? "time" : "moon"} size={12} color={colors.white} />
-                <Text className="ml-1 text-xs font-bold text-white">{statusText}</Text>
+                style={{
+                  backgroundColor: r.isOpenNow ? colors.brand : colors.text,
+                }}>
+                <Ionicons
+                  name={r.isOpenNow ? "time" : "moon"}
+                  size={12}
+                  color={colors.white}
+                />
+                <Text className="ml-1 text-xs font-bold text-white">
+                  {statusText}
+                </Text>
               </View>
-              {services.map((s) => (
-                <View
-                  key={s.key}
-                  className="flex-row items-center rounded-full px-2.5 py-1"
-                  style={{ backgroundColor: colors.brandSoft }}>
-                  <Ionicons name={s.icon} size={12} color={colors.brand} />
-                  <Text className="ml-1 text-xs font-semibold text-brand">{s.label}</Text>
-                </View>
-              ))}
+              <View className="flex-row mt-2 gap-2">
+                {services.map((s) => (
+                  <View
+                    key={s.key}
+                    className="flex-row items-center rounded-full px-2.5 py-1 bg-brand-soft">
+                    <Ionicons name={s.icon} size={12} color={colors.brand} />
+                    <Text className="ml-1 text-xs font-semibold text-brand">
+                      {s.label}
+                    </Text>
+                  </View>
+                ))}
+              </View>
             </View>
           </View>
         </View>
 
         {/* [1] Sticky category bar (filled by the menu module) */}
-        <View className="mt-4 px-4 py-2" style={{ backgroundColor: colors.mist }}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
-            <View className="rounded-full px-4 py-2" style={{ backgroundColor: colors.brand }}>
+        <View
+          className="mt-4 px-4 py-2"
+          style={{ backgroundColor: colors.mist }}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ gap: 8 }}>
+            <View
+              className="rounded-full px-4 py-2"
+              style={{ backgroundColor: colors.brand }}>
               <Text className="text-sm font-semibold text-white">Menu</Text>
             </View>
           </ScrollView>
@@ -366,15 +488,20 @@ export default function CustomerRestaurantScreen() {
 
         {/* [2] Menu (items come in the menu module) */}
         <View className="flex-1 px-4 pt-2">
-          <View className="items-center rounded-3xl bg-white px-6 py-12" style={cardShadow}>
+          <View
+            className="items-center rounded-3xl bg-white px-6 py-12"
+            style={cardShadow}>
             <View
               className="h-16 w-16 items-center justify-center rounded-2xl"
               style={{ backgroundColor: colors.brandSoft }}>
               <Ionicons name="fast-food" size={30} color={colors.brand} />
             </View>
-            <Text className="mt-3 text-base font-bold text-brand-dark">Menu coming soon</Text>
+            <Text className="mt-3 text-base font-bold text-brand-dark">
+              Menu coming soon
+            </Text>
             <Text className="mt-1 text-center text-sm text-brand-light">
-              This restaurant hasn't added its menu yet. Tap Info for hours and location.
+              This restaurant hasn't added its menu yet. Tap Info for hours and
+              location.
             </Text>
           </View>
         </View>
@@ -382,7 +509,11 @@ export default function CustomerRestaurantScreen() {
 
       {backButton}
 
-      <InfoSheet restaurant={r} visible={infoOpen} onClose={() => setInfoOpen(false)} />
+      <InfoSheet
+        restaurant={r}
+        visible={infoOpen}
+        onClose={() => setInfoOpen(false)}
+      />
     </View>
   );
 }
