@@ -93,14 +93,14 @@ function RestaurantCard({ item }: { item: CustomerRestaurant }) {
       </View>
 
       <View className="px-4 pb-4 pt-1">
-        <View className="ml-[65px] min-h-[30px] justify-center">
-          <Text className="text-lg font-bold text-brand-dark" numberOfLines={1}>
+        <View className="ml-[60px] -mt-[18px] min-h-[30px] bg-white justify-center pb-2">
+          <Text className="text-lg font-bold text-brand-dark " numberOfLines={1}>
             {item.name}
           </Text>
         </View>
 
         {item.cuisines.length > 0 && (
-          <Text className="mt-2 text-base text-brand" numberOfLines={1}>
+          <Text className="mt-4 text-base text-brand" numberOfLines={1}>
             {item.cuisines.join(" · ")}
           </Text>
         )}
