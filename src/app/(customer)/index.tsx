@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
-import { useFocusEffect } from "expo-router";
+import { useFocusEffect,router } from "expo-router";
 import {
   useCallback,
   useEffect,
@@ -44,6 +44,7 @@ function RestaurantCard({ item }: { item: CustomerRestaurant }) {
 
   return (
     <Pressable
+          onPress={() => router.push({ pathname: "/restaurant/[id]", params: { id: item._id } })}
       className="mb-4 overflow-hidden rounded-3xl bg-white active:opacity-90"
       style={cardShadow}>
       <View className="h-32 w-full bg-brand-soft">
@@ -111,6 +112,14 @@ function RestaurantCard({ item }: { item: CustomerRestaurant }) {
             className="ml-2 flex-1 text-sm text-brand-light"
             numberOfLines={1}>
             {[item.address.area, item.address.city].filter(Boolean).join(", ")}
+          </Text>
+        </View>
+        <View className="mt-2 flex-row items-center">
+          <Ionicons name="call" size={13} color={colors.brandLight} />
+          <Text
+            className="ml-2 flex-1 text-sm text-brand-light"
+            numberOfLines={1}>
+            {item.phone}
           </Text>
         </View>
 
