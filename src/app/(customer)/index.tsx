@@ -109,10 +109,10 @@ function RestaurantCard({ item }: { item: CustomerRestaurant }) {
           </Text>
         )}
 
-        <View className="mt-1 flex-row items-center">
+        <View className="mt-2 flex-row items-center">
           <Ionicons name="location" size={13} color={colors.brandLight} />
           <Text
-            className="ml-1 flex-1 text-sm text-brand-light"
+            className="ml-2 flex-1 text-sm text-brand-light"
             numberOfLines={1}>
             {[item.address.area, item.address.city].filter(Boolean).join(", ")}
           </Text>
