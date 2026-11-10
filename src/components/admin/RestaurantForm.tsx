@@ -619,7 +619,7 @@ function TimeButton({ time, onPress }: { time: string; onPress: () => void }) {
   );
 }
 
-// ================= The form =================
+
 
 type Props = {
   initialValues?: RestaurantFormValues;

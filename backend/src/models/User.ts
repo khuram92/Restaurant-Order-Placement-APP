@@ -66,10 +66,18 @@ userSchema.index(
   { phone: 1 },
   { unique: true, partialFilterExpression: { phone: { $type: "string" } } },
 );
-// One manager per restaurant (enforced by MongoDB too, not only by the API)
+
 userSchema.index(
   { restaurantId: 1 },
-  { unique: true, partialFilterExpression: { role: "manager", restaurantId: { $type: "objectId" } } },
+  {
+    name: "one_active_manager_per_restaurant",
+    unique: true,
+    partialFilterExpression: {
+      role: "manager",
+      isActive: true,
+      restaurantId: { $type: "objectId" },
+    },
+  },
 );
 
 userSchema.pre("validate", function () {
@@ -94,7 +102,7 @@ userSchema.methods.comparePassword = function (candidate: string) {
     : Promise.resolve(false);
 };
 
-// Never send password in responses
+
 userSchema.set("toJSON", {
   transform: (_doc, ret) => {
     const { password: _p, __v: _v, ...safe } = ret;

@@ -37,13 +37,13 @@ const findManagerOr404 = async (req: Request, res: Response) => {
   return manager;
 };
 
-/** Is this restaurant free (no manager, or only `exceptManagerId`)? */
 const restaurantHasOtherManager = (
   restaurantId: string,
   exceptManagerId?: string,
 ) =>
   User.exists({
     role: "manager",
+    isActive: true,
     restaurantId,
     ...(exceptManagerId && { _id: { $ne: exceptManagerId } }),
   });
@@ -121,7 +121,7 @@ export const listManagers = async (req: Request, res: Response) => {
 export const restaurantOptions = async (_req: Request, res: Response) => {
   const [restaurants, managers] = await Promise.all([
     Restaurant.find().select(RESTAURANT_FIELDS).sort({ name: 1 }),
-    User.find({ role: "manager", restaurantId: { $exists: true } }).select(
+     User.find({ role: "manager", isActive: true, restaurantId: { $exists: true } }).select(
       "firstName lastName restaurantId",
     ),
   ]);
@@ -258,7 +258,6 @@ export const updateManager = async (req: Request, res: Response) => {
   res.json({ manager: await withRestaurant(manager) });
 };
 
-/** PATCH /api/admin/managers/:id/status   { isActive } — inactive managers can't log in */
 export const setManagerStatus = async (req: Request, res: Response) => {
   const parsed = managerStatusSchema.safeParse(req.body);
   if (!parsed.success)
@@ -267,11 +266,30 @@ export const setManagerStatus = async (req: Request, res: Response) => {
   const manager = await findManagerOr404(req, res);
   if (!manager) return;
 
+  const activating = parsed.data.isActive && !manager.isActive;
+  if (activating) {
+    const holder = await User.findOne({
+      role: "manager",
+      isActive: true,
+      restaurantId: manager.restaurantId,
+      _id: { $ne: manager._id },
+    }).select("firstName lastName");
+
+    if (holder) {
+      const name = `${holder.firstName ?? ""} ${holder.lastName ?? ""}`.trim() || "Another manager";
+      return res.status(409).json({
+        message: `${name} now manages this restaurant. Edit this manager and choose a free restaurant, then activate them.`,
+      });
+    }
+  }
+
   manager.isActive = parsed.data.isActive;
   await manager.save();
 
   res.json({
-    message: manager.isActive ? "Manager activated" : "Manager deactivated",
+    message: manager.isActive
+      ? "Manager activated"
+      : "Manager deactivated. Their restaurant is now free for another manager",
     manager: await withRestaurant(manager),
   });
 };

@@ -75,8 +75,11 @@ function ManagerCard({ item }: { item: Manager }) {
             </Text>
           </View>
         </View>
-        <Text className="text-sm text-brand-light" numberOfLines={1}>
+        <Text className="text-sm text-brand-light mt-1" numberOfLines={1}>
           {item.email}
+        </Text>
+        <Text className="text-sm text-brand-light mt-1" numberOfLines={1}>
+          {item.phone}
         </Text>
         <View className="mt-1.5 flex-row items-center">
           <Ionicons name="storefront" size={13} color={colors.brand} />
