@@ -220,17 +220,7 @@ function InfoSheet({
             )}
 
             <SheetSection title="Location & contact" icon="location">
-              <InfoRow
-                icon="map"
-                text={address}
-                {...(coords && {
-                  action: "Map",
-                  onPress: () =>
-                    Linking.openURL(
-                      `https://www.google.com/maps/search/?api=1&query=${coords[1]},${coords[0]}`,
-                    ),
-                })}
-              />
+              <InfoRow icon="map" text={address} />
               {!!r.phone && (
                 <InfoRow
                   icon="call"
@@ -360,7 +350,6 @@ export default function CustomerRestaurantScreen() {
     <View className="flex-1" style={{ backgroundColor: colors.mist }}>
       <ScrollView
         showsVerticalScrollIndicator={false}
-        
         stickyHeaderIndices={[1]}
         contentContainerStyle={{
           paddingBottom: insets.bottom + 24,
@@ -397,7 +386,7 @@ export default function CustomerRestaurantScreen() {
           </View>
 
           <View
-            className="-mt-8 mx-4 rounded-3xl bg-white p-4"
+            className="-mt-8 mx-4 rounded-3xl h-44 bg-white p-4"
             style={cardShadow}>
             <View className="flex-row items-center">
               <View className="mr-3 h-14 w-14 items-center justify-center overflow-hidden rounded-2xl bg-brand-soft">
@@ -425,36 +414,23 @@ export default function CustomerRestaurantScreen() {
                   </Text>
                 )}
               </View>
-
-              <Pressable
-                onPress={() => setInfoOpen(true)}
-                hitSlop={8}
-                className="ml-4 items-center rounded-2xl px-3 py-2 bg-brand-soft">
-                <Ionicons
-                  name="information-circle"
-                  size={20}
-                  color={colors.brand}
-                />
-                <Text className="text-[10px] font-bold text-brand">Info</Text>
-              </Pressable>
             </View>
-
-            <View className="mt-4 flex-1 flex-wrap items-center gap-1.5">
-              <View
-                className="flex-row items-center rounded-full px-2.5 py-1"
-                style={{
-                  backgroundColor: r.isOpenNow ? colors.brand : colors.text,
-                }}>
-                <Ionicons
-                  name={r.isOpenNow ? "time" : "moon"}
-                  size={12}
-                  color={colors.white}
-                />
-                <Text className="ml-1 text-xs font-bold text-white">
-                  {statusText}
-                </Text>
-              </View>
-              <View className="flex-row mt-2 gap-2">
+            <View
+              className="flex-row mt-4 items-center self-start rounded-full px-2.5 py-1"
+              style={{
+                backgroundColor: r.isOpenNow ? colors.brand : colors.text,
+              }}>
+              <Ionicons
+                name={r.isOpenNow ? "time" : "moon"}
+                size={12}
+                color={colors.white}
+              />
+              <Text className="ml-1 text-xs font-bold text-white">
+                {statusText}
+              </Text>
+            </View>
+            <View className="flex-row justify-between">
+              <View className="flex-row mt-2  gap-2">
                 {services.map((s) => (
                   <View
                     key={s.key}
@@ -466,14 +442,22 @@ export default function CustomerRestaurantScreen() {
                   </View>
                 ))}
               </View>
+              <Pressable
+                onPress={() => setInfoOpen(true)}
+                hitSlop={8}
+                className=" flex-row items-center  border-brand-dark border-2 gap-1 px-3 py-1 bg-white">
+                <Ionicons
+                  name="information-circle"
+                  size={20}
+                  color={colors.brand}
+                />
+                <Text className="text-[10px] font-bold text-brand">Info</Text>
+              </Pressable>
             </View>
           </View>
         </View>
 
-        {/* [1] Sticky category bar (filled by the menu module) */}
-        <View
-          className="mt-4 px-4 py-2"
-          style={{ backgroundColor: colors.mist }}>
+        <View className="mt-4 px-4 py-2 bg-mist">
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -486,7 +470,6 @@ export default function CustomerRestaurantScreen() {
           </ScrollView>
         </View>
 
-        {/* [2] Menu (items come in the menu module) */}
         <View className="flex-1 px-4 pt-2">
           <View
             className="items-center rounded-3xl bg-white px-6 py-12"
