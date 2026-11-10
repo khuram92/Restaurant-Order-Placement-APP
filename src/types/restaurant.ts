@@ -63,3 +63,16 @@ export interface PickedImage {
   mimeType?: string;
   fileName?: string;
 }
+
+
+export type ServiceKey = "dineIn" | "takeaway" | "delivery";
+export interface CustomerRestaurant extends Omit<Restaurant, "email" | "isActive"> {
+  isOpenNow: boolean;
+}
+
+export interface CustomerRestaurantListResponse {
+  restaurants: CustomerRestaurant[];
+  total: number;
+  page: number;
+  pages: number;
+}

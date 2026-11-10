@@ -3,6 +3,7 @@ import cors from "cors";
 import mongoose from "mongoose";
 import authRoutes from "./routes/auth.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
+import restaurantRoutes from "./routes/restaurant.routes.js";
 
 const app = express();
 
@@ -23,6 +24,7 @@ app.get("/api/health", (_req: Request, res: Response) => {
 });
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/restaurants", restaurantRoutes);
 
 // 404 handler
 app.use((req: Request, res: Response) => {
