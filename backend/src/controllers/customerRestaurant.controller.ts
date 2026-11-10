@@ -3,6 +3,8 @@ import { Restaurant, type RestaurantDoc } from "../models/Restaurant.js";
 import { User } from "../models/User.js";
 import { isOpenNow } from "../utils/openingHours.js";
 import { customerListQuerySchema } from "../validators/customerRestaurant.validators.js";
+import mongoose from "mongoose";
+
 
 const firstIssue = (error: { issues: { message: string }[] }) =>
   error.issues[0]?.message ?? "Invalid input";
@@ -48,4 +50,24 @@ export const listRestaurants = async (req: Request, res: Response) => {
     page,
     pages: Math.max(1, Math.ceil(total / limit)),
   });
+};
+
+
+
+export const getRestaurant = async (req: Request, res: Response) => {
+  const id = String(req.params.id);
+  if (!mongoose.isValidObjectId(id)) {
+    return res.status(400).json({ message: "Invalid restaurant id" });
+  }
+
+  const [restaurant, hasManager] = await Promise.all([
+    Restaurant.findOne({ _id: id, isActive: true }).select(HIDDEN_FIELDS),
+    User.exists({ role: "manager", isActive: true, restaurantId: id }),
+  ]);
+
+  if (!restaurant || !hasManager) {
+    return res.status(404).json({ message: "This restaurant isn't available right now" });
+  }
+
+  res.json({ restaurant: toCustomerJSON(restaurant) });
 };

@@ -93,7 +93,7 @@ function RestaurantCard({ item }: { item: CustomerRestaurant }) {
       </View>
 
       <View className="px-4 pb-4 pt-1">
-        <View className="ml-[60px] -mt-[18px] min-h-[30px] bg-white justify-center pb-2">
+        <View className="ml-[60px] -mt-[18px] min-h-[30px] bg-white/50 justify-center pb-2">
           <Text className="text-lg font-bold text-brand-dark " numberOfLines={1}>
             {item.name}
           </Text>
