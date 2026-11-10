@@ -1,5 +1,9 @@
 import { api } from "../lib/api";
-import type { CustomerRestaurantListResponse, ServiceKey } from "../types/restaurant";
+import type {
+  CustomerRestaurant,
+  CustomerRestaurantListResponse,
+  ServiceKey,
+} from "../types/restaurant";
 
 export interface BrowseParams {
   search?: string;
@@ -21,4 +25,11 @@ export const browseRestaurants = async (params: BrowseParams = {}) => {
     },
   });
   return data;
+};
+
+
+
+export const getCustomerRestaurant = async (id: string) => {
+  const { data } = await api.get<{ restaurant: CustomerRestaurant }>(`/restaurants/${id}`);
+  return data.restaurant;
 };
