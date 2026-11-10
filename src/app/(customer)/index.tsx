@@ -39,19 +39,14 @@ const greeting = () => {
   return "Good evening";
 };
 
-// ---------- One restaurant card ----------
 function RestaurantCard({ item }: { item: CustomerRestaurant }) {
   const services = SERVICES.filter((s) => item.services[s.key]);
 
   return (
     <Pressable
-      // Restaurant screen comes in the next step
-      className="mb-4 overflow-hidden rounded-3xl bg-white "
-      style={({ pressed }) => [cardShadow, { opacity: pressed ? 0.9 : 1 }]}>
-      {/* Cover */}
-      <View
-        className="h-36 w-full"
-        style={{ backgroundColor: colors.brandSoft }}>
+      className="mb-4 overflow-hidden rounded-3xl bg-white active:opacity-90"
+      style={cardShadow}>
+      <View className="h-32 w-full bg-brand-soft">
         {item.coverImage ? (
           <Image
             source={{ uri: item.coverImage }}
@@ -64,20 +59,14 @@ function RestaurantCard({ item }: { item: CustomerRestaurant }) {
           </View>
         )}
 
-        {/* Grey out closed restaurants */}
         {!item.isOpenNow && (
-          <View
-            className="absolute inset-0"
-            style={{ backgroundColor: "rgba(44,51,41,0.35)" }}
-          />
+          <View className="absolute inset-0 bg-[#2c3329]/35" />
         )}
 
-        {/* Open / Closed badge */}
         <View
-          className="absolute left-3 top-3 flex-row items-center rounded-full px-2.5 py-1"
-          style={{
-            backgroundColor: item.isOpenNow ? colors.brand : colors.text,
-          }}>
+          className={`absolute left-3 top-3 flex-row items-center rounded-full px-2.5 py-1 ${
+            item.isOpenNow ? "bg-brand" : "bg-[#2c3329]"
+          }`}>
           <Ionicons
             name={item.isOpenNow ? "time" : "moon"}
             size={12}
@@ -89,10 +78,10 @@ function RestaurantCard({ item }: { item: CustomerRestaurant }) {
         </View>
       </View>
 
-      {/* Logo overlapping the cover */}
+     
       <View
-        className="absolute left-4 top-24 h-16 w-16 items-center justify-center overflow-hidden rounded-2xl border-4 border-white"
-        style={{ backgroundColor: colors.brandSoft }}>
+        className="absolute left-4 top-24 h-16 w-16 bg-brand-soft items-center justify-center overflow-hidden rounded-2xl border-4 border-white"
+        >
         {item.logo ? (
           <Image
             source={{ uri: item.logo }}
@@ -106,7 +95,7 @@ function RestaurantCard({ item }: { item: CustomerRestaurant }) {
         )}
       </View>
 
-      {/* Info */}
+      
       <View className="px-4 pb-4 pt-2">
         <View className="ml-[76px] min-h-[28px] justify-center">
           <Text className="text-lg font-bold text-brand-dark" numberOfLines={1}>
@@ -154,7 +143,6 @@ function RestaurantCard({ item }: { item: CustomerRestaurant }) {
   );
 }
 
-
 export default function CustomerHome() {
   const { user } = useAuth();
 
@@ -170,9 +158,8 @@ export default function CustomerHome() {
   const [error, setError] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
 
-  const requestId = useRef(0); // ignore answers from old requests
+  const requestId = useRef(0);
 
-  // Wait 400ms after typing stops before searching
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(search.trim()), 400);
     return () => clearTimeout(timer);
@@ -312,8 +299,7 @@ export default function CustomerHome() {
               <Pressable
                 key={s.key}
                 onPress={() => setService(selected ? null : s.key)}
-                className={`flex-row items-center rounded-full px-3 py-2 ${ selected ? "bg-brand" : "bg-white"} `}
-                > 
+                className={`flex-row items-center rounded-full px-3 py-2 ${selected ? "bg-brand" : "bg-white"} `}>
                 <Ionicons
                   name={s.icon}
                   size={14}
@@ -330,7 +316,6 @@ export default function CustomerHome() {
         </View>
       </View>
 
-     
       {loading ? (
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator color={colors.brand} size="large" />
@@ -373,9 +358,7 @@ export default function CustomerHome() {
           }
           ListEmptyComponent={
             <View className="flex-1 items-center justify-center py-16">
-              <View
-                className="h-16 w-16 items-center justify-center rounded-2xl"
-                style={{ backgroundColor: colors.brandSoft }}>
+              <View className="h-16 w-16 items-center justify-center rounded-2xl bg-brand-soft">
                 <Ionicons
                   name={filtered ? "search" : "restaurant"}
                   size={30}
