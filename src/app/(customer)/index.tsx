@@ -1,7 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useFocusEffect } from "expo-router";
-import { useCallback, useEffect, useRef, useState, type ComponentProps } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ComponentProps,
+} from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -43,9 +49,15 @@ function RestaurantCard({ item }: { item: CustomerRestaurant }) {
       className="mb-4 overflow-hidden rounded-3xl bg-white "
       style={({ pressed }) => [cardShadow, { opacity: pressed ? 0.9 : 1 }]}>
       {/* Cover */}
-      <View className="h-36 w-full" style={{ backgroundColor: colors.brandSoft }}>
+      <View
+        className="h-36 w-full"
+        style={{ backgroundColor: colors.brandSoft }}>
         {item.coverImage ? (
-          <Image source={{ uri: item.coverImage }} style={{ width: "100%", height: "100%" }} contentFit="cover" />
+          <Image
+            source={{ uri: item.coverImage }}
+            style={{ width: "100%", height: "100%" }}
+            contentFit="cover"
+          />
         ) : (
           <View className="flex-1 items-center justify-center">
             <Ionicons name="restaurant" size={40} color={colors.brandLight} />
@@ -54,15 +66,26 @@ function RestaurantCard({ item }: { item: CustomerRestaurant }) {
 
         {/* Grey out closed restaurants */}
         {!item.isOpenNow && (
-          <View className="absolute inset-0" style={{ backgroundColor: "rgba(44,51,41,0.35)" }} />
+          <View
+            className="absolute inset-0"
+            style={{ backgroundColor: "rgba(44,51,41,0.35)" }}
+          />
         )}
 
         {/* Open / Closed badge */}
         <View
           className="absolute left-3 top-3 flex-row items-center rounded-full px-2.5 py-1"
-          style={{ backgroundColor: item.isOpenNow ? colors.brand : colors.text }}>
-          <Ionicons name={item.isOpenNow ? "time" : "moon"} size={12} color={colors.white} />
-          <Text className="ml-1 text-xs font-bold text-white">{item.isOpenNow ? "Open now" : "Closed"}</Text>
+          style={{
+            backgroundColor: item.isOpenNow ? colors.brand : colors.text,
+          }}>
+          <Ionicons
+            name={item.isOpenNow ? "time" : "moon"}
+            size={12}
+            color={colors.white}
+          />
+          <Text className="ml-1 text-xs font-bold text-white">
+            {item.isOpenNow ? "Open now" : "Closed"}
+          </Text>
         </View>
       </View>
 
@@ -71,9 +94,15 @@ function RestaurantCard({ item }: { item: CustomerRestaurant }) {
         className="absolute left-4 top-24 h-16 w-16 items-center justify-center overflow-hidden rounded-2xl border-4 border-white"
         style={{ backgroundColor: colors.brandSoft }}>
         {item.logo ? (
-          <Image source={{ uri: item.logo }} style={{ width: "100%", height: "100%" }} contentFit="cover" />
+          <Image
+            source={{ uri: item.logo }}
+            style={{ width: "100%", height: "100%" }}
+            contentFit="cover"
+          />
         ) : (
-          <Text className="text-xl font-extrabold text-brand">{item.name[0]?.toUpperCase()}</Text>
+          <Text className="text-xl font-extrabold text-brand">
+            {item.name[0]?.toUpperCase()}
+          </Text>
         )}
       </View>
 
@@ -93,7 +122,9 @@ function RestaurantCard({ item }: { item: CustomerRestaurant }) {
 
         <View className="mt-1 flex-row items-center">
           <Ionicons name="location" size={13} color={colors.brandLight} />
-          <Text className="ml-1 flex-1 text-sm text-brand-light" numberOfLines={1}>
+          <Text
+            className="ml-1 flex-1 text-sm text-brand-light"
+            numberOfLines={1}>
             {[item.address.area, item.address.city].filter(Boolean).join(", ")}
           </Text>
         </View>
@@ -105,12 +136,16 @@ function RestaurantCard({ item }: { item: CustomerRestaurant }) {
               className="flex-row items-center rounded-full px-2 py-0.5"
               style={{ backgroundColor: colors.brandSoft }}>
               <Ionicons name={s.icon} size={11} color={colors.brand} />
-              <Text className="ml-1 text-xs font-semibold text-brand">{s.label}</Text>
+              <Text className="ml-1 text-xs font-semibold text-brand">
+                {s.label}
+              </Text>
             </View>
           ))}
           {item.services.delivery && (
             <Text className="ml-1 text-xs text-brand-light">
-              {item.deliveryFee > 0 ? `Rs ${item.deliveryFee} delivery` : "Free delivery"}
+              {item.deliveryFee > 0
+                ? `Rs ${item.deliveryFee} delivery`
+                : "Free delivery"}
             </Text>
           )}
         </View>
@@ -154,7 +189,9 @@ export default function CustomerHome() {
           page: pageToLoad,
         });
         if (id !== requestId.current) return;
-        setRestaurants((prev) => (mode === "append" ? [...prev, ...res.restaurants] : res.restaurants));
+        setRestaurants((prev) =>
+          mode === "append" ? [...prev, ...res.restaurants] : res.restaurants,
+        );
         setPage(res.page);
         setPages(res.pages);
       } catch (err) {
@@ -170,7 +207,6 @@ export default function CustomerHome() {
     [debouncedSearch, service],
   );
 
-  
   useFocusEffect(
     useCallback(() => {
       setLoading(true);
@@ -192,9 +228,8 @@ export default function CustomerHome() {
   const filtered = !!debouncedSearch || !!service;
 
   return (
-    <View className="flex-1 bg-mist" >
-     
-      <View className="bg-brand" >
+    <View className="flex-1 bg-mist">
+      <View className="bg-brand">
         <SafeAreaView edges={["top"]}>
           <View className="px-4 pb-8 ">
             <View className="flex-row items-center">
@@ -202,23 +237,28 @@ export default function CustomerHome() {
                 className="mr-3 h-16 w-16 items-center justify-center overflow-hidden rounded-full border-2 border-white"
                 style={{ backgroundColor: colors.brandDark }}>
                 {user?.avatar ? (
-                  <Image source={{ uri: user.avatar }} style={{ width: "100%", height: "100%" }} contentFit="cover" />
+                  <Image
+                    source={{ uri: user.avatar }}
+                    style={{ width: "100%", height: "100%" }}
+                    contentFit="cover"
+                  />
                 ) : (
                   <Ionicons name="person" size={20} color={colors.white} />
                 )}
               </View>
               <View className="flex-1">
-                <Text className="text-base text-brand-soft">
-                  {greeting()}
-                </Text>
-                <Text className="text-2xl font-extrabold text-white" numberOfLines={1}>
+                <Text className="text-base text-brand-soft">{greeting()}</Text>
+                <Text
+                  className="text-2xl font-extrabold text-white"
+                  numberOfLines={1}>
                   {user?.firstName ?? "there"}
                 </Text>
               </View>
-             
             </View>
 
-            <Text className="mt-5 text-2xl font-extrabold text-white">What are you craving?</Text>
+            <Text className="mt-5 text-2xl font-extrabold text-white">
+              What are you craving?
+            </Text>
           </View>
         </SafeAreaView>
       </View>
@@ -227,7 +267,10 @@ export default function CustomerHome() {
       <View className="-mt-5 px-4">
         <View
           className="flex-row items-center rounded-2xl border-2 bg-white px-4"
-          style={[cardShadow, { borderColor: searchFocused ? colors.brand : colors.white }]}>
+          style={[
+            cardShadow,
+            { borderColor: searchFocused ? colors.brand : colors.white },
+          ]}>
           <Ionicons name="search" size={18} color={colors.brandLight} />
           <TextInput
             value={search}
@@ -237,13 +280,16 @@ export default function CustomerHome() {
             placeholder="Restaurant, cuisine or area"
             placeholderTextColor={colors.placeholder}
             autoCorrect={false}
-            selectionColor={colors.brand}
             className="ml-2 flex-1 py-3.5 text-base"
             style={{ color: colors.text }}
           />
           {!!search && (
             <Pressable onPress={() => setSearch("")} hitSlop={8}>
-              <Ionicons name="close-circle" size={18} color={colors.brandLight} />
+              <Ionicons
+                name="close-circle"
+                size={18}
+                color={colors.brandLight}
+              />
             </Pressable>
           )}
         </View>
@@ -252,8 +298,12 @@ export default function CustomerHome() {
           <Pressable
             onPress={() => setService(null)}
             className="rounded-full px-4 py-2"
-            style={{ backgroundColor: service === null ? colors.brand : colors.white }}>
-            <Text className="text-sm font-semibold" style={{ color: service === null ? colors.white : colors.brand }}>
+            style={{
+              backgroundColor: service === null ? colors.brand : colors.white,
+            }}>
+            <Text
+              className="text-sm font-semibold"
+              style={{ color: service === null ? colors.white : colors.brand }}>
               All
             </Text>
           </Pressable>
@@ -264,9 +314,17 @@ export default function CustomerHome() {
                 key={s.key}
                 onPress={() => setService(selected ? null : s.key)}
                 className="flex-row items-center rounded-full px-3 py-2"
-                style={{ backgroundColor: selected ? colors.brand : colors.white }}>
-                <Ionicons name={s.icon} size={14} color={selected ? colors.white : colors.brand} />
-                <Text className="ml-1 text-sm font-semibold" style={{ color: selected ? colors.white : colors.brand }}>
+                style={{
+                  backgroundColor: selected ? colors.brand : colors.white,
+                }}>
+                <Ionicons
+                  name={s.icon}
+                  size={14}
+                  color={selected ? colors.white : colors.brand}
+                />
+                <Text
+                  className="ml-1 text-sm font-semibold"
+                  style={{ color: selected ? colors.white : colors.brand }}>
                   {s.label}
                 </Text>
               </Pressable>
@@ -311,13 +369,21 @@ export default function CustomerHome() {
           }
           onEndReached={onEndReached}
           onEndReachedThreshold={0.4}
-          ListFooterComponent={loadingMore ? <ActivityIndicator color={colors.brand} className="my-4" /> : undefined}
+          ListFooterComponent={
+            loadingMore ? (
+              <ActivityIndicator color={colors.brand} className="my-4" />
+            ) : undefined
+          }
           ListEmptyComponent={
             <View className="flex-1 items-center justify-center py-16">
               <View
                 className="h-16 w-16 items-center justify-center rounded-2xl"
                 style={{ backgroundColor: colors.brandSoft }}>
-                <Ionicons name={filtered ? "search" : "restaurant"} size={30} color={colors.brand} />
+                <Ionicons
+                  name={filtered ? "search" : "restaurant"}
+                  size={30}
+                  color={colors.brand}
+                />
               </View>
               <Text className="mt-3 text-base font-semibold text-brand-dark">
                 {filtered ? "No matching restaurants" : "No restaurants yet"}
