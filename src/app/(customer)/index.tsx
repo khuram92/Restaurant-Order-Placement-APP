@@ -154,7 +154,7 @@ function RestaurantCard({ item }: { item: CustomerRestaurant }) {
   );
 }
 
-// ---------- Screen ----------
+
 export default function CustomerHome() {
   const { user } = useAuth();
 
@@ -263,7 +263,6 @@ export default function CustomerHome() {
         </SafeAreaView>
       </View>
 
-      {/* Search + service filter */}
       <View className="-mt-5 px-4">
         <View
           className="flex-row items-center rounded-2xl border-2 bg-white px-4"
@@ -294,7 +293,7 @@ export default function CustomerHome() {
           )}
         </View>
 
-        <View className="mt-3 flex-row justify-between">
+        <View className="mt-4 flex-row justify-between">
           <Pressable
             onPress={() => setService(null)}
             className="rounded-full px-4 py-2"
@@ -313,17 +312,15 @@ export default function CustomerHome() {
               <Pressable
                 key={s.key}
                 onPress={() => setService(selected ? null : s.key)}
-                className="flex-row items-center rounded-full px-3 py-2"
-                style={{
-                  backgroundColor: selected ? colors.brand : colors.white,
-                }}>
+                className={`flex-row items-center rounded-full px-3 py-2 ${ selected ? "bg-brand" : "bg-white"} `}
+                > 
                 <Ionicons
                   name={s.icon}
                   size={14}
                   color={selected ? colors.white : colors.brand}
                 />
                 <Text
-                  className="ml-1 text-sm font-semibold"
+                  className="ml-1 text-base font-semibold"
                   style={{ color: selected ? colors.white : colors.brand }}>
                   {s.label}
                 </Text>
@@ -333,7 +330,7 @@ export default function CustomerHome() {
         </View>
       </View>
 
-      {/* Content */}
+     
       {loading ? (
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator color={colors.brand} size="large" />
