@@ -78,10 +78,7 @@ function RestaurantCard({ item }: { item: CustomerRestaurant }) {
         </View>
       </View>
 
-     
-      <View
-        className="absolute left-4 top-24 h-16 w-16 bg-brand-soft items-center justify-center overflow-hidden rounded-2xl border-4 border-white"
-        >
+      <View className="absolute left-4 top-24 h-16 w-16 bg-brand-soft items-center justify-center overflow-hidden rounded-2xl border-4 border-white">
         {item.logo ? (
           <Image
             source={{ uri: item.logo }}
@@ -95,7 +92,6 @@ function RestaurantCard({ item }: { item: CustomerRestaurant }) {
         )}
       </View>
 
-      
       <View className="px-4 pb-4 pt-1">
         <View className="ml-[65px] min-h-[30px] justify-center">
           <Text className="text-lg font-bold text-brand-dark" numberOfLines={1}>
