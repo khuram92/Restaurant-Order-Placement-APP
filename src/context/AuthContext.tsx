@@ -13,11 +13,11 @@ import type { User } from "../types/auth";
 
 interface AuthContextValue {
   user: User | null;
-  isLoading: boolean; // true while restoring the session on app start
+  isLoading: boolean; 
   signIn: (token: string, user: User) => Promise<void>;
   signOut: () => Promise<void>;
   refreshUser: () => Promise<void>;
-  updateUser: (user: User) => void; // re-fetch user (e.g. after profile update)
+  updateUser: (user: User) => void; 
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -31,12 +31,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const restore = async () => {
       try {
         const token = await getToken();
-        if (!token) return; // never logged in
+        if (!token) return; 
 
-        const me = await getMe(); // token attached automatically by api.ts
+        const me = await getMe();
         setUser(me);
       } catch (error) {
-        // Only log out if the token is invalid/expired, not on network errors
+        
         if (axios.isAxiosError(error) && error.response?.status === 401) {
           await removeToken();
         }
@@ -73,7 +73,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-/** Use inside any screen: const { user, signIn, signOut } = useAuth(); */
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) throw new Error("useAuth must be used inside <AuthProvider>");

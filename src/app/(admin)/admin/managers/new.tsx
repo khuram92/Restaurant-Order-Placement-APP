@@ -23,7 +23,7 @@ export default function NewManagerScreen() {
           [{ text: "OK", onPress: openDetails }],
         );
       } else {
-        // Email failed: show the password once so the admin can pass it on
+        
         Alert.alert(
           "Manager added — email not sent",
           `Give these login details to the manager yourself:\n\nEmail: ${res.manager.email}\nPassword: ${res.temporaryPassword}\n\nThis password won't be shown again.`,

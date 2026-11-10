@@ -211,7 +211,7 @@ export default function LoginScreen() {
             <View className="mt-5 flex-row items-center justify-center">
               <Ionicons
                 name="shield-checkmark"
-                size={13}
+                size={13} 
                 color={colors.brandLight}
               />
               <Text className="ml-1 text-xs text-brand-light">

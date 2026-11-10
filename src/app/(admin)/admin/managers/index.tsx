@@ -277,7 +277,7 @@ export default function AdminManagersScreen() {
             loadingMore ? (
               <ActivityIndicator color={colors.brand} className="my-4" />
             ) : undefined
-          }
+          } 
           ListEmptyComponent={
             <View className="flex-1 items-center justify-center py-16">
               <View

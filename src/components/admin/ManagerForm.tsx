@@ -388,7 +388,7 @@ function RestaurantPicker({
   );
 }
 
-// ================= The form =================
+
 
 type Props = {
   initialValues?: ManagerFormValues;

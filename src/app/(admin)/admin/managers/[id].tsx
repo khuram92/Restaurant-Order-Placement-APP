@@ -247,12 +247,12 @@ export default function ManagerDetailScreen() {
               Alert.alert("Couldn't delete", getErrorMessage(err));
             }
           },
-        },
+        }, 
       ],
     );
   };
 
-  // ---------- Render ----------
+  
   const header = (
     <Stack.Screen
       options={{

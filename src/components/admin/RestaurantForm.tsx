@@ -28,9 +28,6 @@ import type {
   RestaurantInput,
 } from "../../types/restaurant";
 
-// ================= Form values =================
-// Numbers are kept as strings while typing, and converted on submit.
-
 export interface RestaurantFormValues {
   name: string;
   description: string;
@@ -106,7 +103,6 @@ export const emptyRestaurantValues = (): RestaurantFormValues => ({
   })),
 });
 
-/** Restaurant from the API → form values (used by the Edit screen) */
 export const restaurantToValues = (r: Restaurant): RestaurantFormValues => ({
   name: r.name,
   description: r.description ?? "",
@@ -190,8 +186,6 @@ export const valuesToInput = (
     location = { lat, lng };
   }
 
-  // Optional text is always sent; "" tells the backend to remove it (so Edit can clear fields)
-  // Optional text is always sent; "" tells the backend to remove it (so Edit can clear fields)
   return {
     input: {
       name: v.name.trim(),
@@ -211,8 +205,6 @@ export const valuesToInput = (
     },
   };
 };
-
-// ================= Small UI pieces =================
 
 function Section({
   title,
@@ -344,7 +336,6 @@ function ToggleRow({
   );
 }
 
-/** Small grey note shown when a group of settings is locked */
 function LockedNote({ text }: { text: string }) {
   return (
     <View
@@ -361,7 +352,6 @@ function LockedNote({ text }: { text: string }) {
   );
 }
 
-// ---------- Cuisines: chips + add ----------
 function CuisinesInput({
   value,
   onChange,
@@ -562,8 +552,7 @@ function ImagesSection({
         </View>
       </Pressable>
 
-      {/* Logo overlapping the cover */}
-      <View className="flex-row items-end px-5 pb-4" style={{ marginTop: -40 }}>
+      <View className="flex-row items-end px-5 pb-4 -mt-10">
         <Pressable
           onPress={onPickLogo}
           className="h-20 w-20 items-center justify-center overflow-hidden rounded-2xl border-4 border-white"
@@ -582,7 +571,7 @@ function ImagesSection({
             <Ionicons name="camera" size={26} color={colors.brand} />
           )}
         </Pressable>
-        <View className="ml-3 flex-1 pb-1">
+        <View className="ml-3 flex-1 pb-1 ">
           <Pressable onPress={onPickLogo} hitSlop={6}>
             <Text className="text-sm font-bold text-brand">
               {logoUri ? "Change logo" : "Add logo"}
@@ -597,7 +586,6 @@ function ImagesSection({
   );
 }
 
-// "14:30" ⇄ Date
 const timeToDate = (time: string) => {
   const [h, m] = time.split(":").map(Number);
   const d = new Date();

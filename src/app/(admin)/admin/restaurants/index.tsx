@@ -287,7 +287,7 @@ export default function AdminRestaurantsScreen() {
             style={{ backgroundColor: colors.brand }}>
             <Text className="font-bold text-white">Try again</Text>
           </Pressable>
-        </View>
+        </View> 
       ) : (
         <FlatList
           data={restaurants}

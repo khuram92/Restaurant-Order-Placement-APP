@@ -76,29 +76,26 @@ export default function StaffLoginScreen() {
       colors={BG}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
-      style={{ flex: 1 }}>
-      {/* Soft olive circles */}
+      style={{ flex: 1 }}
+      >
+    
       <View
-        className="absolute -left-16 -top-10 h-56 w-56 rounded-full"
-        style={{ backgroundColor: colors.brandLight, opacity: 0.18 }}
+        className="absolute -left-16 -top-10 h-56 w-56 rounded-full bg-brand-light/18"
+    
       />
       <View
-        className="absolute -right-20 bottom-32 h-64 w-64 rounded-full"
-        style={{ backgroundColor: colors.brand, opacity: 0.12 }}
+       className="absolute -right-20 bottom-32 h-64 w-64 rounded-full bg-brand/30"
       />
 
       <SafeAreaView className="flex-1">
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : undefined}
           className="flex-1 justify-center px-6">
-          {/* Header */}
+         
           <View className="mb-8 items-center">
             <View
-              className="h-20 w-20 items-center justify-center rounded-full"
-              style={{
-                backgroundColor: colors.brand,
-                ...shadow(0.35, 22, 10),
-              }}>
+              className="h-20 w-20 items-center justify-center rounded-full bg-brand shadow-lg"
+             >
               <Ionicons
                 name="shield-checkmark"
                 size={38}
@@ -113,14 +110,9 @@ export default function StaffLoginScreen() {
             </Text>
           </View>
 
-          {/* Card */}
-          <View
-            className="rounded-3xl p-6"
-            style={{
-              backgroundColor: colors.mistLight,
-              ...shadow(0.3, 30, 14),
-            }}>
-            {/* Email */}
+       
+          <View className="rounded-3xl bg-mist-light p-6 shadow-lg">
+            
             <Text className="mb-2 text-sm font-semibold text-brand-dark">
               Email
             </Text>
@@ -209,13 +201,18 @@ export default function StaffLoginScreen() {
                 style={{
                   borderRadius: 16,
                   paddingVertical: 16,
+                  borderWidth: 2,
+                  borderColor: canSubmit ? "transparent" : "#4e5c4a",
                   alignItems: "center",
                 }}>
                 {loading ? (
                   <ActivityIndicator color={colors.white} />
                 ) : (
-                  <Text className="text-base font-bold tracking-wide text-white">
-                    Log in
+                  <Text
+                    className={`text-base font-bold tracking-wide ${
+                      canSubmit ? "text-white" : "text-[#4e5c4a]"
+                    }`}>
+                    Login
                   </Text>
                 )}
               </LinearGradient>
@@ -229,7 +226,7 @@ export default function StaffLoginScreen() {
             hitSlop={8}>
             <Text className="text-sm" style={{ color: colors.brandDark }}>
               Not staff?{" "}
-              <Text className="font-bold text-white">Customer login</Text>
+              <Text className="font-bold text-[#0900fa]">Customer login</Text>
             </Text>
           </Pressable>
         </KeyboardAvoidingView>

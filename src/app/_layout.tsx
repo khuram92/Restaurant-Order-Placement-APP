@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import "../../global.css";
 import { AuthProvider, useAuth } from "../context/AuthContext";
 
-// Keep the splash screen visible until we know if the user is logged in
+
 SplashScreen.preventAutoHideAsync();
 
 function SplashScreenController() {
@@ -26,7 +26,7 @@ function RootNavigator() {
   const needsProfile = isCustomer && !user?.profileCompleted;
   const mustChangePassword = isManager && !!user?.mustChangePassword;
 
-  // Send the user to the right group whenever their state changes
+ 
   useEffect(() => {
     if (isLoading) return;
     const group = segments[0];

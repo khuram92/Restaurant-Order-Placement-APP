@@ -218,7 +218,7 @@ export default function VerifyOtpScreen() {
                       )}
                     </View>
                   );
-                })}
+                })} 
               </View>
 
               {/* Hidden real input: receives typing + SMS autofill */}
