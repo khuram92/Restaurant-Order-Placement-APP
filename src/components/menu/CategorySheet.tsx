@@ -119,8 +119,8 @@ export default function CategorySheet({ visible, category, onClose, onSave }: Pr
 
           <Pressable
             onPress={() => setIsActive((v) => !v)}
-            className="mb-4 flex-row items-center rounded-2xl px-4 py-3"
-            style={{ backgroundColor: colors.mistLight }}>
+            className="mb-4 flex-row items-center rounded-2xl px-4 py-3 bg-mist-light"
+            >
             <Ionicons name={isActive ? "eye" : "eye-off"} size={18} color={colors.brand} />
             <View className="ml-3 flex-1">
               <Text className="text-sm font-semibold text-brand-dark">Show to customers</Text>
@@ -138,7 +138,7 @@ export default function CategorySheet({ visible, category, onClose, onSave }: Pr
           </Pressable>
 
           {!!error && (
-            <Text className="mb-3 text-sm" style={{ color: colors.danger }}>
+            <Text className="mb-3 text-sm text-[#b42318]" >
               {error}
             </Text>
           )}
@@ -149,9 +149,9 @@ export default function CategorySheet({ visible, category, onClose, onSave }: Pr
             className="items-center rounded-2xl py-4 bg-brand-dark"
             >
             {saving ? (
-              <ActivityIndicator color={colors.white} />
+              <ActivityIndicator color="white" />
             ) : (
-              <Text className="text-base text-center font-bold text-white">{category ? "Save changes" : "Add Category"}</Text>
+              <Text className="text-base text-center font-bold text-white">{category ? "Save changes" : "+ Add Category"}</Text>
             )}
           </Pressable>
         </View>
