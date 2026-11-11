@@ -1,92 +1,86 @@
-// import type { Request, Response } from "express";
-// import mongoose from "mongoose";
-// import { MenuCategory } from "../models/MenuCategory.js";
-// import { MenuItem } from "../models/MenuItem.js";
-// import {
-//   availabilitySchema,
-//   createCategorySchema,
-//   createItemSchema,
-//   reorderSchema,
-//   updateCategorySchema,
-//   updateItemSchema,
-// } from "../validators/menu.validators.js";
+import type { Request, Response } from "express";
+import mongoose from "mongoose";
+import { MenuCategory } from "../models/MenuCategory.js";
+import { MenuItem } from "../models/MenuItem.js";
+import {
+  availabilitySchema,
+  createCategorySchema,
+  createItemSchema,
+  reorderSchema,
+  updateCategorySchema,
+  updateItemSchema,
+} from "../validators/menu.validators.js";
 
-// /*
-//  * Shared by managers (/api/manager/menu) and the Super Admin
-//  * (/api/admin/restaurants/:restaurantId/menu). The access middleware sets
-//  * res.locals.restaurantId, and every query is limited to that restaurant.
-//  */
 
-// // ---------- Helpers ----------
 
-// const firstIssue = (error: { issues: { message: string }[] }) => error.issues[0]?.message ?? "Invalid input";
-// const restaurantOf = (res: Response) => String(res.locals.restaurantId);
-// const CASE_INSENSITIVE = { locale: "en", strength: 2 };
+const firstIssue = (error: { issues: { message: string }[] }) => error.issues[0]?.message ?? "Invalid input";
+const restaurantOf = (res: Response) => String(res.locals.restaurantId);
+const CASE_INSENSITIVE = { locale: "en", strength: 2 };
 
-// /** Loads a doc of this restaurant by a URL param, or sends 400/404 and returns null */
-// const findCategoryOr404 = async (req: Request, res: Response) => {
-//   const id = String(req.params.categoryId);
-//   if (!mongoose.isValidObjectId(id)) {
-//     res.status(400).json({ message: "Invalid category id" });
-//     return null;
-//   }
-//   const category = await MenuCategory.findOne({ _id: id, restaurantId: restaurantOf(res) });
-//   if (!category) res.status(404).json({ message: "Category not found" });
-//   return category;
-// };
 
-// const findItemOr404 = async (req: Request, res: Response) => {
-//   const id = String(req.params.itemId);
-//   if (!mongoose.isValidObjectId(id)) {
-//     res.status(400).json({ message: "Invalid item id" });
-//     return null;
-//   }
-//   const item = await MenuItem.findOne({ _id: id, restaurantId: restaurantOf(res) });
-//   if (!item) res.status(404).json({ message: "Menu item not found" });
-//   return item;
-// };
+const findCategoryOr404 = async (req: Request, res: Response) => {
+  const id = String(req.params.categoryId);
+  if (!mongoose.isValidObjectId(id)) {
+    res.status(400).json({ message: "Invalid category id" });
+    return null;
+  }
+  const category = await MenuCategory.findOne({ _id: id, restaurantId: restaurantOf(res) });
+  if (!category) res.status(404).json({ message: "Category not found" });
+  return category;
+};
 
-// const nameTaken = (restaurantId: string, name: string, exceptId?: string) =>
-//   MenuCategory.exists({
-//     restaurantId,
-//     name,
-//     ...(exceptId && { _id: { $ne: exceptId } }),
-//   }).collation(CASE_INSENSITIVE);
+const findItemOr404 = async (req: Request, res: Response) => {
+  const id = String(req.params.itemId);
+  if (!mongoose.isValidObjectId(id)) {
+    res.status(400).json({ message: "Invalid item id" });
+    return null;
+  }
+  const item = await MenuItem.findOne({ _id: id, restaurantId: restaurantOf(res) });
+  if (!item) res.status(404).json({ message: "Menu item not found" });
+  return item;
+};
 
-// /** Next sortOrder at the end of a list */
-// const nextSortOrder = async (model: "category" | "item", filter: Record<string, unknown>) => {
-//   const last =
-//     model === "category"
-//       ? await MenuCategory.findOne(filter).sort({ sortOrder: -1 }).select("sortOrder")
-//       : await MenuItem.findOne(filter).sort({ sortOrder: -1 }).select("sortOrder");
-//   return (last?.sortOrder ?? -1) + 1;
-// };
+const nameTaken = (restaurantId: string, name: string, exceptId?: string) =>
+  MenuCategory.exists({
+    restaurantId,
+    name,
+    ...(exceptId && { _id: { $ne: exceptId } }),
+  }).collation(CASE_INSENSITIVE);
 
-// /** Copies validated fields onto a doc ("" / null = remove the field) */
-// const applyFields = (doc: { set: (path: string, value: unknown) => unknown }, fields: object) => {
-//   for (const [key, value] of Object.entries(fields)) {
-//     if (value === undefined) continue;
-//     doc.set(key, value === "" || value === null ? undefined : value);
-//   }
-// };
 
-// // ---------- Full menu ----------
+const nextSortOrder = async (model: "category" | "item", filter: Record<string, unknown>) => {
+  const last =
+    model === "category"
+      ? await MenuCategory.findOne(filter).sort({ sortOrder: -1 }).select("sortOrder")
+      : await MenuItem.findOne(filter).sort({ sortOrder: -1 }).select("sortOrder");
+  return (last?.sortOrder ?? -1) + 1;
+};
 
-// /** GET /menu — every category (with its items), including hidden and sold out ones */
-// export const getMenu = async (_req: Request, res: Response) => {
-//   const restaurantId = restaurantOf(res);
-//   const [categories, items] = await Promise.all([
-//     MenuCategory.find({ restaurantId }).sort({ sortOrder: 1, createdAt: 1 }),
-//     MenuItem.find({ restaurantId }).sort({ sortOrder: 1, createdAt: 1 }),
-//   ]);
 
-//   res.json({
-//     categories: categories.map((c) => ({
-//       ...c.toJSON(),
-//       items: items.filter((i) => String(i.categoryId) === c.id),
-//     })),
-//   });
-// };
+const applyFields = (doc: { set: (path: string, value: unknown) => unknown }, fields: object) => {
+  for (const [key, value] of Object.entries(fields)) {
+    if (value === undefined) continue;
+    doc.set(key, value === "" || value === null ? undefined : value);
+  }
+};
+
+
+
+
+export const getMenu = async (_req: Request, res: Response) => {
+  const restaurantId = restaurantOf(res);
+  const [categories, items] = await Promise.all([
+    MenuCategory.find({ restaurantId }).sort({ sortOrder: 1, createdAt: 1 }),
+    MenuItem.find({ restaurantId }).sort({ sortOrder: 1, createdAt: 1 }),
+  ]);
+
+  res.json({
+    categories: categories.map((c) => ({
+      ...c.toJSON(),
+      items: items.filter((i) => String(i.categoryId) === c.id),
+    })),
+  });
+};
 
 // // ---------- Categories ----------
 
