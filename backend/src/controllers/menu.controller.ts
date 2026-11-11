@@ -121,7 +121,7 @@ export const updateCategory = async (req: Request, res: Response) => {
   res.json({ category });
 };
 
-/** DELETE /menu/categories/:categoryId — only when it has no items */
+
 export const deleteCategory = async (req: Request, res: Response) => {
   const category = await findCategoryOr404(req, res);
   if (!category) return;
@@ -137,26 +137,26 @@ export const deleteCategory = async (req: Request, res: Response) => {
   res.json({ message: `"${category.name}" was deleted` });
 };
 
-// /** PUT /menu/categories/order   { ids: [all category ids in the new order] } */
-// export const reorderCategories = async (req: Request, res: Response) => {
-//   const parsed = reorderSchema.safeParse(req.body);
-//   if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
-//   const restaurantId = restaurantOf(res);
-//   const { ids } = parsed.data;
 
-//   const total = await MenuCategory.countDocuments({ restaurantId });
-//   const matching = await MenuCategory.countDocuments({ restaurantId, _id: { $in: ids } });
-//   if (new Set(ids).size !== ids.length || matching !== ids.length || ids.length !== total) {
-//     return res.status(400).json({ message: "Send every category of this menu exactly once" });
-//   }
+export const reorderCategories = async (req: Request, res: Response) => {
+  const parsed = reorderSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
+  const restaurantId = restaurantOf(res);
+  const { ids } = parsed.data;
 
-//   await MenuCategory.bulkWrite(
-//     ids.map((id, index) => ({
-//       updateOne: { filter: { _id: id, restaurantId }, update: { $set: { sortOrder: index } } },
-//     })),
-//   );
-//   res.json({ message: "Order saved" });
-// };
+  const total = await MenuCategory.countDocuments({ restaurantId });
+  const matching = await MenuCategory.countDocuments({ restaurantId, _id: { $in: ids } });
+  if (new Set(ids).size !== ids.length || matching !== ids.length || ids.length !== total) {
+    return res.status(400).json({ message: "Send every category of this menu exactly once" });
+  }
+
+  await MenuCategory.bulkWrite(
+    ids.map((id, index) => ({
+      updateOne: { filter: { _id: id, restaurantId }, update: { $set: { sortOrder: index } } },
+    })),
+  );
+  res.json({ message: "Order saved" });
+};
 
 // // ---------- Items ----------
 
