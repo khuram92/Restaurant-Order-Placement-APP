@@ -167,26 +167,26 @@ export const getItem = async (req: Request, res: Response) => {
   res.json({ item });
 };
 
-// /** POST /menu/items */
-// export const createItem = async (req: Request, res: Response) => {
-//   const parsed = createItemSchema.safeParse(req.body);
-//   if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
-//   const restaurantId = restaurantOf(res);
-//   const { categoryId } = parsed.data;
 
-//   if (!(await MenuCategory.exists({ _id: categoryId, restaurantId }))) {
-//     return res.status(404).json({ message: "Category not found" });
-//   }
+export const createItem = async (req: Request, res: Response) => {
+  const parsed = createItemSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
+  const restaurantId = restaurantOf(res);
+  const { categoryId } = parsed.data;
 
-//   const item = new MenuItem({
-//     restaurantId,
-//     sortOrder: await nextSortOrder("item", { restaurantId, categoryId }),
-//   });
-//   applyFields(item, parsed.data);
-//   await item.save(); // model checks price/sizes and add-on rules
+  if (!(await MenuCategory.exists({ _id: categoryId, restaurantId }))) {
+    return res.status(404).json({ message: "Category not found" });
+  }
 
-//   res.status(201).json({ item });
-// };
+  const item = new MenuItem({
+    restaurantId,
+    sortOrder: await nextSortOrder("item", { restaurantId, categoryId }),
+  });
+  applyFields(item, parsed.data);
+  await item.save(); // model checks price/sizes and add-on rules
+
+  res.status(201).json({ item });
+};
 
 // /** PATCH /menu/items/:itemId — send only what changes; sizes/addOnGroups replace the whole list */
 // export const updateItem = async (req: Request, res: Response) => {
