@@ -234,8 +234,8 @@ function ToggleRow({
         <Ionicons name={icon} size={18} color={colors.brand} />
       </View>
       <View className="ml-3 flex-1">
-        <Text className="text-sm font-semibold text-brand-dark">{title}</Text>
-        <Text className="text-xs text-brand-light">{subtitle}</Text>
+        <Text className="text-base font-semibold text-brand-dark">{title}</Text>
+        <Text className="text-sm text-brand-light">{subtitle}</Text>
       </View>
       <View pointerEvents="none">
         <Switch
@@ -890,16 +890,12 @@ export default function ItemForm({
           right={<Text className="text-xs text-brand-light">Optional</Text>}>
           {groups.length === 0 && (
             <Text className="mb-2 text-sm text-brand-dark">
-              e.g. "Choose a drink" or "Extras" like Extra cheese +Rs
-              150
+              e.g. "Choose a drink" or "Extras" like Extra cheese +Rs 150
             </Text>
           )}
 
           {groups.map((group, gi) => (
-            <View
-              key={group.key}
-              className="mb-3 rounded-2xl p-3 bg-mist"
-              >
+            <View key={group.key} className="mb-3 rounded-2xl p-3 bg-mist">
               <View className="mb-2 flex-row items-center">
                 <View className="flex-1">
                   <Input
@@ -917,7 +913,6 @@ export default function ItemForm({
                 </Pressable>
               </View>
 
-              
               <View className="mb-1 flex-row gap-2">
                 <Pressable
                   onPress={() =>
@@ -925,8 +920,7 @@ export default function ItemForm({
                       minSelect: group.minSelect > 0 ? 0 : 1,
                     })
                   }
-                  className="flex-1 items-center justify-center rounded-2xl py-2 bg-mist-light"
-                  >
+                  className="flex-1 items-center justify-center rounded-2xl py-2 bg-mist-light">
                   <Text className="text-sm text-brand-dark">Required?</Text>
                   <View
                     pointerEvents="none"
@@ -1015,11 +1009,7 @@ export default function ItemForm({
                     onPress={() => removeOption(group.key, option.key)}
                     hitSlop={8}
                     className="ml-2">
-                    <Ionicons
-                      name="close-circle"
-                      size={22}
-                      color="red"
-                    />
+                    <Ionicons name="close-circle" size={22} color="red" />
                   </Pressable>
                 </View>
               ))}
@@ -1039,8 +1029,7 @@ export default function ItemForm({
           {groups.length < MAX_GROUPS && (
             <Pressable
               onPress={addGroup}
-              className="flex-row items-center justify-center rounded-2xl border-2 bg-mist-light border-brand-light py-3"
-              >
+              className="flex-row items-center justify-center rounded-2xl border-2 bg-mist-light border-brand-light py-3">
               <Ionicons name="add-circle" size={18} color={colors.brand} />
               <Text className="ml-1.5 text-sm font-bold text-brand-dark">
                 Add add-on group
@@ -1117,11 +1106,10 @@ export default function ItemForm({
         <Pressable
           onPress={save}
           disabled={saving || deleting}
-          className="items-center rounded-2xl py-4"
-          style={[
-            cardShadow,
-            { backgroundColor: colors.brand, opacity: saving ? 0.7 : 1 },
-          ]}>
+          className={`items-center rounded-2xl bg-brand py-4 ${
+            saving ? "opacity-70" : "opacity-100"
+          }`}
+          style={cardShadow}>
           {saving ? (
             <ActivityIndicator color={colors.white} />
           ) : (
