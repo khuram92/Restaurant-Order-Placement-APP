@@ -2,7 +2,14 @@ import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { Stack, router, useFocusEffect } from "expo-router";
 import { useCallback, useState, type ComponentProps } from "react";
-import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { cardShadow, colors } from "../../../constants/theme";
 import { useAuth } from "../../../context/AuthContext";
@@ -84,20 +91,31 @@ export default function ManagerHome() {
         <SafeAreaView edges={["top"]}>
           <View className="px-6 pb-10 pt-4">
             <View className="flex-row items-center justify-between">
-              <View className="flex-row items-center rounded-full px-3 py-1" style={{ backgroundColor: colors.brandDark }}>
+              <View
+                className="flex-row items-center rounded-full px-3 py-1"
+                style={{ backgroundColor: colors.brandDark }}>
                 <Ionicons name="briefcase" size={14} color={colors.white} />
-                <Text className="ml-1 text-xs font-bold uppercase text-white">Manager</Text>
+                <Text className="ml-1 text-xs font-bold uppercase text-white">
+                  Manager
+                </Text>
               </View>
-              <Pressable onPress={signOut} hitSlop={8} className="flex-row items-center">
+              <Pressable
+                onPress={signOut}
+                hitSlop={8}
+                className="flex-row items-center">
                 <Ionicons name="log-out" size={20} color={colors.white} />
-                <Text className="ml-1 text-sm font-semibold text-white">Log out</Text>
+                <Text className="ml-1 text-sm font-semibold text-white">
+                  Log out
+                </Text>
               </Pressable>
             </View>
 
             <Text className="mt-6 text-sm" style={{ color: colors.brandSoft }}>
               Welcome back
             </Text>
-            <Text className="text-3xl font-extrabold text-white">{user?.firstName ?? "Manager"}</Text>
+            <Text className="text-3xl font-extrabold text-white">
+              {user?.firstName ?? "Manager"}
+            </Text>
           </View>
         </SafeAreaView>
       </View>
@@ -122,9 +140,18 @@ export default function ManagerHome() {
             <ActivityIndicator color={colors.brand} className="py-6" />
           ) : error || !restaurant ? (
             <View className="items-center py-4">
-              <Ionicons name="alert-circle" size={32} color={colors.brandLight} />
-              <Text className="mt-2 text-center text-sm text-brand-dark">{error || "Restaurant not found"}</Text>
-              <Pressable onPress={load} className="mt-3 rounded-2xl px-5 py-2.5" style={{ backgroundColor: colors.brand }}>
+              <Ionicons
+                name="alert-circle"
+                size={32}
+                color={colors.brandLight}
+              />
+              <Text className="mt-2 text-center text-sm text-brand-dark">
+                {error || "Restaurant not found"}
+              </Text>
+              <Pressable
+                onPress={load}
+                className="mt-3 rounded-2xl px-5 py-2.5"
+                style={{ backgroundColor: colors.brand }}>
                 <Text className="font-bold text-white">Try again</Text>
               </Pressable>
             </View>
@@ -134,29 +161,57 @@ export default function ManagerHome() {
                 className="mr-3 h-16 w-16 items-center justify-center overflow-hidden rounded-2xl"
                 style={{ backgroundColor: colors.brandSoft }}>
                 {restaurant.logo ? (
-                  <Image source={{ uri: restaurant.logo }} style={{ width: "100%", height: "100%" }} contentFit="cover" />
+                  <Image
+                    source={{ uri: restaurant.logo }}
+                    style={{ width: "100%", height: "100%" }}
+                    contentFit="cover"
+                  />
                 ) : (
-                  <Text className="text-2xl font-extrabold text-brand">{restaurant.name[0]?.toUpperCase()}</Text>
+                  <Text className="text-2xl font-extrabold text-brand">
+                    {restaurant.name[0]?.toUpperCase()}
+                  </Text>
                 )}
               </View>
               <View className="flex-1">
-                <Text className="text-lg font-extrabold text-brand-dark" numberOfLines={1}>
+                <Text
+                  className="text-lg font-extrabold text-brand-dark"
+                  numberOfLines={1}>
                   {restaurant.name}
                 </Text>
                 <Text className="text-sm text-brand-light" numberOfLines={1}>
-                  {[restaurant.address.area, restaurant.address.city].filter(Boolean).join(", ")}
+                  {[restaurant.address.area, restaurant.address.city]
+                    .filter(Boolean)
+                    .join(", ")}
                 </Text>
                 <View className="mt-1.5 flex-row flex-wrap gap-1.5">
                   <View
                     className="flex-row items-center rounded-full px-2.5 py-0.5"
-                    style={{ backgroundColor: restaurant.isOpenNow ? colors.brand : colors.text }}>
-                    <Ionicons name={restaurant.isOpenNow ? "time" : "moon"} size={11} color={colors.white} />
-                    <Text className="ml-1 text-xs font-bold text-white">{restaurant.isOpenNow ? "Open now" : "Closed"}</Text>
+                    style={{
+                      backgroundColor: restaurant.isOpenNow
+                        ? colors.brand
+                        : colors.text,
+                    }}>
+                    <Ionicons
+                      name={restaurant.isOpenNow ? "time" : "moon"}
+                      size={11}
+                      color={colors.white}
+                    />
+                    <Text className="ml-1 text-xs font-bold text-white">
+                      {restaurant.isOpenNow
+                        ? "Open now"
+                        : restaurant.isTemporarilyClosed
+                          ? "Closed for now"
+                          : "Closed"}
+                    </Text>
                   </View>
                   {!restaurant.isActive && (
-                    <View className="flex-row items-center rounded-full px-2.5 py-0.5" style={{ backgroundColor: colors.danger }}>
+                    <View
+                      className="flex-row items-center rounded-full px-2.5 py-0.5"
+                      style={{ backgroundColor: colors.danger }}>
                       <Ionicons name="eye-off" size={11} color={colors.white} />
-                      <Text className="ml-1 text-xs font-bold text-white">Hidden by admin</Text>
+                      <Text className="ml-1 text-xs font-bold text-white">
+                        Hidden by admin
+                      </Text>
                     </View>
                   )}
                 </View>
@@ -165,18 +220,33 @@ export default function ManagerHome() {
           )}
         </View>
 
-        <Text className="mb-3 text-xs font-bold uppercase tracking-wide text-brand-light">Manage</Text>
+        <Text className="mb-3 text-xs font-bold uppercase tracking-wide text-brand-light">
+          Manage
+        </Text>
 
-        <MenuCard icon="receipt" title="Orders" subtitle="Accept and track customer orders" disabled />
+        <MenuCard
+          icon="receipt"
+          title="Orders"
+          subtitle="Accept and track customer orders"
+          disabled
+        />
         <MenuCard
           icon="fast-food"
           title="Menu"
           subtitle="Categories, items, prices and add-ons"
           onPress={() =>
-            router.push({ pathname: "/manager/menu", params: restaurant ? { name: restaurant.name } : {} })
+            router.push({
+              pathname: "/manager/menu",
+              params: restaurant ? { name: restaurant.name } : {},
+            })
           }
         />
-        <MenuCard icon="storefront" title="Restaurant info" subtitle="Hours, services and details" disabled />
+        <MenuCard
+          icon="storefront"
+          title="Restaurant info"
+          subtitle="Hours, services, details and Close now"
+          onPress={() => router.push("/manager/restaurant")}
+        />
       </ScrollView>
     </View>
   );

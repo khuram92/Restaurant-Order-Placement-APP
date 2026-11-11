@@ -11,7 +11,7 @@ const seedSuperAdmin = async () => {
     process.exit(1);
   }
 
-  await connectDB();
+  await connectDB();  
 
   const email = SUPERADMIN_EMAIL.toLowerCase();
   const existing = await User.findOne({ email });
