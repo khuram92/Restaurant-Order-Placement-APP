@@ -6,6 +6,7 @@ import { Restaurant } from "../models/Restaurant.js";
 import { User } from "../models/User.js";
 import {
   deleteRestaurantImages,
+  deleteRestaurantMenuImages,
   uploadRestaurantImage,
 } from "../utils/cloudinary.js";
 import {
@@ -229,13 +230,17 @@ export const deleteRestaurant = async (req: Request, res: Response) => {
   }
 
   await restaurant.deleteOne();
+
   await Promise.all([
     MenuItem.deleteMany({ restaurantId: restaurant._id }),
     MenuCategory.deleteMany({ restaurantId: restaurant._id }),
   ]);
-  // Clean up its images; a Cloudinary problem shouldn't undo the delete
+  
   try {
-    await deleteRestaurantImages(restaurant.id);
+    await Promise.all([
+      deleteRestaurantImages(restaurant.id),
+      deleteRestaurantMenuImages(restaurant.id),
+    ]);
   } catch (error) {
     console.error(
       "⚠️ Couldn't delete restaurant images:",
