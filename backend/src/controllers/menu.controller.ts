@@ -14,6 +14,9 @@ import {
   updateCategorySchema,
   updateItemSchema,
 } from "../validators/menu.validators.js";
+import { Restaurant } from "../models/Restaurant.js";
+
+
 
 const firstIssue = (error: { issues: { message: string }[] }) =>
   error.issues[0]?.message ?? "Invalid input";
@@ -54,7 +57,12 @@ const nameTaken = (restaurantId: string, name: string, exceptId?: string) =>
     name,
     ...(exceptId && { _id: { $ne: exceptId } }),
   }).collation(CASE_INSENSITIVE);
-
+const resolveCuisine = async (restaurantId: string, cuisine: string) => {
+  if (cuisine === "") return "";
+  const restaurant = await Restaurant.findById(restaurantId).select("cuisines");
+  const match = restaurant?.cuisines.find((c) => c.toLowerCase() === cuisine.toLowerCase());
+  return match ?? null;
+};
 const nextSortOrder = async (
   model: "category" | "item",
   filter: Record<string, unknown>,
@@ -82,12 +90,14 @@ const applyFields = (
 
 export const getMenu = async (_req: Request, res: Response) => {
   const restaurantId = restaurantOf(res);
-  const [categories, items] = await Promise.all([
+  const [categories, items, restaurant] = await Promise.all([
     MenuCategory.find({ restaurantId }).sort({ sortOrder: 1, createdAt: 1 }),
     MenuItem.find({ restaurantId }).sort({ sortOrder: 1, createdAt: 1 }),
+    Restaurant.findById(restaurantId).select("cuisines"),
   ]);
 
   res.json({
+    cuisines: restaurant?.cuisines ?? [], 
     categories: categories.map((c) => ({
       ...c.toJSON(),
       items: items.filter((i) => String(i.categoryId) === c.id),
@@ -97,21 +107,25 @@ export const getMenu = async (_req: Request, res: Response) => {
 
 export const createCategory = async (req: Request, res: Response) => {
   const parsed = createCategorySchema.safeParse(req.body);
-  if (!parsed.success)
-    return res.status(400).json({ message: firstIssue(parsed.error) });
+  if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
   const restaurantId = restaurantOf(res);
 
   if (await nameTaken(restaurantId, parsed.data.name)) {
-    return res
-      .status(409)
-      .json({ message: "A category with this name already exists" });
+    return res.status(409).json({ message: "A category with this name already exists" });
+  }
+
+  const data = { ...parsed.data };
+  if (data.cuisine !== undefined) {
+    const cuisine = await resolveCuisine(restaurantId, data.cuisine);
+    if (cuisine === null) return res.status(400).json({ message: "Pick one of this restaurant's cuisines" });
+    data.cuisine = cuisine;
   }
 
   const category = new MenuCategory({
     restaurantId,
     sortOrder: await nextSortOrder("category", { restaurantId }),
   });
-  applyFields(category, parsed.data);
+  applyFields(category, data);
   await category.save();
 
   res.status(201).json({ category });
@@ -119,22 +133,23 @@ export const createCategory = async (req: Request, res: Response) => {
 
 export const updateCategory = async (req: Request, res: Response) => {
   const parsed = updateCategorySchema.safeParse(req.body);
-  if (!parsed.success)
-    return res.status(400).json({ message: firstIssue(parsed.error) });
+  if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
 
   const category = await findCategoryOr404(req, res);
   if (!category) return;
 
-  if (
-    parsed.data.name &&
-    (await nameTaken(restaurantOf(res), parsed.data.name, category.id))
-  ) {
-    return res
-      .status(409)
-      .json({ message: "A category with this name already exists" });
+  if (parsed.data.name && (await nameTaken(restaurantOf(res), parsed.data.name, category.id))) {
+    return res.status(409).json({ message: "A category with this name already exists" });
   }
 
-  applyFields(category, parsed.data);
+  const data = { ...parsed.data };
+  if (data.cuisine !== undefined) {
+    const cuisine = await resolveCuisine(restaurantOf(res), data.cuisine);
+    if (cuisine === null) return res.status(400).json({ message: "Pick one of this restaurant's cuisines" });
+    data.cuisine = cuisine;
+  }
+
+  applyFields(category, data);
   await category.save();
   res.json({ category });
 };
