@@ -10,7 +10,7 @@ import {
   updateCategorySchema,
   updateItemSchema,
 } from "../validators/menu.validators.js";
-
+import { deleteMenuItemImage, uploadMenuItemImage } from "../utils/cloudinary.js";
 
 
 const firstIssue = (error: { issues: { message: string }[] }) => error.issues[0]?.message ?? "Invalid input";
@@ -229,10 +229,36 @@ export const deleteItem = async (req: Request, res: Response) => {
   const item = await findItemOr404(req, res);
   if (!item) return;
 
+  const hadImage = !!item.image;
   await item.deleteOne();
+
+  // A Cloudinary problem shouldn't undo the delete
+  if (hadImage) {
+    try {
+      await deleteMenuItemImage(restaurantOf(res), item.id);
+    } catch (error) {
+      console.error("⚠️ Couldn't delete menu item photo:", (error as Error).message);
+    }
+  }
+
   res.json({ message: `"${item.name}" was deleted` });
 };
+export const uploadItemImage = async (req: Request, res: Response) => {
+  if (!req.file) return res.status(400).json({ message: "Choose a photo" });
 
+  const item = await findItemOr404(req, res);
+  if (!item) return;
+
+  try {
+    const result = await uploadMenuItemImage(req.file.buffer, restaurantOf(res), item.id);
+    item.image = `${result.secure_url}?v=${result.version}`; // ?v= skips the phone's cached old photo
+    await item.save();
+    res.json({ item });
+  } catch (error) {
+    console.error("❌ Menu item photo upload failed:", (error as Error).message);
+    res.status(502).json({ message: "Couldn't upload the photo. Please try again." });
+  }
+};
 
 export const reorderItems = async (req: Request, res: Response) => {
   const parsed = reorderSchema.safeParse(req.body);

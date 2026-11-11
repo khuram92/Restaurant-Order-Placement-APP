@@ -39,3 +39,6 @@ export const restaurantImagesUpload = withFriendlyErrors(
     { name: "cover", maxCount: 1 },
   ])
 );
+
+
+export const menuItemImageUpload = withFriendlyErrors(upload.single("image"));

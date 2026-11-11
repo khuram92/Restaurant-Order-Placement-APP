@@ -99,3 +99,42 @@ export const deleteRestaurantImages = async (restaurantId: string): Promise<void
 export const deleteAvatarImage = async (userId: string): Promise<void> => {
   await getCloudinary().uploader.destroy(`food-app/avatars/${userId}`, { invalidate: true });
 };
+
+
+
+export const uploadMenuItemImage = (
+  buffer: Buffer,
+  restaurantId: string,
+  itemId: string,
+): Promise<UploadApiResponse> => {
+  return new Promise((resolve, reject) => {
+    const stream = getCloudinary().uploader.upload_stream(
+      {
+        folder: `food-app/menu/${restaurantId}`,
+        public_id: itemId,
+        overwrite: true,
+        invalidate: true,
+        resource_type: "image",
+        transformation: [
+          { width: 800, height: 600, crop: "fill", gravity: "auto" },
+          { quality: "auto", fetch_format: "auto" },
+        ],
+      },
+      (error, result) => {
+        if (error || !result) return reject(error ?? new Error("Upload failed"));
+        resolve(result);
+      },
+    );
+    stream.end(buffer);
+  });
+};
+
+/** Deletes one menu item photo (missing image is ignored) */
+export const deleteMenuItemImage = async (restaurantId: string, itemId: string): Promise<void> => {
+  await getCloudinary().uploader.destroy(`food-app/menu/${restaurantId}/${itemId}`, { invalidate: true });
+};
+
+/** Deletes every menu photo of a restaurant (used when the restaurant is deleted) */
+export const deleteRestaurantMenuImages = async (restaurantId: string): Promise<void> => {
+  await getCloudinary().api.delete_resources_by_prefix(`food-app/menu/${restaurantId}/`, { invalidate: true });
+};
