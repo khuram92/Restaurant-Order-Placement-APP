@@ -104,38 +104,38 @@ export const createCategory = async (req: Request, res: Response) => {
   res.status(201).json({ category });
 };
 
-// /** PATCH /menu/categories/:categoryId */
-// export const updateCategory = async (req: Request, res: Response) => {
-//   const parsed = updateCategorySchema.safeParse(req.body);
-//   if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
 
-//   const category = await findCategoryOr404(req, res);
-//   if (!category) return;
+export const updateCategory = async (req: Request, res: Response) => {
+  const parsed = updateCategorySchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
 
-//   if (parsed.data.name && (await nameTaken(restaurantOf(res), parsed.data.name, category.id))) {
-//     return res.status(409).json({ message: "A category with this name already exists" });
-//   }
+  const category = await findCategoryOr404(req, res);
+  if (!category) return;
 
-//   applyFields(category, parsed.data);
-//   await category.save();
-//   res.json({ category });
-// };
+  if (parsed.data.name && (await nameTaken(restaurantOf(res), parsed.data.name, category.id))) {
+    return res.status(409).json({ message: "A category with this name already exists" });
+  }
 
-// /** DELETE /menu/categories/:categoryId — only when it has no items */
-// export const deleteCategory = async (req: Request, res: Response) => {
-//   const category = await findCategoryOr404(req, res);
-//   if (!category) return;
+  applyFields(category, parsed.data);
+  await category.save();
+  res.json({ category });
+};
 
-//   const itemCount = await MenuItem.countDocuments({ categoryId: category._id });
-//   if (itemCount > 0) {
-//     return res.status(409).json({
-//       message: `"${category.name}" has ${itemCount} item${itemCount === 1 ? "" : "s"}. Move or delete them first.`,
-//     });
-//   }
+/** DELETE /menu/categories/:categoryId — only when it has no items */
+export const deleteCategory = async (req: Request, res: Response) => {
+  const category = await findCategoryOr404(req, res);
+  if (!category) return;
 
-//   await category.deleteOne();
-//   res.json({ message: `"${category.name}" was deleted` });
-// };
+  const itemCount = await MenuItem.countDocuments({ categoryId: category._id });
+  if (itemCount > 0) {
+    return res.status(409).json({
+      message: `"${category.name}" has ${itemCount} item${itemCount === 1 ? "" : "s"}. Move or delete them first.`,
+    });
+  }
+
+  await category.deleteOne();
+  res.json({ message: `"${category.name}" was deleted` });
+};
 
 // /** PUT /menu/categories/order   { ids: [all category ids in the new order] } */
 // export const reorderCategories = async (req: Request, res: Response) => {
