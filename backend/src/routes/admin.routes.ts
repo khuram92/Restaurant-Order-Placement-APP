@@ -20,6 +20,10 @@ import {
   setManagerStatus,
   updateManager,
 } from "../controllers/adminManager.controller.js";
+import { adminMenuAccess } from "../middleware/menuAccess.middleware.js";
+import menuRoutes from "./menu.routes.js"
+
+
 const router = Router();
 
 // Every route below: logged in + Super Admin only
@@ -33,6 +37,8 @@ router.patch("/restaurants/:id", updateRestaurant);
 router.patch("/restaurants/:id/status", setRestaurantStatus);
 router.patch("/restaurants/:id/images", restaurantImagesUpload, uploadRestaurantImages);
 router.delete("/restaurants/:id", deleteRestaurant);
+// Menu of any restaurant
+router.use("/restaurants/:restaurantId/menu", adminMenuAccess, menuRoutes);
 // Managers ("restaurant-options" must come before "/:id")
 router.get("/managers/restaurant-options", restaurantOptions);
 router.get("/managers", listManagers);

@@ -18,14 +18,14 @@ const router = Router({ mergeParams: true });
 
 router.get("/", getMenu);
 
-// Categories ("order" routes before ":categoryId")
+
 router.put("/categories/order", reorderCategories);
 router.post("/categories", createCategory);
 router.patch("/categories/:categoryId", updateCategory);
 router.delete("/categories/:categoryId", deleteCategory);
 router.put("/categories/:categoryId/items/order", reorderItems);
 
-// Items
+
 router.post("/items", createItem);
 router.get("/items/:itemId", getItem);
 router.patch("/items/:itemId", updateItem);
