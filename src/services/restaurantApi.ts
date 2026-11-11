@@ -4,7 +4,7 @@ import type {
   CustomerRestaurantListResponse,
   ServiceKey,
 } from "../types/restaurant";
-
+import type { MenuCategoryWithItems } from "../types/menu";
 export interface BrowseParams {
   search?: string;
   service?: ServiceKey;
@@ -32,4 +32,10 @@ export const browseRestaurants = async (params: BrowseParams = {}) => {
 export const getCustomerRestaurant = async (id: string) => {
   const { data } = await api.get<{ restaurant: CustomerRestaurant }>(`/restaurants/${id}`);
   return data.restaurant;
+};
+
+
+export const getCustomerMenu = async (id: string) => {
+  const { data } = await api.get<{ categories: MenuCategoryWithItems[] }>(`/restaurants/${id}/menu`);
+  return data.categories;
 };
