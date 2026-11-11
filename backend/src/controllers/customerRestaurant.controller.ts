@@ -16,7 +16,7 @@ const HIDDEN_FIELDS = "-createdBy -email -isActive";
 /** Restaurant JSON + isOpenNow */
 const toCustomerJSON = (restaurant: RestaurantDoc) => ({
   ...restaurant.toJSON(),
-  isOpenNow: isOpenNow(restaurant.openingHours),
+    isOpenNow: !restaurant.isTemporarilyClosed && isOpenNow(restaurant.openingHours),
 });
 
 

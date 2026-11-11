@@ -46,6 +46,7 @@ export interface IRestaurant {
   taxRate: number; // percent, e.g. 16
   seatingCapacity: number; // total dine-in seats
   isActive: boolean;
+  isTemporarilyClosed: boolean;
   createdBy?: Types.ObjectId;
 }
 
@@ -149,6 +150,7 @@ const restaurantSchema = new Schema<IRestaurant>(
       max: [2000, "At most 2000 seats"],
     },
     isActive: { type: Boolean, default: true },
+    isTemporarilyClosed: { type: Boolean, default: false },
     createdBy: { type: Schema.Types.ObjectId, ref: "User" },
   },
   { timestamps: true },
