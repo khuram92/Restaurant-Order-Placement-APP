@@ -62,11 +62,11 @@ export default function CategorySheet({ visible, category, onClose, onSave }: Pr
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} className="flex-1 justify-end">
-        <Pressable className="absolute inset-0" style={{ backgroundColor: "rgba(44,51,41,0.45)" }} onPress={onClose} />
+        <Pressable className="absolute inset-0 bg-[rgba(44,51,41,0.45)]" onPress={onClose} />
 
-        <View className="rounded-t-3xl bg-white px-5 pt-3" style={{ paddingBottom: insets.bottom + 16 }}>
+        <View className="rounded-t-3xl bg-white px-5 pt-3 pb-6" >
           <View className="mb-3 items-center">
-            <View className="h-1.5 w-12 rounded-full" style={{ backgroundColor: colors.mistDark }} />
+            <View className="h-1.5 w-12 rounded-full bg-mist-dark"  />
           </View>
 
           <View className="mb-4 flex-row items-center justify-between">
@@ -76,8 +76,8 @@ export default function CategorySheet({ visible, category, onClose, onSave }: Pr
             <Pressable
               onPress={onClose}
               hitSlop={8}
-              className="h-9 w-9 items-center justify-center rounded-full"
-              style={{ backgroundColor: colors.brandSoft }}>
+              className="h-9 w-9 items-center justify-center rounded-full bg-brand-soft"
+              >
               <Ionicons name="close" size={20} color={colors.brand} />
             </Pressable>
           </View>
