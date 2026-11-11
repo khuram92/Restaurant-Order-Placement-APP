@@ -1,6 +1,6 @@
-import { Stack, useLocalSearchParams } from "expo-router";
+import { Stack, router, useLocalSearchParams } from "expo-router";
 import { useMemo } from "react";
-import { Alert, View } from "react-native";
+import { View } from "react-native";
 import MenuEditor from "../../../../components/menu/MenuEditor";
 import { colors } from "../../../../constants/theme";
 import { adminMenuApi } from "../../../../services/menuApi";
@@ -17,10 +17,16 @@ export default function AdminMenuScreen() {
       <Stack.Screen options={{ title: name ? `${name} · Menu` : "Menu" }} />
       <MenuEditor
         menuApi={menuApi}
-        onOpenItem={() => {
-          // The Add / Edit item form comes in the next step
-          Alert.alert("Coming next", "The item form is the next step.");
-        }}
+        onOpenItem={(categoryId, item) =>
+          router.push({
+            pathname: "/admin/menu/item",
+            params: {
+              restaurantId: String(restaurantId),
+              categoryId,
+              ...(item && { itemId: item._id }),
+            },
+          })
+        }
       />
     </View>
   );

@@ -2,17 +2,17 @@ import { api } from "../lib/api";
 import type {
   CategoryInput,
   MenuCategory,
-  MenuCategoryWithItems,
   MenuItem,
   MenuItemInput,
+  MenuResponse,
 } from "../types/menu";
 import type { PickedImage } from "../types/restaurant";
 
 
 export const createMenuApi = (base: string) => ({
   getMenu: async () => {
-    const { data } = await api.get<{ categories: MenuCategoryWithItems[] }>(base);
-    return data.categories;
+    const { data } = await api.get<MenuResponse>(base);
+    return data;
   },
 
 

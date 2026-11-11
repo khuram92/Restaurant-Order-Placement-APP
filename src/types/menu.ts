@@ -1,4 +1,3 @@
-
 export interface ItemSize {
   _id?: string;
   name: string;
@@ -6,14 +5,12 @@ export interface ItemSize {
   serves?: number;
 }
 
-
 export interface AddOnOption {
   _id?: string;
   name: string;
   price: number;
   isAvailable: boolean;
 }
-
 
 export interface AddOnGroup {
   _id?: string;
@@ -30,7 +27,7 @@ export interface MenuItem {
   name: string;
   description?: string;
   image?: string;
-  price?: number; 
+  price?: number;
   serves?: number;
   sizes: ItemSize[];
   addOnGroups: AddOnGroup[];
@@ -47,12 +44,12 @@ export interface MenuCategory {
   restaurantId: string;
   name: string;
   description?: string;
+  cuisine?: string;
   sortOrder: number;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
 }
-
 
 export interface MenuCategoryWithItems extends MenuCategory {
   items: MenuItem[];
@@ -60,10 +57,10 @@ export interface MenuCategoryWithItems extends MenuCategory {
 
 export interface CategoryInput {
   name: string;
-  description?: string; 
+  description?: string;
+  cuisine?: string;
   isActive?: boolean;
 }
-
 
 export interface MenuItemInput {
   categoryId: string;
@@ -76,4 +73,9 @@ export interface MenuItemInput {
   isVeg?: boolean;
   isSpicy?: boolean;
   isAvailable?: boolean;
+}
+
+export interface MenuResponse {
+  cuisines: string[];
+  categories: MenuCategoryWithItems[];
 }
