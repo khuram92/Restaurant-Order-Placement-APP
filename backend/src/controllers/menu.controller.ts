@@ -197,7 +197,7 @@ export const updateItem = async (req: Request, res: Response) => {
   if (!item) return;
   const { categoryId } = parsed.data;
 
-  // Moving to another category: it must be in the same restaurant, and goes to the end
+  
   if (categoryId && categoryId !== String(item.categoryId)) {
     const restaurantId = restaurantOf(res);
     if (!(await MenuCategory.exists({ _id: categoryId, restaurantId }))) {
@@ -211,27 +211,27 @@ export const updateItem = async (req: Request, res: Response) => {
   res.json({ item });
 };
 
-// /** PATCH /menu/items/:itemId/availability   { isAvailable } — quick "Sold out" toggle */
-// export const setItemAvailability = async (req: Request, res: Response) => {
-//   const parsed = availabilitySchema.safeParse(req.body);
-//   if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
 
-//   const item = await findItemOr404(req, res);
-//   if (!item) return;
+export const setItemAvailability = async (req: Request, res: Response) => {
+  const parsed = availabilitySchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
 
-//   item.isAvailable = parsed.data.isAvailable;
-//   await item.save();
-//   res.json({ item });
-// };
+  const item = await findItemOr404(req, res);
+  if (!item) return;
 
-// /** DELETE /menu/items/:itemId */
-// export const deleteItem = async (req: Request, res: Response) => {
-//   const item = await findItemOr404(req, res);
-//   if (!item) return;
+  item.isAvailable = parsed.data.isAvailable;
+  await item.save();
+  res.json({ item });
+};
 
-//   await item.deleteOne();
-//   res.json({ message: `"${item.name}" was deleted` });
-// };
+
+export const deleteItem = async (req: Request, res: Response) => {
+  const item = await findItemOr404(req, res);
+  if (!item) return;
+
+  await item.deleteOne();
+  res.json({ message: `"${item.name}" was deleted` });
+};
 
 // /** PUT /menu/categories/:categoryId/items/order   { ids: [all item ids of the category] } */
 // export const reorderItems = async (req: Request, res: Response) => {
