@@ -158,14 +158,14 @@ export const reorderCategories = async (req: Request, res: Response) => {
   res.json({ message: "Order saved" });
 };
 
-// // ---------- Items ----------
 
-// /** GET /menu/items/:itemId */
-// export const getItem = async (req: Request, res: Response) => {
-//   const item = await findItemOr404(req, res);
-//   if (!item) return;
-//   res.json({ item });
-// };
+
+
+export const getItem = async (req: Request, res: Response) => {
+  const item = await findItemOr404(req, res);
+  if (!item) return;
+  res.json({ item });
+};
 
 // /** POST /menu/items */
 // export const createItem = async (req: Request, res: Response) => {
