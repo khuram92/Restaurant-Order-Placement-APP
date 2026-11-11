@@ -26,7 +26,7 @@ type IconName = ComponentProps<typeof Ionicons>["name"];
 
 type Props = {
   menuApi: MenuApi;
-  /** Category to preselect when adding */
+  
   initialCategoryId?: string;
   /** Set when editing an existing item */
   itemId?: string;
