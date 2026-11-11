@@ -113,7 +113,7 @@ function Section({
 
 function Label({ text, hint }: { text: string; hint?: string }) {
   return (
-    <View className="mb-1.5 flex-row justify-between">
+    <View className="mb-1.5 flex-row justify-between mt-2">
       <Text className="text-sm font-semibold text-brand-dark">{text}</Text>
       {!!hint && <Text className="text-xs text-brand-light">{hint}</Text>}
     </View>
@@ -732,7 +732,7 @@ export default function ItemForm({
               setName(t);
               clearError();
             }}
-            placeholder="e.g. Chicken Fried Rice"
+            placeholder="Item Name"
             maxLength={60}
             className="mb-3"
           />
@@ -740,14 +740,14 @@ export default function ItemForm({
           <Input
             value={description}
             onChangeText={setDescription}
-            placeholder="e.g. Egg fried rice with chicken and veggies"
+            placeholder="Item description..."
             multiline
             maxLength={300}
             className="mb-3"
           />
 
           <Label text="Category" />
-          <View className="flex-row flex-wrap">
+          <View className="flex-row flex-wrap" >
             {categories.map((c) => {
               const selected = c._id === categoryId;
               return (
@@ -780,7 +780,7 @@ export default function ItemForm({
           </View>
         </Section>
 
-        {/* Price */}
+        
         <Section title="Price" icon="pricetag">
           <View
             className="mb-4 flex-row rounded-2xl p-1"
