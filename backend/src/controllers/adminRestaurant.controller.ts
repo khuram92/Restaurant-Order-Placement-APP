@@ -1,15 +1,19 @@
 import type { Request, Response } from "express";
 import mongoose from "mongoose";
+import { MenuCategory } from "../models/MenuCategory.js";
+import { MenuItem } from "../models/MenuItem.js";
 import { Restaurant } from "../models/Restaurant.js";
-import { uploadRestaurantImage, deleteRestaurantImages, } from "../utils/cloudinary.js";
+import { User } from "../models/User.js";
+import {
+  deleteRestaurantImages,
+  uploadRestaurantImage,
+} from "../utils/cloudinary.js";
 import {
   createRestaurantSchema,
   listQuerySchema,
   statusSchema,
   updateRestaurantSchema,
 } from "../validators/restaurant.validators.js";
-import { User } from "../models/User.js";
-
 
 // ---------- Helpers ----------
 
@@ -63,7 +67,7 @@ export const createRestaurant = async (req: Request, res: Response) => {
 
   const { address, ...rest } = data;
 
-    const restaurant = new Restaurant({ createdBy: req.user!._id });
+  const restaurant = new Restaurant({ createdBy: req.user!._id });
   applyFields(restaurant, rest);
   applyFields(restaurant, address, "address.");
   if (location) restaurant.set("location", toGeoPoint(location));
@@ -71,7 +75,6 @@ export const createRestaurant = async (req: Request, res: Response) => {
 
   res.status(201).json({ restaurant });
 };
-
 
 /** GET /api/admin/restaurants?search=&city=&status=active|inactive|all&page=1&limit=20 */
 export const listRestaurants = async (req: Request, res: Response) => {
@@ -210,28 +213,34 @@ export const uploadRestaurantImages = async (req: Request, res: Response) => {
   }
 };
 
-/**
- * DELETE /api/admin/restaurants/:id
- * Permanent. Blocked while a manager is assigned (later also: menu items, active orders).
- */
 export const deleteRestaurant = async (req: Request, res: Response) => {
   const restaurant = await findRestaurantOr404(req, res);
   if (!restaurant) return;
 
-  const hasManager = await User.exists({ role: "manager", restaurantId: restaurant._id });
+  const hasManager = await User.exists({
+    role: "manager",
+    restaurantId: restaurant._id,
+  });
   if (hasManager) {
     return res.status(409).json({
-      message: "This restaurant has a manager assigned. Remove or reassign the manager first.",
+      message:
+        "This restaurant has a manager assigned. Remove or reassign the manager first.",
     });
   }
 
   await restaurant.deleteOne();
-
+  await Promise.all([
+    MenuItem.deleteMany({ restaurantId: restaurant._id }),
+    MenuCategory.deleteMany({ restaurantId: restaurant._id }),
+  ]);
   // Clean up its images; a Cloudinary problem shouldn't undo the delete
   try {
     await deleteRestaurantImages(restaurant.id);
   } catch (error) {
-    console.error("⚠️ Couldn't delete restaurant images:", (error as Error).message);
+    console.error(
+      "⚠️ Couldn't delete restaurant images:",
+      (error as Error).message,
+    );
   }
 
   res.json({ message: `"${restaurant.name}" was deleted` });
