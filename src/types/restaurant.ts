@@ -76,3 +76,9 @@ export interface CustomerRestaurantListResponse {
   page: number;
   pages: number;
 }
+
+
+
+export interface ManagerRestaurant extends Restaurant {
+  isOpenNow: boolean;
+}
