@@ -8,8 +8,8 @@ import { cardShadow, colors } from "../../constants/theme";
 import { getErrorMessage } from "../../lib/api";
 import type { MenuApi } from "../../services/menuApi";
 import type { CategoryInput, MenuCategory, MenuCategoryWithItems, MenuItem } from "../../types/menu";
-// import { itemPriceText, itemServesText } from "../../utils/menuFormat";
-// import CategorySheet from "./CategorySheet";
+import { itemPriceText, itemServesText } from "../../utils/menuFormat";
+import CategorySheet from "./CategorySheet";
 
 type IconName = ComponentProps<typeof Ionicons>["name"];
 
@@ -69,7 +69,7 @@ function ItemRow({
   onToggle: (value: boolean) => void;
   onMove: (direction: -1 | 1) => void;
 }) {
-//   const serves = itemServesText(item);
+  const serves = itemServesText(item);
 
   return (
     <Pressable
@@ -96,7 +96,7 @@ function ItemRow({
           {item.isVeg && <Ionicons name="leaf" size={13} color={colors.brand} style={{ marginLeft: 4 }} />}
           {item.isSpicy && <Ionicons name="flame" size={13} color={colors.danger} style={{ marginLeft: 4 }} />}
         </View>
-        {/* <Text className="mt-0.5 text-sm font-semibold text-brand">{itemPriceText(item)}</Text>
+        <Text className="mt-0.5 text-sm font-semibold text-brand">{itemPriceText(item)}</Text>
         <Text className="text-xs text-brand-light" numberOfLines={1}>
           {[
             item.sizes.length > 0 && `${item.sizes.length} sizes`,
@@ -105,7 +105,7 @@ function ItemRow({
           ]
             .filter(Boolean)
             .join(" · ")}
-        </Text> */}
+        </Text>
       </View>
 
       {/* Sold out switch */}
@@ -371,7 +371,7 @@ export default function MenuEditor({ menuApi, onOpenItem }: Props) {
         )}
       </ScrollView>
 
-      {/* Floating "Add category" button */}
+      
       <View className="absolute left-4 right-4" style={{ bottom: insets.bottom + 16 }}>
         <Pressable
           onPress={() => setSheet({ open: true, category: null })}
@@ -382,12 +382,12 @@ export default function MenuEditor({ menuApi, onOpenItem }: Props) {
         </Pressable>
       </View>
 
-      {/* <CategorySheet
+      <CategorySheet
         visible={sheet.open}
         category={sheet.category}
         onClose={() => setSheet({ open: false, category: null })}
         onSave={saveCategory}
-      /> */}
+      />
     </View>
   );
 }

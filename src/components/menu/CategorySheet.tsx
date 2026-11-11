@@ -17,7 +17,6 @@ import type { CategoryInput, MenuCategory } from "../../types/menu";
 
 type Props = {
   visible: boolean;
-  /** null = adding a new category */
   category: MenuCategory | null;
   onClose: () => void;
   onSave: (input: CategoryInput) => Promise<void>;
@@ -33,7 +32,6 @@ export default function CategorySheet({ visible, category, onClose, onSave }: Pr
   const [error, setError] = useState("");
   const [focused, setFocused] = useState<"name" | "description" | null>(null);
 
-  // Fill the form each time the sheet opens
   useEffect(() => {
     if (!visible) return;
     setName(category?.name ?? "");
@@ -93,7 +91,7 @@ export default function CategorySheet({ visible, category, onClose, onSave }: Pr
             }}
             onFocus={() => setFocused("name")}
             onBlur={() => setFocused(null)}
-            placeholder="e.g. Burgers"
+            placeholder="e.g. Burgers, Pizza etc..."
             placeholderTextColor={colors.placeholder}
             maxLength={40}
             selectionColor={colors.brand}
@@ -110,7 +108,7 @@ export default function CategorySheet({ visible, category, onClose, onSave }: Pr
             onChangeText={setDescription}
             onFocus={() => setFocused("description")}
             onBlur={() => setFocused(null)}
-            placeholder="e.g. All burgers come with fries"
+            placeholder="Write Discription..."
             placeholderTextColor={colors.placeholder}
             maxLength={200}
             multiline
@@ -148,12 +146,12 @@ export default function CategorySheet({ visible, category, onClose, onSave }: Pr
           <Pressable
             onPress={save}
             disabled={saving}
-            className="items-center rounded-2xl py-4"
-            style={{ backgroundColor: colors.brand, opacity: saving ? 0.7 : 1 }}>
+            className="items-center rounded-2xl py-4 bg-brand-dark"
+            >
             {saving ? (
               <ActivityIndicator color={colors.white} />
             ) : (
-              <Text className="text-base font-bold text-white">{category ? "Save changes" : "Add category"}</Text>
+              <Text className="text-base text-center font-bold text-white">{category ? "Save changes" : "Add Category"}</Text>
             )}
           </Pressable>
         </View>
