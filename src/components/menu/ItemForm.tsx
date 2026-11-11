@@ -40,13 +40,13 @@ type Props = {
   menuApi: MenuApi;
 
   initialCategoryId?: string;
-  /** Set when editing an existing item */
+ 
   itemId?: string;
-  /** Called after save or delete (usually router.back) */
+
   onDone: () => void;
 };
 
-// ---------- Form rows (numbers are kept as text while typing) ----------
+
 type SizeRow = {
   key: string;
   _id?: string;
@@ -188,8 +188,8 @@ function Stepper({
 }) {
   return (
     <View
-      className="flex-1 items-center rounded-2xl py-2"
-      style={{ backgroundColor: colors.mistLight }}>
+      className="flex-1 items-center rounded-2xl py-2 bg-mist-light"
+      >
       <Text className="text-xs text-brand-light">{label}</Text>
       <View className="mt-1 flex-row items-center">
         <Pressable
@@ -232,7 +232,7 @@ function ToggleRow({
       onPress={() => onChange(!value)}
       className="flex-row items-center py-2">
       <View
-        className="h-9 w-9 items-center justify-center rounded-xl"
+        className="h-9 w-9 items-center justify-center rounded-xl "
         style={{ backgroundColor: colors.brandSoft }}>
         <Ionicons name={icon} size={18} color={colors.brand} />
       </View>
@@ -251,7 +251,7 @@ function ToggleRow({
   );
 }
 
-/** What the customer will see, e.g. "Required · pick 1" or "Optional · pick up to 3" */
+
 const groupRuleText = (required: boolean, max: number) => {
   if (!required) return `Optional · customer can pick up to ${max}`;
   if (max === 1) return "Required · customer must pick 1";
@@ -291,7 +291,6 @@ export default function ItemForm({
 
   const [isAvailable, setIsAvailable] = useState(true);
 
-  // Photo: the saved URL, a newly picked one, or removed
   const [imageUrl, setImageUrl] = useState<string | undefined>();
   const [pickedImage, setPickedImage] = useState<PickedImage | null>(null);
   const [removeImage, setRemoveImage] = useState(false);
@@ -300,7 +299,7 @@ export default function ItemForm({
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState("");
 
-  // ---------- Load categories (+ the item when editing) ----------
+
   useEffect(() => {
     const load = async () => {
       try {
@@ -368,7 +367,7 @@ export default function ItemForm({
     if (error) setError("");
   };
 
-  // ---------- Photo ----------
+  
   const handlePicked = (result: ImagePicker.ImagePickerResult) => {
     if (result.canceled || !result.assets[0]) return;
     const asset = result.assets[0];
@@ -420,7 +419,7 @@ export default function ItemForm({
 
   const previewUri = pickedImage?.uri ?? (removeImage ? undefined : imageUrl);
 
-  // ---------- Sizes ----------
+
   const addSize = () =>
     setSizes((prev) => [
       ...prev,
@@ -447,7 +446,6 @@ export default function ItemForm({
     clearError();
   };
 
-  // ---------- Add-on groups ----------
   const addGroup = () =>
     setGroups((prev) => [
       ...prev,
@@ -591,7 +589,7 @@ export default function ItemForm({
     return input;
   };
 
-  // ---------- Save ----------
+  
   const save = async () => {
     const input = buildInput();
     if (typeof input === "string") return setError(input);
@@ -649,7 +647,7 @@ export default function ItemForm({
     );
   };
 
-  // ---------- Render ----------
+  
   if (loading) {
     return (
       <View className="flex-1 items-center justify-center">
@@ -689,11 +687,11 @@ export default function ItemForm({
         }}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}>
-        {/* Photo */}
+        
         <Pressable
           onPress={choosePhoto}
-          className="mb-4 h-48 items-center justify-center overflow-hidden rounded-3xl"
-          style={[cardShadow, { backgroundColor: colors.brandSoft }]}>
+          className="mb-4 h-48 items-center justify-center overflow-hidden rounded-3xl bg-brand-soft"
+          style={[cardShadow, ]}>
           {previewUri ? (
             <>
               <Image
@@ -702,8 +700,8 @@ export default function ItemForm({
                 contentFit="cover"
               />
               <View
-                className="absolute bottom-3 right-3 flex-row items-center rounded-full px-3 py-1.5"
-                style={{ backgroundColor: "rgba(59,70,56,0.8)" }}>
+                className="absolute bottom-3 right-3 flex-row items-center rounded-full px-3 py-1.5 bg-[rgba(59,70,56,0.8)]"
+                >
                 <Ionicons name="camera" size={14} color={colors.white} />
                 <Text className="ml-1 text-xs font-bold text-white">
                   Change
@@ -713,16 +711,14 @@ export default function ItemForm({
           ) : (
             <>
               <View
-                className="h-14 w-14 items-center justify-center rounded-full"
-                style={{ backgroundColor: colors.brand }}>
+                className="h-14 w-14 items-center justify-center rounded-full bg-brand"
+                >
                 <Ionicons name="camera" size={26} color={colors.white} />
               </View>
               <Text className="mt-2 text-sm font-bold text-brand-dark">
                 Add a photo
               </Text>
-              <Text className="text-xs text-brand-light">
-                Optional · 4:3 works best
-              </Text>
+              
             </>
           )}
         </Pressable>
@@ -980,7 +976,7 @@ export default function ItemForm({
                 {groupRuleText(group.minSelect > 0, group.maxSelect)}
               </Text>
 
-              {/* Options */}
+             
               {group.options.map((option) => (
                 <View key={option.key} className="mb-2 flex-row items-center">
                   <View className="flex-[1.6]">
@@ -1097,7 +1093,7 @@ export default function ItemForm({
           />
         </Section>
 
-        {/* Delete (edit only) */}
+       
         {original && (
           <Pressable
             onPress={confirmDelete}
@@ -1120,7 +1116,7 @@ export default function ItemForm({
         )}
       </ScrollView>
 
-      {/* Save bar */}
+    
       <View
         className="absolute bottom-0 left-0 right-0 px-4 pt-3"
         style={{
@@ -1151,7 +1147,7 @@ export default function ItemForm({
             <ActivityIndicator color={colors.white} />
           ) : (
             <Text className="text-base font-bold text-white">
-              {original ? "Save changes" : "Add item"}
+              {original ? "Save changes" : "+ Add item"}
             </Text>
           )}
         </Pressable>
