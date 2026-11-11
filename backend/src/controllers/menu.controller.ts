@@ -233,25 +233,25 @@ export const deleteItem = async (req: Request, res: Response) => {
   res.json({ message: `"${item.name}" was deleted` });
 };
 
-// /** PUT /menu/categories/:categoryId/items/order   { ids: [all item ids of the category] } */
-// export const reorderItems = async (req: Request, res: Response) => {
-//   const parsed = reorderSchema.safeParse(req.body);
-//   if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
 
-//   const category = await findCategoryOr404(req, res);
-//   if (!category) return;
-//   const { ids } = parsed.data;
+export const reorderItems = async (req: Request, res: Response) => {
+  const parsed = reorderSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
 
-//   const total = await MenuItem.countDocuments({ categoryId: category._id });
-//   const matching = await MenuItem.countDocuments({ categoryId: category._id, _id: { $in: ids } });
-//   if (new Set(ids).size !== ids.length || matching !== ids.length || ids.length !== total) {
-//     return res.status(400).json({ message: "Send every item of this category exactly once" });
-//   }
+  const category = await findCategoryOr404(req, res);
+  if (!category) return;
+  const { ids } = parsed.data;
 
-//   await MenuItem.bulkWrite(
-//     ids.map((id, index) => ({
-//       updateOne: { filter: { _id: id, categoryId: category._id }, update: { $set: { sortOrder: index } } },
-//     })),
-//   );
-//   res.json({ message: "Order saved" });
-// };
+  const total = await MenuItem.countDocuments({ categoryId: category._id });
+  const matching = await MenuItem.countDocuments({ categoryId: category._id, _id: { $in: ids } });
+  if (new Set(ids).size !== ids.length || matching !== ids.length || ids.length !== total) {
+    return res.status(400).json({ message: "Send every item of this category exactly once" });
+  }
+
+  await MenuItem.bulkWrite(
+    ids.map((id, index) => ({
+      updateOne: { filter: { _id: id, categoryId: category._id }, update: { $set: { sortOrder: index } } },
+    })),
+  );
+  res.json({ message: "Order saved" });
+};
