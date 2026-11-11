@@ -187,7 +187,7 @@ function Stepper({
 }) {
   return (
     <View className="flex-1 items-center rounded-2xl py-2 bg-mist-light">
-      <Text className="text-xs text-brand-light">{label}</Text>
+      <Text className="text-sm text-brand-dark">{label}</Text>
       <View className="mt-1 flex-row items-center">
         <Pressable
           onPress={() => onChange(value - 1)}
@@ -889,8 +889,8 @@ export default function ItemForm({
           icon="layers"
           right={<Text className="text-xs text-brand-light">Optional</Text>}>
           {groups.length === 0 && (
-            <Text className="mb-2 text-xs text-brand-light">
-              e.g. "Choose a drink" (pick 1) or "Extras" like Extra cheese +Rs
+            <Text className="mb-2 text-sm text-brand-dark">
+              e.g. "Choose a drink" or "Extras" like Extra cheese +Rs
               150
             </Text>
           )}
@@ -898,8 +898,8 @@ export default function ItemForm({
           {groups.map((group, gi) => (
             <View
               key={group.key}
-              className="mb-3 rounded-2xl p-3"
-              style={{ backgroundColor: colors.mist }}>
+              className="mb-3 rounded-2xl p-3 bg-mist"
+              >
               <View className="mb-2 flex-row items-center">
                 <View className="flex-1">
                   <Input
@@ -917,7 +917,7 @@ export default function ItemForm({
                 </Pressable>
               </View>
 
-              {/* Required? + how many the customer can pick */}
+              
               <View className="mb-1 flex-row gap-2">
                 <Pressable
                   onPress={() =>
@@ -925,9 +925,9 @@ export default function ItemForm({
                       minSelect: group.minSelect > 0 ? 0 : 1,
                     })
                   }
-                  className="flex-1 items-center justify-center rounded-2xl py-2"
-                  style={{ backgroundColor: colors.mistLight }}>
-                  <Text className="text-xs text-brand-light">Required?</Text>
+                  className="flex-1 items-center justify-center rounded-2xl py-2 bg-mist-light"
+                  >
+                  <Text className="text-sm text-brand-dark">Required?</Text>
                   <View
                     pointerEvents="none"
                     className="mt-0.5 flex-row items-center">
@@ -954,7 +954,7 @@ export default function ItemForm({
                   onChange={(n) => updateGroup(group.key, { maxSelect: n })}
                 />
               </View>
-              <Text className="mb-3 text-center text-xs font-semibold text-brand">
+              <Text className="mb-3 text-center text-sm mt-2 font-semibold text-brand">
                 {groupRuleText(group.minSelect > 0, group.maxSelect)}
               </Text>
 
@@ -1018,7 +1018,7 @@ export default function ItemForm({
                     <Ionicons
                       name="close-circle"
                       size={22}
-                      color={colors.mistDark}
+                      color="red"
                     />
                   </Pressable>
                 </View>
@@ -1028,7 +1028,7 @@ export default function ItemForm({
                   onPress={() => addOption(group.key)}
                   className="flex-row items-center self-start py-1">
                   <Ionicons name="add-circle" size={18} color={colors.brand} />
-                  <Text className="ml-1 text-sm font-bold text-brand">
+                  <Text className="ml-1 text-sm font-bold text-brand-dark">
                     Add option
                   </Text>
                 </Pressable>
@@ -1039,10 +1039,10 @@ export default function ItemForm({
           {groups.length < MAX_GROUPS && (
             <Pressable
               onPress={addGroup}
-              className="flex-row items-center justify-center rounded-2xl border-2 border-dashed py-3"
-              style={{ borderColor: colors.mistDark }}>
+              className="flex-row items-center justify-center rounded-2xl border-2 bg-mist-light border-brand-light py-3"
+              >
               <Ionicons name="add-circle" size={18} color={colors.brand} />
-              <Text className="ml-1.5 text-sm font-bold text-brand">
+              <Text className="ml-1.5 text-sm font-bold text-brand-dark">
                 Add add-on group
               </Text>
             </Pressable>
