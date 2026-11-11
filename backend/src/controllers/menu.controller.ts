@@ -188,28 +188,28 @@ export const createItem = async (req: Request, res: Response) => {
   res.status(201).json({ item });
 };
 
-// /** PATCH /menu/items/:itemId — send only what changes; sizes/addOnGroups replace the whole list */
-// export const updateItem = async (req: Request, res: Response) => {
-//   const parsed = updateItemSchema.safeParse(req.body);
-//   if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
 
-//   const item = await findItemOr404(req, res);
-//   if (!item) return;
-//   const { categoryId } = parsed.data;
+export const updateItem = async (req: Request, res: Response) => {
+  const parsed = updateItemSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
 
-//   // Moving to another category: it must be in the same restaurant, and goes to the end
-//   if (categoryId && categoryId !== String(item.categoryId)) {
-//     const restaurantId = restaurantOf(res);
-//     if (!(await MenuCategory.exists({ _id: categoryId, restaurantId }))) {
-//       return res.status(404).json({ message: "Category not found" });
-//     }
-//     item.sortOrder = await nextSortOrder("item", { restaurantId, categoryId });
-//   }
+  const item = await findItemOr404(req, res);
+  if (!item) return;
+  const { categoryId } = parsed.data;
 
-//   applyFields(item, parsed.data);
-//   await item.save();
-//   res.json({ item });
-// };
+  // Moving to another category: it must be in the same restaurant, and goes to the end
+  if (categoryId && categoryId !== String(item.categoryId)) {
+    const restaurantId = restaurantOf(res);
+    if (!(await MenuCategory.exists({ _id: categoryId, restaurantId }))) {
+      return res.status(404).json({ message: "Category not found" });
+    }
+    item.sortOrder = await nextSortOrder("item", { restaurantId, categoryId });
+  }
+
+  applyFields(item, parsed.data);
+  await item.save();
+  res.json({ item });
+};
 
 // /** PATCH /menu/items/:itemId/availability   { isAvailable } — quick "Sold out" toggle */
 // export const setItemAvailability = async (req: Request, res: Response) => {
