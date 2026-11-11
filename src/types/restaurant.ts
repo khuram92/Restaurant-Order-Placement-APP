@@ -26,6 +26,7 @@ export interface Restaurant {
   taxRate: number;
   seatingCapacity: number;
   isActive: boolean;
+  isTemporarilyClosed?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -64,9 +65,11 @@ export interface PickedImage {
   fileName?: string;
 }
 
-
 export type ServiceKey = "dineIn" | "takeaway" | "delivery";
-export interface CustomerRestaurant extends Omit<Restaurant, "email" | "isActive"> {
+export interface CustomerRestaurant extends Omit<
+  Restaurant,
+  "email" | "isActive"
+> {
   isOpenNow: boolean;
 }
 
@@ -76,8 +79,6 @@ export interface CustomerRestaurantListResponse {
   page: number;
   pages: number;
 }
-
-
 
 export interface ManagerRestaurant extends Restaurant {
   isOpenNow: boolean;
