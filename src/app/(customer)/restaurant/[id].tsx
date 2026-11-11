@@ -414,7 +414,7 @@ export default function CustomerRestaurantScreen() {
           </View>
         </View>
 
-        {/* [1] Sticky category tabs */}
+        
         <View
           className="mt-4 py-2"
           style={{ backgroundColor: colors.mist }}
@@ -434,7 +434,7 @@ export default function CustomerRestaurantScreen() {
                     onLayout={(e) => (tabX.current[c._id] = e.nativeEvent.layout.x)}
                     className="rounded-full px-4 py-2"
                     style={{ backgroundColor: active ? colors.brand : colors.white }}>
-                    <Text className="text-sm font-semibold" style={{ color: active ? colors.white : colors.brand }}>
+                    <Text className="text-sm font-semibold " style={{ color: active ? colors.white : colors.brand }}>
                       {c.name}
                     </Text>
                   </Pressable>
@@ -444,7 +444,7 @@ export default function CustomerRestaurantScreen() {
           )}
         </View>
 
-        {/* [2] Menu */}
+        
         <View className="flex-1 px-4 pt-2" onLayout={(e) => (menuTop.current = e.nativeEvent.layout.y)}>
           {!r.isOpenNow && menu.length > 0 && (
             <View className="mb-3 flex-row items-center rounded-2xl px-4 py-3" style={{ backgroundColor: colors.text }}>

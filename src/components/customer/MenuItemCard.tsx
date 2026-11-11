@@ -7,7 +7,7 @@ import { ITEM_TAGS, itemPriceText, itemServesText } from "../../utils/menuFormat
 
 type Props = {
   item: MenuItem;
-  /** false when the restaurant is closed: card still shows, but can't be added */
+  
   canOrder: boolean;
   onPress: () => void;
 };
@@ -26,7 +26,7 @@ export default function MenuItemCard({ item, canOrder, onPress }: Props) {
       disabled={soldOut}
       className="mb-3 flex-row rounded-3xl bg-white p-3"
       style={({ pressed }) => [cardShadow, { opacity: soldOut ? 0.55 : pressed ? 0.9 : 1 }]}>
-      {/* Text */}
+    
       <View className="flex-1 pr-3">
         {tags.length > 0 && (
           <View className="mb-1 flex-row flex-wrap">
