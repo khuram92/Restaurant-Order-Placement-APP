@@ -423,12 +423,12 @@ export default function RestaurantDetailScreen() {
           </View>
           {/* Menu */}
           <Pressable
-            // onPress={() =>
-            //   router.push({
-            //     pathname: "/admin/menu/[restaurantId]",
-            //     params: { restaurantId: r._id, name: r.name },
-            //   })
-            // }
+            onPress={() =>
+              router.push({
+                pathname: "/admin/menu/[restaurantId]",
+                params: { restaurantId: r._id, name: r.name },
+              })
+            }
             className="mb-4 flex-row items-center rounded-3xl bg-white p-5"
             style={cardShadow}>
             <View
