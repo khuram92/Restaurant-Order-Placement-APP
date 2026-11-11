@@ -4,7 +4,8 @@ import { User } from "../models/User.js";
 import { isOpenNow } from "../utils/openingHours.js";
 import { customerListQuerySchema } from "../validators/customerRestaurant.validators.js";
 import mongoose from "mongoose";
-
+import { MenuCategory } from "../models/MenuCategory.js";
+import { MenuItem } from "../models/MenuItem.js";
 
 const firstIssue = (error: { issues: { message: string }[] }) =>
   error.issues[0]?.message ?? "Invalid input";
@@ -70,4 +71,30 @@ export const getRestaurant = async (req: Request, res: Response) => {
   }
 
   res.json({ restaurant: toCustomerJSON(restaurant) });
+};
+
+export const getRestaurantMenu = async (req: Request, res: Response) => {
+  const id = String(req.params.id);
+  if (!mongoose.isValidObjectId(id)) {
+    return res.status(400).json({ message: "Invalid restaurant id" });
+  }
+
+  const [available, hasManager] = await Promise.all([
+    Restaurant.exists({ _id: id, isActive: true }),
+    User.exists({ role: "manager", isActive: true, restaurantId: id }),
+  ]);
+  if (!available || !hasManager) {
+    return res.status(404).json({ message: "This restaurant isn't available right now" });
+  }
+
+  const [categories, items] = await Promise.all([
+    MenuCategory.find({ restaurantId: id, isActive: true }).sort({ sortOrder: 1, createdAt: 1 }),
+    MenuItem.find({ restaurantId: id }).sort({ sortOrder: 1, createdAt: 1 }),
+  ]);
+
+  res.json({
+    categories: categories
+      .map((c) => ({ ...c.toJSON(), items: items.filter((i) => String(i.categoryId) === c.id) }))
+      .filter((c) => c.items.length > 0),
+  });
 };
