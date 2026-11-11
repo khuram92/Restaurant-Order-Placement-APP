@@ -253,7 +253,7 @@ const groupRuleText = (required: boolean, max: number) => {
   if (max === 1) return "Required · customer must pick 1";
   return `Required · customer picks 1 to ${max}`;
 };
-// ---------- Form ----------
+
 export default function ItemForm({
   menuApi,
   initialCategoryId,
