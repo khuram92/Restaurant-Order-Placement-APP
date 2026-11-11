@@ -40,12 +40,11 @@ type Props = {
   menuApi: MenuApi;
 
   initialCategoryId?: string;
- 
+
   itemId?: string;
 
   onDone: () => void;
 };
-
 
 type SizeRow = {
   key: string;
@@ -187,9 +186,7 @@ function Stepper({
   onChange: (n: number) => void;
 }) {
   return (
-    <View
-      className="flex-1 items-center rounded-2xl py-2 bg-mist-light"
-      >
+    <View className="flex-1 items-center rounded-2xl py-2 bg-mist-light">
       <Text className="text-xs text-brand-light">{label}</Text>
       <View className="mt-1 flex-row items-center">
         <Pressable
@@ -251,7 +248,6 @@ function ToggleRow({
   );
 }
 
-
 const groupRuleText = (required: boolean, max: number) => {
   if (!required) return `Optional · customer can pick up to ${max}`;
   if (max === 1) return "Required · customer must pick 1";
@@ -298,7 +294,6 @@ export default function ItemForm({
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState("");
-
 
   useEffect(() => {
     const load = async () => {
@@ -367,7 +362,6 @@ export default function ItemForm({
     if (error) setError("");
   };
 
-  
   const handlePicked = (result: ImagePicker.ImagePickerResult) => {
     if (result.canceled || !result.assets[0]) return;
     const asset = result.assets[0];
@@ -418,7 +412,6 @@ export default function ItemForm({
   };
 
   const previewUri = pickedImage?.uri ?? (removeImage ? undefined : imageUrl);
-
 
   const addSize = () =>
     setSizes((prev) => [
@@ -589,7 +582,6 @@ export default function ItemForm({
     return input;
   };
 
-  
   const save = async () => {
     const input = buildInput();
     if (typeof input === "string") return setError(input);
@@ -647,7 +639,6 @@ export default function ItemForm({
     );
   };
 
-  
   if (loading) {
     return (
       <View className="flex-1 items-center justify-center">
@@ -687,11 +678,10 @@ export default function ItemForm({
         }}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}>
-        
         <Pressable
           onPress={choosePhoto}
           className="mb-4 h-48 items-center justify-center overflow-hidden rounded-3xl bg-brand-soft"
-          style={[cardShadow, ]}>
+          style={[cardShadow]}>
           {previewUri ? (
             <>
               <Image
@@ -699,9 +689,7 @@ export default function ItemForm({
                 style={{ width: "100%", height: "100%" }}
                 contentFit="cover"
               />
-              <View
-                className="absolute bottom-3 right-3 flex-row items-center rounded-full px-3 py-1.5 bg-[rgba(59,70,56,0.8)]"
-                >
+              <View className="absolute bottom-3 right-3 flex-row items-center rounded-full px-3 py-1.5 bg-[rgba(59,70,56,0.8)]">
                 <Ionicons name="camera" size={14} color={colors.white} />
                 <Text className="ml-1 text-xs font-bold text-white">
                   Change
@@ -710,15 +698,12 @@ export default function ItemForm({
             </>
           ) : (
             <>
-              <View
-                className="h-14 w-14 items-center justify-center rounded-full bg-brand"
-                >
+              <View className="h-14 w-14 items-center justify-center rounded-full bg-brand">
                 <Ionicons name="camera" size={26} color={colors.white} />
               </View>
               <Text className="mt-2 text-sm font-bold text-brand-dark">
                 Add a photo
               </Text>
-              
             </>
           )}
         </Pressable>
@@ -747,7 +732,7 @@ export default function ItemForm({
           />
 
           <Label text="Category" />
-          <View className="flex-row flex-wrap" >
+          <View className="flex-row flex-wrap">
             {categories.map((c) => {
               const selected = c._id === categoryId;
               return (
@@ -780,22 +765,19 @@ export default function ItemForm({
           </View>
         </Section>
 
-        
         <Section title="Price" icon="pricetag">
-          <View
-            className="mb-4 flex-row rounded-2xl p-1"
-            style={{ backgroundColor: colors.mistLight }}>
+          <View className="mb-4 flex-row rounded-2xl p-1 bg-mist-light">
             {(["single", "sizes"] as const).map((m) => (
               <Pressable
                 key={m}
                 onPress={() => switchMode(m)}
-                className="flex-1 items-center rounded-xl py-2.5"
-                style={{
-                  backgroundColor: mode === m ? colors.brand : "transparent",
-                }}>
+                className={`flex-1 items-center rounded-xl py-2.5 ${
+                  mode === m ? "bg-brand" : "bg-transparent"
+                }`}>
                 <Text
-                  className="text-sm font-bold"
-                  style={{ color: mode === m ? colors.white : colors.brand }}>
+                  className={`text-sm font-bold ${
+                    mode === m ? "text-white" : "text-brand"
+                  }`}>
                   {m === "single" ? "One price" : "Sizes"}
                 </Text>
               </Pressable>
@@ -812,7 +794,7 @@ export default function ItemForm({
                     setPrice(t.replace(/[^\d]/g, ""));
                     clearError();
                   }}
-                  placeholder="650"
+                  placeholder="eg: 500"
                   keyboardType="number-pad"
                   prefix="Rs"
                   maxLength={7}
@@ -832,13 +814,13 @@ export default function ItemForm({
           ) : (
             <>
               <View className="mb-1 flex-row px-1">
-                <Text className="flex-[1.4] text-xs font-semibold text-brand-light">
+                <Text className="flex-[1.4] text-xs font-semibold text-brand-dark">
                   Size
                 </Text>
-                <Text className="ml-2 flex-1 text-xs font-semibold text-brand-light">
+                <Text className="ml-2 flex-1 text-xs font-semibold text-brand-dark">
                   Price (Rs)
                 </Text>
-                <Text className="ml-2 w-16 text-xs font-semibold text-brand-light">
+                <Text className="ml-2 w-16 text-xs font-semibold text-brand-dark">
                   Serves
                 </Text>
                 <View className="ml-2 w-6" />
@@ -892,7 +874,7 @@ export default function ItemForm({
                   onPress={addSize}
                   className="mt-1 flex-row items-center self-start py-1">
                   <Ionicons name="add-circle" size={18} color={colors.brand} />
-                  <Text className="ml-1 text-sm font-bold text-brand">
+                  <Text className="ml-1 text-sm font-bold text-brand-dark">
                     Add size
                   </Text>
                 </Pressable>
@@ -976,7 +958,6 @@ export default function ItemForm({
                 {groupRuleText(group.minSelect > 0, group.maxSelect)}
               </Text>
 
-             
               {group.options.map((option) => (
                 <View key={option.key} className="mb-2 flex-row items-center">
                   <View className="flex-[1.6]">
@@ -1093,7 +1074,6 @@ export default function ItemForm({
           />
         </Section>
 
-       
         {original && (
           <Pressable
             onPress={confirmDelete}
@@ -1116,7 +1096,6 @@ export default function ItemForm({
         )}
       </ScrollView>
 
-    
       <View
         className="absolute bottom-0 left-0 right-0 px-4 pt-3"
         style={{
