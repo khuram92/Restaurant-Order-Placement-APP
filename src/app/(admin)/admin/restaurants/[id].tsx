@@ -421,6 +421,33 @@ export default function RestaurantDetailScreen() {
               />
             )}
           </View>
+          {/* Menu */}
+          <Pressable
+            // onPress={() =>
+            //   router.push({
+            //     pathname: "/admin/menu/[restaurantId]",
+            //     params: { restaurantId: r._id, name: r.name },
+            //   })
+            // }
+            className="mb-4 flex-row items-center rounded-3xl bg-white p-5"
+            style={cardShadow}>
+            <View
+              className="mr-4 h-12 w-12 items-center justify-center rounded-2xl"
+              style={{ backgroundColor: colors.brand }}>
+              <Ionicons name="fast-food" size={24} color={colors.white} />
+            </View>
+            <View className="flex-1">
+              <Text className="text-base font-bold text-brand-dark">Menu</Text>
+              <Text className="text-sm text-brand-light">
+                Categories, items, prices and add-ons
+              </Text>
+            </View>
+            <Ionicons
+              name="chevron-forward"
+              size={20}
+              color={colors.brandLight}
+            />
+          </Pressable>
           {/* Services */}
           <Card title="Services" icon="grid">
             <View className="flex-row gap-2">
@@ -525,7 +552,6 @@ export default function RestaurantDetailScreen() {
             })}
           </Card>
 
-          
           <Pressable
             onPress={onDelete}
             disabled={deleting}
