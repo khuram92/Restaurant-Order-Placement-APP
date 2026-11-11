@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getRestaurant, listRestaurants } from "../controllers/customerRestaurant.controller.js";
+import { getRestaurant, getRestaurantMenu, listRestaurants } from "../controllers/customerRestaurant.controller.js";
 import { protect } from "../middleware/auth.middleware.js";
 
 const router = Router();
@@ -9,5 +9,6 @@ router.use(protect);
 
 router.get("/", listRestaurants);
 router.get("/:id", getRestaurant);
+router.get("/:id/menu", getRestaurantMenu);
 
 export default router;
