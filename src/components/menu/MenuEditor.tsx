@@ -29,11 +29,10 @@ type IconName = ComponentProps<typeof Ionicons>["name"];
 
 type Props = {
   menuApi: MenuApi;
-  /** Open the item form (add when item is null) */
+
   onOpenItem: (categoryId: string, item: MenuItem | null) => void;
 };
 
-/** Move one element of a list up (-1) or down (+1) */
 const move = <T,>(list: T[], index: number, direction: -1 | 1) => {
   const target = index + direction;
   if (target < 0 || target >= list.length) return list;
@@ -68,7 +67,6 @@ function IconButton({
   );
 }
 
-// ---------- One item row ----------
 function ItemRow({
   item,
   isFirst,
@@ -93,7 +91,6 @@ function ItemRow({
       onPress={onPress}
       className="flex-row items-center border-t py-3"
       style={{ borderColor: colors.mist, opacity: item.isAvailable ? 1 : 0.6 }}>
-      {/* Photo */}
       <View
         className="mr-3 h-14 w-14 items-center justify-center overflow-hidden rounded-xl"
         style={{ backgroundColor: colors.brandSoft }}>
@@ -271,7 +268,6 @@ export default function MenuEditor({ menuApi, onOpenItem }: Props) {
     ]);
   };
 
-  // ---------- Items ----------
   const updateItemInState = (updated: MenuItem) =>
     setCategories((prev) =>
       prev.map((c) => ({
@@ -306,7 +302,6 @@ export default function MenuEditor({ menuApi, onOpenItem }: Props) {
     );
   };
 
-  // ---------- Render ----------
   if (loading) {
     return (
       <View className="flex-1 items-center justify-center">
@@ -375,7 +370,7 @@ export default function MenuEditor({ menuApi, onOpenItem }: Props) {
           </View>
         ) : (
           <>
-            <Text className="mb-3 text-xs text-brand-light">
+            <Text className="mb-3 text-xs text-brand">
               {categories.length} categor{categories.length === 1 ? "y" : "ies"}{" "}
               · {itemCount} item
               {itemCount === 1 ? "" : "s"}
@@ -385,14 +380,13 @@ export default function MenuEditor({ menuApi, onOpenItem }: Props) {
             {categories.map((category, index) => (
               <View
                 key={category._id}
-                className="mb-4 rounded-3xl bg-white p-4"
+                className="mb-4 rounded-3xl bg-white p-4 "
                 style={cardShadow}>
-                {/* Category header */}
-                <View className="flex-row items-center">
+                <View className="flex-row items-center pb-2">
                   <View className="flex-1">
-                    <View className="flex-row items-center">
+                    <View className="flex-row items-center ">
                       <Text
-                        className="flex-shrink text-base font-extrabold text-brand-dark"
+                        className="flex-shrink text-base font-extrabold  text-brand-dark"
                         numberOfLines={1}>
                         {category.name}
                       </Text>
@@ -414,7 +408,6 @@ export default function MenuEditor({ menuApi, onOpenItem }: Props) {
                       )}
                     </View>
 
-                    {/* Cuisine label + item count */}
                     <View className="mt-0.5 flex-row items-center">
                       {!!category.cuisine && (
                         <View
@@ -466,7 +459,6 @@ export default function MenuEditor({ menuApi, onOpenItem }: Props) {
                   </Text>
                 )}
 
-                {/* Items */}
                 <View className="mt-2">
                   {category.items.map((item, i) => (
                     <ItemRow
@@ -483,8 +475,7 @@ export default function MenuEditor({ menuApi, onOpenItem }: Props) {
                 </View>
                 <Pressable
                   onPress={() => onOpenItem(category._id, null)}
-                  className="mt-2 flex-row items-center justify-center rounded-2xl border-2 border-brand-light  py-3"
-                  >
+                  className="mt-2 flex-row items-center justify-center rounded-2xl border-2 border-brand-light  py-3">
                   <Ionicons name="add-circle" size={18} color={colors.brand} />
                   <Text className="ml-1.5 text-sm font-bold text-brand">
                     Add item
@@ -496,14 +487,11 @@ export default function MenuEditor({ menuApi, onOpenItem }: Props) {
         )}
       </ScrollView>
 
-      <View
-        className="absolute left-4 right-4 bottom-12 "
-        >
+      <View className="absolute left-4 right-4 bottom-12 ">
         <Pressable
           onPress={() => setSheet({ open: true, category: null })}
           className="flex-row items-center justify-center rounded-2xl border-2 border-brand py-4 bg-brand-light"
-          style={[cardShadow, ]}>
-          
+          style={[cardShadow]}>
           <Text className="ml-1 text-base text-center font-bold text-white">
             + Add Category
           </Text>
