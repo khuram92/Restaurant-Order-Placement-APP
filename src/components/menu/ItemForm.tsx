@@ -54,7 +54,6 @@ const pickerOptions: ImagePicker.ImagePickerOptions = {
   quality: 0.8,
 };
 
-// ---------- Small UI pieces ----------
 function Section({ title, icon, right, children }: { title: string; icon: IconName; right?: ReactNode; children: ReactNode }) {
   return (
     <View className="mb-4 rounded-3xl bg-white p-5" style={cardShadow}>

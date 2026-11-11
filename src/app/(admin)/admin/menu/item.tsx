@@ -5,7 +5,7 @@ import ItemForm from "../../../../components/menu/ItemForm";
 import { colors } from "../../../../constants/theme";
 import { adminMenuApi } from "../../../../services/menuApi";
 
-/** Super Admin: add or edit a menu item  (/admin/menu/item?restaurantId=&categoryId=&itemId=) */
+
 export default function AdminMenuItemScreen() {
   const { restaurantId, categoryId, itemId } = useLocalSearchParams<{
     restaurantId: string;

@@ -89,11 +89,10 @@ function ItemRow({
   return (
     <Pressable
       onPress={onPress}
-      className="flex-row items-center border-t py-3"
+      className={`flex-row items-center border-t py-3
+}`}
       style={{ borderColor: colors.mist, opacity: item.isAvailable ? 1 : 0.6 }}>
-      <View
-        className="mr-3 h-14 w-14 items-center justify-center overflow-hidden rounded-xl"
-        style={{ backgroundColor: colors.brandSoft }}>
+      <View className="mr-3 h-14 w-14 items-center justify-center overflow-hidden rounded-xl bg-brand-soft">
         {item.image ? (
           <Image
             source={{ uri: item.image }}
@@ -144,7 +143,6 @@ function ItemRow({
         </Text>
       </View>
 
-      {/* Sold out switch */}
       <View className="items-center">
         <Switch
           value={item.isAvailable}
@@ -154,7 +152,7 @@ function ItemRow({
           thumbColor={item.isAvailable ? colors.brand : colors.white}
         />
         <Text
-          className="text-[10px] font-semibold"
+          className={`text-[10px] font-semibold `}
           style={{ color: item.isAvailable ? colors.brand : colors.danger }}>
           {item.isAvailable ? "Available" : "Sold out"}
         </Text>
@@ -372,8 +370,6 @@ export default function MenuEditor({ menuApi, onOpenItem }: Props) {
           <>
             <Text className="mb-3 text-xs text-brand">
               {categories.length} categor{categories.length === 1 ? "y" : "ies"}{" "}
-              · {itemCount} item
-              {itemCount === 1 ? "" : "s"}
               {soldOut > 0 ? ` · ${soldOut} sold out` : ""}
             </Text>
 
