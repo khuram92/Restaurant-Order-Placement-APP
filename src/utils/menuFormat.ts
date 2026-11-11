@@ -1,4 +1,22 @@
+import type { Ionicons } from "@expo/vector-icons";
+import type { ComponentProps } from "react";
+import { colors } from "../constants/theme";
 import type { MenuItem } from "../types/menu";
+
+export type ItemTagKey = "isBestseller" | "isChefSpecial" | "isNew" | "isSpicy";
+
+/** Item tags, in the order they're shown (form chips, menu rows, customer cards) */
+export const ITEM_TAGS: {
+  key: ItemTagKey;
+  label: string;
+  icon: ComponentProps<typeof Ionicons>["name"];
+  color: string;
+}[] = [
+  { key: "isBestseller", label: "Bestseller", icon: "star", color: colors.brand },
+  { key: "isChefSpecial", label: "Chef's special", icon: "ribbon", color: colors.brand },
+  { key: "isNew", label: "New", icon: "sparkles", color: colors.brand },
+  { key: "isSpicy", label: "Spicy", icon: "flame", color: colors.danger },
+];
 
 export const money = (n: number) => `Rs ${n.toLocaleString("en-PK")}`;
 

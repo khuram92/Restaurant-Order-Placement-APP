@@ -103,7 +103,9 @@ const itemFields = {
   serves: serves.nullable(),
   sizes: z.array(sizeSchema).max(6, "At most 6 sizes"),
   addOnGroups: z.array(addOnGroupSchema).max(10, "At most 10 add-on groups"),
-  isVeg: z.boolean(),
+  isBestseller: z.boolean(),
+  isChefSpecial: z.boolean(),
+  isNew: z.boolean(),
   isSpicy: z.boolean(),
   isAvailable: z.boolean(),
 };

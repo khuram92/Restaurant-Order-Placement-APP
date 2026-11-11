@@ -40,7 +40,9 @@ export interface IMenuItem {
 
   addOnGroups: IAddOnGroup[];
 
-  isVeg: boolean;
+  isBestseller: boolean;
+  isChefSpecial: boolean;
+  isNew: boolean;
   isSpicy: boolean;
   isAvailable: boolean; 
   sortOrder: number;
@@ -94,7 +96,9 @@ const menuItemSchema = new Schema<IMenuItem>(
 
     addOnGroups: { type: [addOnGroupSchema], default: [] },
 
-    isVeg: { type: Boolean, default: false },
+    isBestseller: { type: Boolean, default: false },
+    isChefSpecial: { type: Boolean, default: false },
+    isNew: { type: Boolean, default: false },
     isSpicy: { type: Boolean, default: false },
     isAvailable: { type: Boolean, default: true },
     sortOrder: { type: Number, default: 0 },

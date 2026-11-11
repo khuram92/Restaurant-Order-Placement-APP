@@ -31,7 +31,9 @@ export interface MenuItem {
   serves?: number;
   sizes: ItemSize[];
   addOnGroups: AddOnGroup[];
-  isVeg: boolean;
+  isBestseller: boolean;
+  isChefSpecial: boolean;
+  isNew: boolean;
   isSpicy: boolean;
   isAvailable: boolean;
   sortOrder: number;
@@ -70,7 +72,9 @@ export interface MenuItemInput {
   serves?: number | null;
   sizes?: ItemSize[];
   addOnGroups?: AddOnGroup[];
-  isVeg?: boolean;
+  isBestseller?: boolean;
+  isChefSpecial?: boolean;
+  isNew?: boolean;
   isSpicy?: boolean;
   isAvailable?: boolean;
 }
