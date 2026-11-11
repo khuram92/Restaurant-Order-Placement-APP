@@ -82,27 +82,27 @@ export const getMenu = async (_req: Request, res: Response) => {
   });
 };
 
-// // ---------- Categories ----------
 
-// /** POST /menu/categories   { name, description?, isActive? } */
-// export const createCategory = async (req: Request, res: Response) => {
-//   const parsed = createCategorySchema.safeParse(req.body);
-//   if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
-//   const restaurantId = restaurantOf(res);
 
-//   if (await nameTaken(restaurantId, parsed.data.name)) {
-//     return res.status(409).json({ message: "A category with this name already exists" });
-//   }
 
-//   const category = new MenuCategory({
-//     restaurantId,
-//     sortOrder: await nextSortOrder("category", { restaurantId }),
-//   });
-//   applyFields(category, parsed.data);
-//   await category.save();
+export const createCategory = async (req: Request, res: Response) => {
+  const parsed = createCategorySchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
+  const restaurantId = restaurantOf(res);
 
-//   res.status(201).json({ category });
-// };
+  if (await nameTaken(restaurantId, parsed.data.name)) {
+    return res.status(409).json({ message: "A category with this name already exists" });
+  }
+
+  const category = new MenuCategory({
+    restaurantId,
+    sortOrder: await nextSortOrder("category", { restaurantId }),
+  });
+  applyFields(category, parsed.data);
+  await category.save();
+
+  res.status(201).json({ category });
+};
 
 // /** PATCH /menu/categories/:categoryId */
 // export const updateCategory = async (req: Request, res: Response) => {
