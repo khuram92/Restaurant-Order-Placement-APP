@@ -331,14 +331,10 @@ export default function CartScreen() {
                 )
               }
               disabled={belowMinimum}
-              className="flex-row items-center justify-between rounded-2xl px-5 py-4"
+              className="flex-row items-center justify-between bg-brand-dark rounded-2xl px-5 py-4"
               style={[
                 cardShadow,
-                {
-                  backgroundColor: belowMinimum
-                    ? colors.mistDark
-                    : colors.brand,
-                },
+                
               ]}>
               <Text className="text-base font-bold text-white">Checkout</Text>
               <View className="flex-row items-center">
