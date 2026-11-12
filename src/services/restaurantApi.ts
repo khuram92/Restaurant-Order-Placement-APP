@@ -39,3 +39,16 @@ export const getCustomerMenu = async (id: string) => {
   const { data } = await api.get<{ categories: MenuCategoryWithItems[] }>(`/restaurants/${id}/menu`);
   return data.categories;
 };
+
+
+export interface SeatAvailability {
+  capacity: number;
+  inUse: number;
+  free: number;
+}
+
+/** Customer: dine-in seats free right now */
+export const getSeatAvailability = async (id: string) => {
+  const { data } = await api.get<SeatAvailability>(`/restaurants/${id}/seats`);
+  return data;
+};
