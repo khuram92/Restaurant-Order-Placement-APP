@@ -7,7 +7,6 @@ import {
   useRef,
   useState,
   type ComponentProps,
-  type ReactNode,
 } from "react";
 import {
   ActivityIndicator,
@@ -75,7 +74,6 @@ const SERVICES: { key: ServiceKey; label: string; icon: IconName }[] = [
   { key: "delivery", label: "Delivery", icon: "bicycle" },
 ];
 
-
 // ---------- Info bottom sheet: order info, location, hours ----------
 
 /** "Closes in 2h 15m" / "Opens in 40m" based on today's hours (phone time) */
@@ -118,8 +116,7 @@ function QuickAction({
     <Pressable
       onPress={onPress}
       disabled={disabled}
-      className="flex-1 items-center rounded-2xl py-3 border-2 border-brand-light bg-mist-light"
-      >
+      className="flex-1 items-center rounded-2xl py-3 border-2 border-brand-light bg-mist-light">
       {({ pressed }) => (
         <>
           <Ionicons
@@ -148,9 +145,7 @@ function StatTile({
   value: string;
 }) {
   return (
-    <View
-      className="mb-2 w-[48.5%] rounded-2xl p-3 bg-mist-light border-2 border-mist-dark"
-      >
+    <View className="mb-2 w-[48.5%] rounded-2xl p-3 bg-mist-light border-2 border-mist-dark">
       <Ionicons name={icon} size={18} color={colors.brand} />
       <Text className="mt-1.5 text-base font-extrabold text-brand-dark">
         {value}
@@ -258,7 +253,6 @@ function InfoSheet({
       animationType="slide"
       onRequestClose={onClose}>
       <View className="flex-1 justify-end">
-      
         <Pressable
           className="absolute inset-0"
           style={{ backgroundColor: "rgba(44,51,41,0.45)" }}
@@ -308,7 +302,6 @@ function InfoSheet({
           <ScrollView
             contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 10 }}
             showsVerticalScrollIndicator={false}>
-            
             <View
               className="mb-4 flex-row items-center rounded-2xl px-4 py-3"
               style={{
@@ -405,8 +398,6 @@ function InfoSheet({
                 </View>
               </>
             )}
-
-            
 
             {/* Opening hours: today first, tap to see the week */}
             <Pressable
