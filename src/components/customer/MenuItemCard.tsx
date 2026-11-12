@@ -32,7 +32,7 @@ export default function MenuItemCard({ item, canOrder, onPress }: Props) {
         soldOut ? "opacity-[0.65]" : "active:opacity-90"
       }`}
       style={cardShadow}>
-        <View className="h-32 w-full items-center justify-center rounded-2xl bg-mist-dark/50 p-1.5">
+        <View className="h-32 w-full items-center justify-center rounded-2xl  p-1">
         <View className="h-full w-full items-center justify-center overflow-hidden rounded-xl bg-brand-soft">
           {item.image ? (
             <Image source={{ uri: item.image }} style={{ width: "100%", height: "100%" }} contentFit="cover" />

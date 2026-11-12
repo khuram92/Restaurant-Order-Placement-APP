@@ -40,7 +40,8 @@ import type {
   Day,
   ServiceKey,
 } from "../../../types/restaurant";
-
+import ItemSheet from "@/components/customer/ItemSheet";
+import { CartSelection } from "@/types/cart";
 type IconName = ComponentProps<typeof Ionicons>["name"];
 
 const DAY_LABELS: Record<Day, string> = {
@@ -461,6 +462,7 @@ export default function CustomerRestaurantScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
   const [infoOpen, setInfoOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
 
   // ---------- Sticky category tabs ----------
   const scrollRef = useRef<ScrollViewInstance>(null);
@@ -527,11 +529,15 @@ export default function CustomerRestaurantScreen() {
     if (current !== activeId) highlightTab(current);
   };
 
-  const openItem = (item: MenuItem) => {
-    // Size / add-ons / quantity sheet comes in the next step
+    const openItem = (item: MenuItem) => setSelectedItem(item);
+
+  const addToCart = (selection: CartSelection) => {
+    setSelectedItem(null);
+    // The cart comes in the next step; for now show what was chosen
+    const extras = [selection.sizeName, ...selection.addOns.map((a) => a.name)].filter(Boolean).join(", ");
     Alert.alert(
-      item.name,
-      "Choosing options and adding to cart comes in the next step.",
+      "Added (preview)",
+      `${selection.quantity} × ${selection.name}${extras ? `\n${extras}` : ""}\nRs ${(selection.unitPrice * selection.quantity).toLocaleString("en-PK")}`,
     );
   };
 
@@ -826,6 +832,13 @@ export default function CustomerRestaurantScreen() {
         restaurant={r}
         visible={infoOpen}
         onClose={() => setInfoOpen(false)}
+      />
+            <ItemSheet
+        item={selectedItem}
+        visible={!!selectedItem}
+        canOrder={r.isOpenNow}
+        onClose={() => setSelectedItem(null)}
+        onAdd={addToCart}
       />
     </View>
   );
