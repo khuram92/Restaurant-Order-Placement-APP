@@ -137,24 +137,24 @@ export const getMyOrder = async (req: Request, res: Response) => {
   res.json({ order });
 };
 
-// /** PATCH /api/orders/:id/cancel   { reason? } — only while the restaurant hasn't accepted it */
-// export const cancelMyOrder = async (req: Request, res: Response) => {
-//   const parsed = cancelOrderSchema.safeParse(req.body ?? {});
-//   if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
+/** PATCH /api/orders/:id/cancel   { reason? } — only while the restaurant hasn't accepted it */
+export const cancelMyOrder = async (req: Request, res: Response) => {
+  const parsed = cancelOrderSchema.safeParse(req.body ?? {});
+  if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
 
-//   const order = await findMyOrderOr404(req, res);
-//   if (!order) return;
+  const order = await findMyOrderOr404(req, res);
+  if (!order) return;
 
-//   if (order.status !== "pending") {
-//     return res.status(409).json({
-//       message: "The restaurant has already accepted this order. Please call them to cancel.",
-//     });
-//   }
+  if (order.status !== "pending") {
+    return res.status(409).json({
+      message: "The restaurant has already accepted this order. Please call them to cancel.",
+    });
+  }
 
-//   order.status = "cancelled";
-//   if (parsed.data.reason) order.cancelReason = parsed.data.reason;
-//   order.statusHistory.push({ status: "cancelled", at: new Date(), by: req.user!._id });
-//   await order.save();
+  order.status = "cancelled";
+  if (parsed.data.reason) order.cancelReason = parsed.data.reason;
+  order.statusHistory.push({ status: "cancelled", at: new Date(), by: req.user!._id });
+  await order.save();
 
-//   res.json({ message: "Order cancelled", order });
-// };
+  res.json({ message: "Order cancelled", order });
+};
