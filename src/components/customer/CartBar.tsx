@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { cardShadow, colors } from "../../constants/theme";
 import { useCart } from "../../context/CartContext";
 import { money } from "../../utils/menuFormat";
+import { router } from "expo-router";
 
 type Props = {
   /** Only show when the cart belongs to this restaurant (leave out to always show) */
@@ -23,7 +24,7 @@ export default function CartBar({ restaurantId }: Props) {
       className="absolute left-4 right-4"
       style={{ bottom: insets.bottom + 12 }}>
       <Pressable
-        // onPress={() => router.push("/cart")}
+        onPress={() => router.push("/cart")}
         className="flex-row items-center rounded-2xl px-4 py-3.5 active:opacity-90"
         style={[cardShadow, { backgroundColor: colors.brandDark }]}>
         <View
