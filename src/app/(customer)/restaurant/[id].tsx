@@ -382,8 +382,7 @@ export default function CustomerRestaurantScreen() {
     <Pressable
       onPress={() => router.back()}
       hitSlop={8}
-     className="absolute left-2 h-10 w-10 items-center top-4 justify-center rounded-full bg-brand-light"
-      >
+      className="absolute left-2 h-10 w-10 items-center top-4 justify-center rounded-full bg-brand-light">
       <Ionicons name="chevron-back" size={22} color={colors.white} />
     </Pressable>
   );
@@ -459,11 +458,8 @@ export default function CustomerRestaurantScreen() {
             colors={[colors.brand]}
           />
         }>
-       
         <View>
-          <View
-            className="h-48 w-full bg-brand-soft"
-            >
+          <View className="h-48 w-full bg-brand-soft">
             {r.coverImage ? (
               <Image
                 source={{ uri: r.coverImage }}
@@ -485,9 +481,7 @@ export default function CustomerRestaurantScreen() {
             className="-mt-10 mx-4 rounded-3xl bg-white p-4"
             style={cardShadow}>
             <View className="flex-row items-center">
-              <View
-                className="mr-3 h-14 w-14 items-center justify-center border-2 border-brand-light bg-brand-soft overflow-hidden rounded-2xl"
-                >
+              <View className="mr-3 h-14 w-14 items-center justify-center border-2 border-brand-light bg-brand-soft overflow-hidden rounded-2xl">
                 {r.logo ? (
                   <Image
                     source={{ uri: r.logo }}
@@ -561,8 +555,7 @@ export default function CustomerRestaurantScreen() {
         </View>
 
         <View
-          className="mt-4 py-2"
-          style={{ backgroundColor: colors.mist }}
+          className="mt-4 py-2 bg-mist"
           onLayout={(e: LayoutChangeEvent) =>
             (barHeight.current = e.nativeEvent.layout.height)
           }>
@@ -586,8 +579,9 @@ export default function CustomerRestaurantScreen() {
                       backgroundColor: active ? colors.brand : colors.white,
                     }}>
                     <Text
-                      className="text-sm font-semibold "
-                      style={{ color: active ? colors.white : colors.brand }}>
+                      className={`text-sm font-semibold ${
+                        active ? "text-white" : "text-brand"
+                      }`}>
                       {c.name}
                     </Text>
                   </Pressable>
@@ -642,15 +636,13 @@ export default function CustomerRestaurantScreen() {
                   <Text className="flex-1 text-lg font-extrabold text-brand-dark">
                     {category.name}
                   </Text>
-                  <Text className="text-xs text-brand-light">
+                  <Text className="text-sm font-medium text-brand">
                     {category.items.length} item
                     {category.items.length === 1 ? "" : "s"}
                   </Text>
                 </View>
                 {!!category.description && (
-                  <Text
-                    className="-mt-1 mb-2 text-xs"
-                    style={{ color: colors.textMuted }}>
+                  <Text className="-mt-1 mb-2 text-sm font-medium text-brand">
                     {category.description}
                   </Text>
                 )}
