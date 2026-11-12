@@ -1,10 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import { Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { cardShadow, colors } from "../../constants/theme";
 import { useCart } from "../../context/CartContext";
 import { money } from "../../utils/menuFormat";
-import { router } from "expo-router";
 
 type Props = {
   /** Only show when the cart belongs to this restaurant (leave out to always show) */

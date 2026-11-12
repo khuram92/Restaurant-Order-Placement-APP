@@ -22,7 +22,11 @@ import type {
   MenuCategoryWithItems,
   MenuItem,
 } from "../../types/menu";
-import { ITEM_TAGS, itemPriceText, itemServesText } from "../../utils/menuFormat";
+import {
+  ITEM_TAGS,
+  itemPriceText,
+  itemServesText,
+} from "../../utils/menuFormat";
 import CategorySheet from "./CategorySheet";
 
 type IconName = ComponentProps<typeof Ionicons>["name"];
@@ -112,7 +116,13 @@ function ItemRow({
             {item.name}
           </Text>
           {ITEM_TAGS.filter((t) => item[t.key]).map((t) => (
-            <Ionicons key={t.key} name={t.icon} size={13} color={t.color} style={{ marginLeft: 4 }} />
+            <Ionicons
+              key={t.key}
+              name={t.icon}
+              size={13}
+              color={t.color}
+              style={{ marginLeft: 4 }}
+            />
           ))}
           {item.isSpicy && (
             <Ionicons
