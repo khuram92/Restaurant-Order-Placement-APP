@@ -129,7 +129,7 @@ export default function ItemSheet({ item, visible, canOrder, onClose, onAdd }: P
             borderTopLeftRadius: 24,
             borderTopRightRadius: 24,
             overflow: "hidden",
-            backgroundColor: colors.white,
+            backgroundColor: 'white',
             transform: [{ translateY: dragY }],
           }}>
           {/* Photo + drag area */}
@@ -160,7 +160,7 @@ export default function ItemSheet({ item, visible, canOrder, onClose, onAdd }: P
                 {tags.map((t) => (
                   <View key={t.key} className="mb-1 mr-1 flex-row items-center rounded-full bg-mist-light px-2 py-0.5">
                     <Ionicons name={t.icon} size={11} color={t.color} />
-                    <Text className="ml-1 text-xs font-bold text-brand">{t.label}</Text>
+                    <Text className="ml-1 text-sm font-bold text-brand">{t.label}</Text>
                   </View>
                 ))}
               </View>
@@ -216,11 +216,11 @@ export default function ItemSheet({ item, visible, canOrder, onClose, onAdd }: P
               const radio = group.maxSelect === 1;
               return (
                 <View key={group._id} className="mt-5">
-                  <View className="mb-2 flex-row items-center">
-                    <View className="flex-1">
+                  <View className="mb-2 flex-row justify-between items-center">
+                    
                       <Text className="text-base font-bold text-brand-dark">{group.name}</Text>
-                      <Text className="text-xs text-brand-light">{groupHint(group)}</Text>
-                    </View>
+                      <Text className="text-xs right-1 text-brand-light">{groupHint(group)}</Text>
+                    
                     {group.minSelect > 0 && (
                       <View
                         className="flex-row items-center rounded-full px-2 py-0.5"

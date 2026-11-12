@@ -32,6 +32,7 @@ export default function MenuItemCard({ item, canOrder, onPress }: Props) {
         soldOut ? "opacity-[0.65]" : "active:opacity-90"
       }`}
       style={cardShadow}>
+        {/* Photo (full card width) + add button */}
         <View className="h-32 w-full items-center justify-center rounded-2xl  p-1">
         <View className="h-full w-full items-center justify-center overflow-hidden rounded-xl bg-brand-soft">
           {item.image ? (
@@ -96,7 +97,7 @@ export default function MenuItemCard({ item, canOrder, onPress }: Props) {
         </View>
       </View>
 
-      {/* Photo (full card width) + add button */}
+      
       
     </Pressable>
   );
