@@ -112,23 +112,23 @@ export const createOrder = async (req: Request, res: Response) => {
   }
 };
 
-// /** GET /api/orders?status=active|past|all&page= — the customer's orders, newest first */
-// export const listMyOrders = async (req: Request, res: Response) => {
-//   const parsed = listMyOrdersSchema.safeParse(req.query);
-//   if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
-//   const { status, page, limit } = parsed.data;
+/** GET /api/orders?status=active|past|all&page= — the customer's orders, newest first */
+export const listMyOrders = async (req: Request, res: Response) => {
+  const parsed = listMyOrdersSchema.safeParse(req.query);
+  if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
+  const { status, page, limit } = parsed.data;
 
-//   const filter: Record<string, unknown> = { customerId: req.user!._id };
-//   if (status === "active") filter.status = { $in: ACTIVE_STATUSES };
-//   if (status === "past") filter.status = { $nin: ACTIVE_STATUSES };
+  const filter: Record<string, unknown> = { customerId: req.user!._id };
+  if (status === "active") filter.status = { $in: ACTIVE_STATUSES };
+  if (status === "past") filter.status = { $nin: ACTIVE_STATUSES };
 
-//   const [orders, total] = await Promise.all([
-//     Order.find(filter).sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit),
-//     Order.countDocuments(filter),
-//   ]);
+  const [orders, total] = await Promise.all([
+    Order.find(filter).sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit),
+    Order.countDocuments(filter),
+  ]);
 
-//   res.json({ orders, total, page, pages: Math.max(1, Math.ceil(total / limit)) });
-// };
+  res.json({ orders, total, page, pages: Math.max(1, Math.ceil(total / limit)) });
+};
 
 // /** GET /api/orders/:id */
 // export const getMyOrder = async (req: Request, res: Response) => {
