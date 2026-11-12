@@ -75,57 +75,6 @@ const SERVICES: { key: ServiceKey; label: string; icon: IconName }[] = [
   { key: "delivery", label: "Delivery", icon: "bicycle" },
 ];
 
-// ---------- Small UI pieces ----------
-function SheetSection({
-  title,
-  icon,
-  children,
-}: {
-  title: string;
-  icon: IconName;
-  children: ReactNode;
-}) {
-  return (
-    <View className="mb-5">
-      <View className="mb-2 flex-row items-center">
-        <View
-          className="mr-2 h-8 w-8 items-center justify-center rounded-xl"
-          style={{ backgroundColor: colors.brandSoft }}>
-          <Ionicons name={icon} size={16} color={colors.brand} />
-        </View>
-        <Text className="text-base font-bold text-brand-dark">{title}</Text>
-      </View>
-      {children}
-    </View>
-  );
-}
-
-function InfoRow({
-  icon,
-  text,
-  action,
-  onPress,
-}: {
-  icon: IconName;
-  text: string;
-  action?: string;
-  onPress?: () => void;
-}) {
-  return (
-    <Pressable
-      onPress={onPress}
-      disabled={!onPress}
-      className="flex-row items-center py-2">
-      <Ionicons name={icon} size={16} color={colors.brandLight} />
-      <Text className="ml-3 flex-1 text-sm" style={{ color: colors.text }}>
-        {text}
-      </Text>
-      {!!action && (
-        <Text className="text-sm font-bold text-brand">{action}</Text>
-      )}
-    </Pressable>
-  );
-}
 
 // ---------- Info bottom sheet: order info, location, hours ----------
 
@@ -169,12 +118,8 @@ function QuickAction({
     <Pressable
       onPress={onPress}
       disabled={disabled}
-      className="flex-1 items-center rounded-2xl py-3"
-      style={({ pressed }) => ({
-        backgroundColor: pressed ? colors.brand : colors.brandSoft,
-        opacity: disabled ? 0.4 : 1,
-        transform: [{ scale: pressed ? 0.96 : 1 }],
-      })}>
+      className="flex-1 items-center rounded-2xl py-3 border-2 border-brand-light bg-mist-light"
+      >
       {({ pressed }) => (
         <>
           <Ionicons
@@ -204,8 +149,8 @@ function StatTile({
 }) {
   return (
     <View
-      className="mb-2 w-[48.5%] rounded-2xl p-3"
-      style={{ backgroundColor: colors.mistLight }}>
+      className="mb-2 w-[48.5%] rounded-2xl p-3 bg-mist-light border-2 border-mist-dark"
+      >
       <Ionicons name={icon} size={18} color={colors.brand} />
       <Text className="mt-1.5 text-base font-extrabold text-brand-dark">
         {value}
@@ -313,7 +258,7 @@ function InfoSheet({
       animationType="slide"
       onRequestClose={onClose}>
       <View className="flex-1 justify-end">
-        {/* Dim background: tap to close */}
+      
         <Pressable
           className="absolute inset-0"
           style={{ backgroundColor: "rgba(44,51,41,0.45)" }}
@@ -337,7 +282,7 @@ function InfoSheet({
                 style={{ backgroundColor: colors.mistDark }}
               />
             </View>
-            <View className="flex-row items-center px-5 pb-1 pt-3">
+            <View className="flex-row items-center px-5 pb-2 pt-3">
               <View className="flex-1">
                 <Text
                   className="text-xl font-extrabold text-brand-dark"
@@ -353,7 +298,7 @@ function InfoSheet({
               <Pressable
                 onPress={onClose}
                 hitSlop={8}
-                className="h-9 w-9 items-center justify-center rounded-full"
+                className="h-8 w-8 mb-6 ml-2 items-center justify-center rounded-full"
                 style={{ backgroundColor: colors.brandSoft }}>
                 <Ionicons name="close" size={20} color={colors.brand} />
               </Pressable>
@@ -363,7 +308,7 @@ function InfoSheet({
           <ScrollView
             contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 10 }}
             showsVerticalScrollIndicator={false}>
-            {/* Live status */}
+            
             <View
               className="mb-4 flex-row items-center rounded-2xl px-4 py-3"
               style={{
@@ -425,7 +370,7 @@ function InfoSheet({
                 return (
                   <View
                     key={s.key}
-                    className="flex-1 items-center rounded-2xl py-3"
+                    className="flex-1 items-center rounded-2xl py-3 border-2 border-mist-dark"
                     style={{
                       backgroundColor: on ? colors.brandSoft : colors.mistLight,
                       opacity: on ? 1 : 0.45,
@@ -461,34 +406,16 @@ function InfoSheet({
               </>
             )}
 
-            {/* Address */}
-            <Pressable
-              onPress={openMap}
-              className="mb-5 flex-row items-center rounded-2xl p-4"
-              style={({ pressed }) => ({
-                backgroundColor: pressed ? colors.brandSoft : colors.mistLight,
-              })}>
-              <View
-                className="h-10 w-10 items-center justify-center rounded-xl"
-                style={{ backgroundColor: colors.brand }}>
-                <Ionicons name="location" size={20} color={colors.white} />
-              </View>
-              <Text
-                className="ml-3 flex-1 text-sm"
-                style={{ color: colors.text }}>
-                {address}
-              </Text>
-              <Ionicons name="open" size={18} color={colors.brandLight} />
-            </Pressable>
+            
 
             {/* Opening hours: today first, tap to see the week */}
             <Pressable
               onPress={() => setShowWeek((v) => !v)}
               className="mb-2 flex-row items-center">
-              <Text className="flex-1 text-xs font-bold uppercase tracking-wide text-brand-light">
+              <Text className="flex-1 text-sm font-bold uppercase tracking-wide text-brand-light">
                 Opening hours
               </Text>
-              <Text className="mr-1 text-xs font-bold text-brand">
+              <Text className="mr-1 text-sm font-bold text-brand">
                 {showWeek ? "Show less" : "Whole week"}
               </Text>
               <Ionicons
@@ -505,7 +432,7 @@ function InfoSheet({
               return (
                 <View
                   key={h.day}
-                  className="mb-1 flex-row items-center justify-between rounded-xl px-3 py-2.5"
+                  className="mb-1 flex-row items-center justify-between rounded-xl px-3 py-2.5 border-2 border-mist-dark"
                   style={{
                     backgroundColor: isToday ? colors.brandSoft : "transparent",
                   }}>
