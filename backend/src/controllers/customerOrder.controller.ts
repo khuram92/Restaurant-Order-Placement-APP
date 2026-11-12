@@ -130,12 +130,12 @@ export const listMyOrders = async (req: Request, res: Response) => {
   res.json({ orders, total, page, pages: Math.max(1, Math.ceil(total / limit)) });
 };
 
-// /** GET /api/orders/:id */
-// export const getMyOrder = async (req: Request, res: Response) => {
-//   const order = await findMyOrderOr404(req, res);
-//   if (!order) return;
-//   res.json({ order });
-// };
+/** GET /api/orders/:id */
+export const getMyOrder = async (req: Request, res: Response) => {
+  const order = await findMyOrderOr404(req, res);
+  if (!order) return;
+  res.json({ order });
+};
 
 // /** PATCH /api/orders/:id/cancel   { reason? } — only while the restaurant hasn't accepted it */
 // export const cancelMyOrder = async (req: Request, res: Response) => {
