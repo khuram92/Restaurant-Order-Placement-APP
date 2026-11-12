@@ -2,7 +2,7 @@ import { SplashScreen, Stack, router, useSegments } from "expo-router";
 import { useEffect } from "react";
 import "../../global.css";
 import { AuthProvider, useAuth } from "../context/AuthContext";
-
+import { CartProvider } from "../context/CartContext";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -26,7 +26,6 @@ function RootNavigator() {
   const needsProfile = isCustomer && !user?.profileCompleted;
   const mustChangePassword = isManager && !!user?.mustChangePassword;
 
- 
   useEffect(() => {
     if (isLoading) return;
     const group = segments[0];
@@ -44,7 +43,16 @@ function RootNavigator() {
     } else if (isCustomer && !needsProfile && group !== "(customer)") {
       router.replace("/");
     }
-  }, [user, isLoading, isSuperAdmin, isManager, mustChangePassword, needsProfile, isCustomer, segments]);
+  }, [
+    user,
+    isLoading,
+    isSuperAdmin,
+    isManager,
+    mustChangePassword,
+    needsProfile,
+    isCustomer,
+    segments,
+  ]);
 
   return (
     <Stack screenOptions={{ headerShown: true }}>
@@ -84,8 +92,10 @@ function RootNavigator() {
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <SplashScreenController />
-      <RootNavigator />
+      <CartProvider>
+        <SplashScreenController />
+        <RootNavigator />
+      </CartProvider>
     </AuthProvider>
   );
 }
