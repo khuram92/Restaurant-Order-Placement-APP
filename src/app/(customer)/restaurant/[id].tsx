@@ -535,7 +535,6 @@ export default function CustomerRestaurantScreen() {
     );
   };
 
-  // Floating back button (over the cover image)
   const backButton = (
     <Pressable
       onPress={() => router.back()}
@@ -804,14 +803,17 @@ export default function CustomerRestaurantScreen() {
                     {category.description}
                   </Text>
                 )}
-                {category.items.map((item) => (
-                  <MenuItemCard
-                    key={item._id}
-                    item={item}
-                    canOrder={r.isOpenNow}
-                    onPress={() => openItem(item)}
-                  />
-                ))}
+                <View className="flex-row flex-wrap justify-between">
+                  {category.items.map((item) => (
+                    <View key={item._id} className="w-[48.5%] ">
+                      <MenuItemCard
+                        item={item}
+                        canOrder={r.isOpenNow}
+                        onPress={() => openItem(item)}
+                      />
+                    </View>
+                  ))}
+                </View>
               </View>
             ))
           )}
