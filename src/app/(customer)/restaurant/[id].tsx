@@ -30,7 +30,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import MenuItemCard from "../../../components/customer/MenuItemCard";
 import { cardShadow, colors } from "../../../constants/theme";
 import { getErrorMessage } from "../../../lib/api";
-// import CartBar from "../../../components/customer/CartBar";
+import CartBar from "../../../components/customer/CartBar";
 import { useCart } from "../../../context/CartContext";
 import {
   getCustomerMenu,
