@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import { Restaurant, type RestaurantDoc } from "../models/Restaurant.js";
 import { User } from "../models/User.js";
 import { isOpenNow } from "../utils/openingHours.js";
+import { seatsInUse } from "../utils/orderPricing.js";
 import { customerListQuerySchema } from "../validators/customerRestaurant.validators.js";
 import mongoose from "mongoose";
 import { MenuCategory } from "../models/MenuCategory.js";
@@ -96,5 +97,25 @@ export const getRestaurantMenu = async (req: Request, res: Response) => {
     categories: categories
       .map((c) => ({ ...c.toJSON(), items: items.filter((i) => String(i.categoryId) === c.id) }))
       .filter((c) => c.items.length > 0),
+  });
+};
+
+
+/** GET /api/restaurants/:id/seats — dine-in seats free right now (for checkout) */
+export const getSeatAvailability = async (req: Request, res: Response) => {
+  const id = String(req.params.id);
+  if (!mongoose.isValidObjectId(id)) {
+    return res.status(400).json({ message: "Invalid restaurant id" });
+  }
+
+  const restaurant = await Restaurant.findOne({ _id: id, isActive: true }).select("seatingCapacity services");
+  if (!restaurant) return res.status(404).json({ message: "This restaurant isn't available right now" });
+  if (!restaurant.services.dineIn) return res.json({ capacity: 0, inUse: 0, free: 0 });
+
+  const inUse = await seatsInUse(restaurant._id);
+  res.json({
+    capacity: restaurant.seatingCapacity,
+    inUse,
+    free: Math.max(0, restaurant.seatingCapacity - inUse),
   });
 };
