@@ -324,18 +324,10 @@ export default function CartScreen() {
               paddingBottom: insets.bottom + 12,
             }}>
             <Pressable
-              onPress={() =>
-                Alert.alert(
-                  "Checkout",
-                  "Choosing Dine-in, Takeaway or Delivery comes in the next step.",
-                )
-              }
+              onPress={() => router.push("/checkout")}
               disabled={belowMinimum}
               className="flex-row items-center justify-between bg-brand-dark rounded-2xl px-5 py-4"
-              style={[
-                cardShadow,
-                
-              ]}>
+              style={[cardShadow]}>
               <Text className="text-base font-bold text-white">Checkout</Text>
               <View className="flex-row items-center">
                 <Text className="text-base font-extrabold text-white">
