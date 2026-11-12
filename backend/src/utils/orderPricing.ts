@@ -18,11 +18,16 @@ export class OrderError extends Error {
  * Builds the order lines from the LIVE menu. The app only sends ids + quantities;
  * every name and price comes from the database, so totals can't be faked.
  */
-export const buildOrderItems = async (restaurantId: string, lines: CreateOrderInput["items"]) => {
+export const buildOrderItems = async (
+  restaurantId: string,
+  lines: CreateOrderInput["items"],
+) => {
   const itemIds = [...new Set(lines.map((l) => l.itemId))];
   const items = await MenuItem.find({ _id: { $in: itemIds }, restaurantId });
   const activeCategoryIds = new Set(
-    (await MenuCategory.find({ restaurantId, isActive: true }).select("_id")).map((c) => c.id as string),
+    (
+      await MenuCategory.find({ restaurantId, isActive: true }).select("_id")
+    ).map((c) => c.id as string),
   );
 
   const built: IOrderItem[] = [];
@@ -30,9 +35,16 @@ export const buildOrderItems = async (restaurantId: string, lines: CreateOrderIn
   for (const line of lines) {
     const item = items.find((i) => i.id === line.itemId);
     if (!item || !activeCategoryIds.has(String(item.categoryId))) {
-      throw new OrderError("An item in your cart is no longer on the menu. Please update your cart.", 409);
+      throw new OrderError(
+        "An item in your cart is no longer on the menu. Please update your cart.",
+        409,
+      );
     }
-    if (!item.isAvailable) throw new OrderError(`"${item.name}" is sold out. Remove it from your cart.`, 409);
+    if (!item.isAvailable)
+      throw new OrderError(
+        `"${item.name}" is sold out. Remove it from your cart.`,
+        409,
+      );
 
     // Size
     let basePrice: number;
@@ -56,10 +68,17 @@ export const buildOrderItems = async (restaurantId: string, lines: CreateOrderIn
         throw new OrderError(`"${item.name}": choose ${group.name}`, 409);
       }
       if (picked.length > group.maxSelect) {
-        throw new OrderError(`"${item.name}": too many choices for ${group.name}`, 409);
+        throw new OrderError(
+          `"${item.name}": too many choices for ${group.name}`,
+          409,
+        );
       }
       for (const option of picked) {
-        if (!option.isAvailable) throw new OrderError(`"${option.name}" is sold out. Please choose another.`, 409);
+        if (!option.isAvailable)
+          throw new OrderError(
+            `"${option.name}" is sold out. Please choose another.`,
+            409,
+          );
         addOns.push({
           groupId: group._id as Types.ObjectId,
           groupName: group.name,
@@ -70,7 +89,10 @@ export const buildOrderItems = async (restaurantId: string, lines: CreateOrderIn
       }
     }
     if (matched !== chosen.size) {
-      throw new OrderError(`Some choices for "${item.name}" changed. Please add it to your cart again.`, 409);
+      throw new OrderError(
+        `Some choices for "${item.name}" changed. Please add it to your cart again.`,
+        409,
+      );
     }
 
     const unitPrice = basePrice + addOns.reduce((sum, a) => sum + a.price, 0);
@@ -92,13 +114,21 @@ export const buildOrderItems = async (restaurantId: string, lines: CreateOrderIn
     built.push(orderItem);
   }
 
-  return { items: built, subtotal: built.reduce((sum, i) => sum + i.lineTotal, 0) };
+  return {
+    items: built,
+    subtotal: built.reduce((sum, i) => sum + i.lineTotal, 0),
+  };
 };
 
 /** Dine-in seats currently held by accepted (not yet finished) orders */
 export const seatsInUse = async (restaurantId: string | Types.ObjectId) => {
   const [result] = await Order.aggregate<{ seats: number }>([
-    { $match: { restaurantId: new Types.ObjectId(String(restaurantId)), "dineIn.seatsReserved": true } },
+    {
+      $match: {
+        restaurantId: new Types.ObjectId(String(restaurantId)),
+        "dineIn.seatsReserved": true,
+      },
+    },
     { $group: { _id: null, seats: { $sum: "$dineIn.partySize" } } },
   ]);
   return result?.seats ?? 0;

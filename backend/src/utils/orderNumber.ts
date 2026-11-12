@@ -14,6 +14,9 @@ const restaurantPrefix = (name: string) => {
 
 /** e.g. "KAB-7Q2XM4" */
 export const generateOrderNumber = (restaurantName: string, length = 6) => {
-  const random = Array.from({ length }, () => ALPHABET[randomInt(ALPHABET.length)]).join("");
+  const random = Array.from(
+    { length },
+    () => ALPHABET[randomInt(ALPHABET.length)],
+  ).join("");
   return `${restaurantPrefix(restaurantName)}-${random}`;
 };
