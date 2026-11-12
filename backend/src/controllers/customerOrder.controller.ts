@@ -12,17 +12,17 @@ const firstIssue = (error: { issues: { message: string }[] }) => error.issues[0]
 
 const SERVICE_LABEL = { dineIn: "Dine-in", takeaway: "Takeaway", delivery: "Delivery" } as const;
 
-// /** Loads one of the customer's own orders, or sends 400/404 and returns null */
-// const findMyOrderOr404 = async (req: Request, res: Response) => {
-//   const id = String(req.params.id);
-//   if (!mongoose.isValidObjectId(id)) {
-//     res.status(400).json({ message: "Invalid order id" });
-//     return null;
-//   }
-//   const order = await Order.findOne({ _id: id, customerId: req.user!._id });
-//   if (!order) res.status(404).json({ message: "Order not found" });
-//   return order;
-// };
+/** Loads one of the customer's own orders, or sends 400/404 and returns null */
+const findMyOrderOr404 = async (req: Request, res: Response) => {
+  const id = String(req.params.id);
+  if (!mongoose.isValidObjectId(id)) {
+    res.status(400).json({ message: "Invalid order id" });
+    return null;
+  }
+  const order = await Order.findOne({ _id: id, customerId: req.user!._id });
+  if (!order) res.status(404).json({ message: "Order not found" });
+  return order;
+};
 
 // /** POST /api/orders — place an order (cash only) */
 // export const createOrder = async (req: Request, res: Response) => {
