@@ -267,7 +267,7 @@ export const setManagerStatus = async (req: Request, res: Response) => {
   if (!manager) return;
 
   const activating = parsed.data.isActive && !manager.isActive;
-  if (activating) {
+  if (activating && manager.restaurantId) {
     const holder = await User.findOne({
       role: "manager",
       isActive: true,
