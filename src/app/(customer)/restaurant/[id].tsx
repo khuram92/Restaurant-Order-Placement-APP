@@ -12,11 +12,14 @@ import {
 import {
   ActivityIndicator,
   Alert,
+  Animated,
   Linking,
   Modal,
+  PanResponder,
   Pressable,
   RefreshControl,
   ScrollView,
+  Share,
   Text,
   View,
   type LayoutChangeEvent,
@@ -125,6 +128,93 @@ function InfoRow({
 }
 
 // ---------- Info bottom sheet: order info, location, hours ----------
+
+/** "Closes in 2h 15m" / "Opens in 40m" based on today's hours (phone time) */
+const timeLeftText = (r: CustomerRestaurant) => {
+  const today = r.openingHours.find((h) => h.day === todayKey());
+  if (!today || today.closed || r.isTemporarilyClosed) return "";
+  const toMin = (t: string) => {
+    const [h = 0, m = 0] = t.split(":").map(Number);
+    return h * 60 + m;
+  };
+  const now = new Date();
+  const nowMin = now.getHours() * 60 + now.getMinutes();
+  const open = toMin(today.open);
+  let close = toMin(today.close);
+  if (close <= open) close += 24 * 60; // closes after midnight
+
+  const format = (mins: number) => {
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    return h > 0 ? `${h}h ${m}m` : `${m}m`;
+  };
+  if (r.isOpenNow && close > nowMin)
+    return `Closes in ${format(close - nowMin)}`;
+  if (!r.isOpenNow && open > nowMin) return `Opens in ${format(open - nowMin)}`;
+  return "";
+};
+
+function QuickAction({
+  icon,
+  label,
+  onPress,
+  disabled,
+}: {
+  icon: IconName;
+  label: string;
+  onPress: () => void;
+  disabled?: boolean;
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      disabled={disabled}
+      className="flex-1 items-center rounded-2xl py-3"
+      style={({ pressed }) => ({
+        backgroundColor: pressed ? colors.brand : colors.brandSoft,
+        opacity: disabled ? 0.4 : 1,
+        transform: [{ scale: pressed ? 0.96 : 1 }],
+      })}>
+      {({ pressed }) => (
+        <>
+          <Ionicons
+            name={icon}
+            size={22}
+            color={pressed ? colors.white : colors.brand}
+          />
+          <Text
+            className="mt-1 text-xs font-bold"
+            style={{ color: pressed ? colors.white : colors.brand }}>
+            {label}
+          </Text>
+        </>
+      )}
+    </Pressable>
+  );
+}
+
+function StatTile({
+  icon,
+  label,
+  value,
+}: {
+  icon: IconName;
+  label: string;
+  value: string;
+}) {
+  return (
+    <View
+      className="mb-2 w-[48.5%] rounded-2xl p-3"
+      style={{ backgroundColor: colors.mistLight }}>
+      <Ionicons name={icon} size={18} color={colors.brand} />
+      <Text className="mt-1.5 text-base font-extrabold text-brand-dark">
+        {value}
+      </Text>
+      <Text className="text-xs text-brand-light">{label}</Text>
+    </View>
+  );
+}
+
 function InfoSheet({
   restaurant: r,
   visible,
@@ -140,8 +230,81 @@ function InfoSheet({
   const address = [r.address.street, r.address.area, r.address.city]
     .filter(Boolean)
     .join(", ");
-  const hasOrderInfo =
-    r.services.delivery || r.minOrder > 0 || r.taxRate > 0 || r.services.dineIn;
+  const todayHours = r.openingHours.find((h) => h.day === today);
+  const timeLeft = timeLeftText(r);
+  const [showWeek, setShowWeek] = useState(false);
+
+  // ---------- Drag the handle down to close ----------
+  const dragY = useRef(new Animated.Value(0)).current;
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_e, g) => g.dy > 4,
+      onPanResponderMove: (_e, g) => dragY.setValue(Math.max(0, g.dy)),
+      onPanResponderRelease: (_e, g) => {
+        if (g.dy > 120 || g.vy > 1) {
+          onClose();
+        } else {
+          Animated.spring(dragY, {
+            toValue: 0,
+            useNativeDriver: true,
+            bounciness: 6,
+          }).start();
+        }
+      },
+    }),
+  ).current;
+
+  // Reset position each time it opens
+  useEffect(() => {
+    if (visible) {
+      dragY.setValue(0);
+      setShowWeek(false);
+    }
+  }, [visible, dragY]);
+
+  const openMap = () => {
+    const query = coords
+      ? `${coords[1]},${coords[0]}`
+      : encodeURIComponent(`${r.name}, ${address}`);
+    Linking.openURL(`https://www.google.com/maps/search/?api=1&query=${query}`);
+  };
+
+  const share = () =>
+    Share.share({
+      message: `${r.name}\n${r.cuisines.join(" · ")}\n${address}${r.phone ? `\nCall: ${r.phone}` : ""}`,
+    });
+
+  const stats: { icon: IconName; label: string; value: string }[] = [];
+  if (r.services.delivery) {
+    stats.push({
+      icon: "bicycle",
+      label: "Delivery fee",
+      value: r.deliveryFee > 0 ? money(r.deliveryFee) : "Free",
+    });
+    stats.push({
+      icon: "navigate",
+      label: "Delivers within",
+      value: `${r.deliveryRadiusKm} km`,
+    });
+  }
+  if (r.minOrder > 0)
+    stats.push({
+      icon: "cart",
+      label: "Minimum order",
+      value: money(r.minOrder),
+    });
+  if (r.taxRate > 0)
+    stats.push({
+      icon: "calculator",
+      label: "Tax at checkout",
+      value: `${r.taxRate}%`,
+    });
+  if (r.services.dineIn)
+    stats.push({
+      icon: "people",
+      label: "Dine-in seats",
+      value: String(r.seatingCapacity),
+    });
 
   return (
     <Modal
@@ -157,37 +320,93 @@ function InfoSheet({
           onPress={onClose}
         />
 
-        <View
-          className="max-h-[85%] rounded-t-3xl"
+        <Animated.View
           style={{
+            maxHeight: "88%",
+            borderTopLeftRadius: 24,
+            borderTopRightRadius: 24,
             backgroundColor: colors.white,
             paddingBottom: insets.bottom + 12,
+            transform: [{ translateY: dragY }],
           }}>
-          {/* Handle + title */}
-          <View className="items-center pt-3">
-            <View
-              className="h-1.5 w-12 rounded-full"
-              style={{ backgroundColor: colors.mistDark }}
-            />
-          </View>
-          <View className="flex-row items-center justify-between px-5 pb-2 pt-3">
-            <Text
-              className="flex-1 text-xl font-extrabold text-brand-dark"
-              numberOfLines={1}>
-              {r.name}
-            </Text>
-            <Pressable
-              onPress={onClose}
-              hitSlop={8}
-              className="h-9 w-9 items-center justify-center rounded-full"
-              style={{ backgroundColor: colors.brandSoft }}>
-              <Ionicons name="close" size={20} color={colors.brand} />
-            </Pressable>
+          {/* Drag area: handle + title */}
+          <View {...panResponder.panHandlers}>
+            <View className="items-center pt-3">
+              <View
+                className="h-1.5 w-12 rounded-full"
+                style={{ backgroundColor: colors.mistDark }}
+              />
+            </View>
+            <View className="flex-row items-center px-5 pb-1 pt-3">
+              <View className="flex-1">
+                <Text
+                  className="text-xl font-extrabold text-brand-dark"
+                  numberOfLines={1}>
+                  {r.name}
+                </Text>
+                {r.cuisines.length > 0 && (
+                  <Text className="text-sm text-brand" numberOfLines={1}>
+                    {r.cuisines.join(" · ")}
+                  </Text>
+                )}
+              </View>
+              <Pressable
+                onPress={onClose}
+                hitSlop={8}
+                className="h-9 w-9 items-center justify-center rounded-full"
+                style={{ backgroundColor: colors.brandSoft }}>
+                <Ionicons name="close" size={20} color={colors.brand} />
+              </Pressable>
+            </View>
           </View>
 
           <ScrollView
-            contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 8 }}
+            contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 10 }}
             showsVerticalScrollIndicator={false}>
+            {/* Live status */}
+            <View
+              className="mb-4 flex-row items-center rounded-2xl px-4 py-3"
+              style={{
+                backgroundColor: r.isOpenNow ? colors.brand : colors.text,
+              }}>
+              <Ionicons
+                name={r.isOpenNow ? "time" : "moon"}
+                size={20}
+                color={colors.white}
+              />
+              <View className="ml-3 flex-1">
+                <Text className="text-base font-bold text-white">
+                  {r.isOpenNow
+                    ? "Open now"
+                    : r.isTemporarilyClosed
+                      ? "Closed for now"
+                      : "Closed"}
+                </Text>
+                <Text className="text-xs" style={{ color: colors.brandSoft }}>
+                  {timeLeft ||
+                    (todayHours && !todayHours.closed
+                      ? `Today ${formatTime(todayHours.open)} – ${formatTime(todayHours.close)}`
+                      : "Closed today")}
+                </Text>
+              </View>
+            </View>
+
+            {/* Quick actions */}
+            <View className="mb-5 flex-row gap-2">
+              <QuickAction
+                icon="call"
+                label="Call"
+                onPress={() => Linking.openURL(`tel:${r.phone}`)}
+                disabled={!r.phone}
+              />
+              <QuickAction
+                icon="navigate"
+                label="Directions"
+                onPress={openMap}
+              />
+              <QuickAction icon="share-social" label="Share" onPress={share} />
+            </View>
+
             {!!r.description && (
               <Text
                 className="mb-5 text-sm leading-5"
@@ -196,97 +415,118 @@ function InfoSheet({
               </Text>
             )}
 
-            {hasOrderInfo && (
-              <SheetSection title="Order info" icon="receipt">
-                {r.services.delivery && (
-                  <>
-                    <InfoRow
-                      icon="bicycle"
-                      text={
-                        r.deliveryFee > 0
-                          ? `Delivery fee ${money(r.deliveryFee)}`
-                          : "Free delivery"
-                      }
-                    />
-                    <InfoRow
-                      icon="navigate"
-                      text={`Delivers within ${r.deliveryRadiusKm} km`}
-                    />
-                  </>
-                )}
-                {r.minOrder > 0 && (
-                  <InfoRow
-                    icon="cart"
-                    text={`Minimum order ${money(r.minOrder)}`}
-                  />
-                )}
-                {r.taxRate > 0 && (
-                  <InfoRow
-                    icon="calculator"
-                    text={`${r.taxRate}% tax added at checkout`}
-                  />
-                )}
-                {r.services.dineIn && (
-                  <InfoRow
-                    icon="people"
-                    text={`${r.seatingCapacity} seats for dine-in`}
-                  />
-                )}
-              </SheetSection>
-            )}
-
-            <SheetSection title="Location & contact" icon="location">
-              <InfoRow
-                icon="map"
-                text={address}
-                {...(coords && {
-                  action: "Map",
-                  onPress: () =>
-                    Linking.openURL(
-                      `https://www.google.com/maps/search/?api=1&query=${coords[1]},${coords[0]}`,
-                    ),
-                })}
-              />
-              {!!r.phone && (
-                <InfoRow
-                  icon="call"
-                  text={r.phone}
-                  action="Call"
-                  onPress={() => Linking.openURL(`tel:${r.phone}`)}
-                />
-              )}
-            </SheetSection>
-
-            <SheetSection title="Opening hours" icon="time">
-              {r.openingHours.map((h) => {
-                const isToday = h.day === today;
+            {/* Services */}
+            <Text className="mb-2 text-xs font-bold uppercase tracking-wide text-brand-light">
+              Order your way
+            </Text>
+            <View className="mb-5 flex-row gap-2">
+              {SERVICES.map((s) => {
+                const on = r.services[s.key];
                 return (
                   <View
-                    key={h.day}
-                    className="mb-1 flex-row items-center justify-between rounded-xl px-3 py-2"
+                    key={s.key}
+                    className="flex-1 items-center rounded-2xl py-3"
                     style={{
-                      backgroundColor: isToday
-                        ? colors.brandSoft
-                        : "transparent",
+                      backgroundColor: on ? colors.brandSoft : colors.mistLight,
+                      opacity: on ? 1 : 0.45,
                     }}>
+                    <Ionicons
+                      name={on ? s.icon : "close-circle"}
+                      size={20}
+                      color={on ? colors.brand : colors.brandLight}
+                    />
                     <Text
-                      className={`text-sm text-brand-dark ${isToday ? "font-bold" : ""}`}>
-                      {DAY_LABELS[h.day]}
-                      {isToday ? "  · Today" : ""}
-                    </Text>
-                    <Text
-                      className="text-sm"
-                      style={{ color: h.closed ? colors.danger : colors.text }}>
-                      {h.closed
-                        ? "Closed"
-                        : `${formatTime(h.open)} – ${formatTime(h.close)}`}
+                      className="mt-1 text-xs font-bold"
+                      style={{
+                        color: on ? colors.brandDark : colors.brandLight,
+                      }}>
+                      {s.label}
                     </Text>
                   </View>
                 );
               })}
-            </SheetSection>
+            </View>
+
+            {/* Order info tiles */}
+            {stats.length > 0 && (
+              <>
+                <Text className="mb-2 text-xs font-bold uppercase tracking-wide text-brand-light">
+                  Good to know
+                </Text>
+                <View className="mb-3 flex-row flex-wrap justify-between">
+                  {stats.map((st) => (
+                    <StatTile key={st.label} {...st} />
+                  ))}
+                </View>
+              </>
+            )}
+
+            {/* Address */}
+            <Pressable
+              onPress={openMap}
+              className="mb-5 flex-row items-center rounded-2xl p-4"
+              style={({ pressed }) => ({
+                backgroundColor: pressed ? colors.brandSoft : colors.mistLight,
+              })}>
+              <View
+                className="h-10 w-10 items-center justify-center rounded-xl"
+                style={{ backgroundColor: colors.brand }}>
+                <Ionicons name="location" size={20} color={colors.white} />
+              </View>
+              <Text
+                className="ml-3 flex-1 text-sm"
+                style={{ color: colors.text }}>
+                {address}
+              </Text>
+              <Ionicons name="open" size={18} color={colors.brandLight} />
+            </Pressable>
+
+            {/* Opening hours: today first, tap to see the week */}
+            <Pressable
+              onPress={() => setShowWeek((v) => !v)}
+              className="mb-2 flex-row items-center">
+              <Text className="flex-1 text-xs font-bold uppercase tracking-wide text-brand-light">
+                Opening hours
+              </Text>
+              <Text className="mr-1 text-xs font-bold text-brand">
+                {showWeek ? "Show less" : "Whole week"}
+              </Text>
+              <Ionicons
+                name={showWeek ? "chevron-up" : "chevron-down"}
+                size={16}
+                color={colors.brand}
+              />
+            </Pressable>
+            {(showWeek
+              ? r.openingHours
+              : r.openingHours.filter((h) => h.day === today)
+            ).map((h) => {
+              const isToday = h.day === today;
+              return (
+                <View
+                  key={h.day}
+                  className="mb-1 flex-row items-center justify-between rounded-xl px-3 py-2.5"
+                  style={{
+                    backgroundColor: isToday ? colors.brandSoft : "transparent",
+                  }}>
+                  <Text
+                    className={`text-sm text-brand-dark ${isToday ? "font-bold" : ""}`}>
+                    {DAY_LABELS[h.day]}
+                    {isToday ? "  · Today" : ""}
+                  </Text>
+                  <Text
+                    className="text-sm"
+                    style={{ color: h.closed ? colors.danger : colors.text }}>
+                    {h.closed
+                      ? "Closed"
+                      : `${formatTime(h.open)} – ${formatTime(h.close)}`}
+                  </Text>
+                </View>
+              );
+            })}
+            <View className="h-3" />
           </ScrollView>
-        </View>
+        </Animated.View>
       </View>
     </Modal>
   );
