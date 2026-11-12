@@ -1,7 +1,14 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
-import { useCallback, useEffect, useRef, useState, type ComponentProps, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ComponentProps,
+  type ReactNode,
+} from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -13,17 +20,24 @@ import {
   Text,
   View,
   type LayoutChangeEvent,
-  type ScrollViewInstance,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
+  type ScrollViewInstance,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import MenuItemCard from "../../../components/customer/MenuItemCard";
 import { cardShadow, colors } from "../../../constants/theme";
 import { getErrorMessage } from "../../../lib/api";
-import MenuItemCard from "../../../components/customer/MenuItemCard";
-import { getCustomerMenu, getCustomerRestaurant } from "../../../services/restaurantApi";
+import {
+  getCustomerMenu,
+  getCustomerRestaurant,
+} from "../../../services/restaurantApi";
 import type { MenuCategoryWithItems, MenuItem } from "../../../types/menu";
-import type { CustomerRestaurant, Day, ServiceKey } from "../../../types/restaurant";
+import type {
+  CustomerRestaurant,
+  Day,
+  ServiceKey,
+} from "../../../types/restaurant";
 
 type IconName = ComponentProps<typeof Ionicons>["name"];
 
@@ -38,7 +52,10 @@ const DAY_LABELS: Record<Day, string> = {
 };
 
 // JavaScript's getDay(): 0 = Sunday
-const todayKey = (): Day => (["sun", "mon", "tue", "wed", "thu", "fri", "sat"] as const)[new Date().getDay()]!;
+const todayKey = (): Day =>
+  (["sun", "mon", "tue", "wed", "thu", "fri", "sat"] as const)[
+    new Date().getDay()
+  ]!;
 
 // "14:30" → "2:30 PM"
 const formatTime = (time: string) => {
@@ -56,7 +73,15 @@ const SERVICES: { key: ServiceKey; label: string; icon: IconName }[] = [
 ];
 
 // ---------- Small UI pieces ----------
-function SheetSection({ title, icon, children }: { title: string; icon: IconName; children: ReactNode }) {
+function SheetSection({
+  title,
+  icon,
+  children,
+}: {
+  title: string;
+  icon: IconName;
+  children: ReactNode;
+}) {
   return (
     <View className="mb-5">
       <View className="mb-2 flex-row items-center">
@@ -84,12 +109,17 @@ function InfoRow({
   onPress?: () => void;
 }) {
   return (
-    <Pressable onPress={onPress} disabled={!onPress} className="flex-row items-center py-2">
+    <Pressable
+      onPress={onPress}
+      disabled={!onPress}
+      className="flex-row items-center py-2">
       <Ionicons name={icon} size={16} color={colors.brandLight} />
       <Text className="ml-3 flex-1 text-sm" style={{ color: colors.text }}>
         {text}
       </Text>
-      {!!action && <Text className="text-sm font-bold text-brand">{action}</Text>}
+      {!!action && (
+        <Text className="text-sm font-bold text-brand">{action}</Text>
+      )}
     </Pressable>
   );
 }
@@ -107,24 +137,43 @@ function InfoSheet({
   const insets = useSafeAreaInsets();
   const today = todayKey();
   const coords = r.location?.coordinates; // [lng, lat]
-  const address = [r.address.street, r.address.area, r.address.city].filter(Boolean).join(", ");
-  const hasOrderInfo = r.services.delivery || r.minOrder > 0 || r.taxRate > 0 || r.services.dineIn;
+  const address = [r.address.street, r.address.area, r.address.city]
+    .filter(Boolean)
+    .join(", ");
+  const hasOrderInfo =
+    r.services.delivery || r.minOrder > 0 || r.taxRate > 0 || r.services.dineIn;
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="slide"
+      onRequestClose={onClose}>
       <View className="flex-1 justify-end">
         {/* Dim background: tap to close */}
-        <Pressable className="absolute inset-0" style={{ backgroundColor: "rgba(44,51,41,0.45)" }} onPress={onClose} />
+        <Pressable
+          className="absolute inset-0"
+          style={{ backgroundColor: "rgba(44,51,41,0.45)" }}
+          onPress={onClose}
+        />
 
         <View
           className="max-h-[85%] rounded-t-3xl"
-          style={{ backgroundColor: colors.white, paddingBottom: insets.bottom + 12 }}>
+          style={{
+            backgroundColor: colors.white,
+            paddingBottom: insets.bottom + 12,
+          }}>
           {/* Handle + title */}
           <View className="items-center pt-3">
-            <View className="h-1.5 w-12 rounded-full" style={{ backgroundColor: colors.mistDark }} />
+            <View
+              className="h-1.5 w-12 rounded-full"
+              style={{ backgroundColor: colors.mistDark }}
+            />
           </View>
           <View className="flex-row items-center justify-between px-5 pb-2 pt-3">
-            <Text className="flex-1 text-xl font-extrabold text-brand-dark" numberOfLines={1}>
+            <Text
+              className="flex-1 text-xl font-extrabold text-brand-dark"
+              numberOfLines={1}>
               {r.name}
             </Text>
             <Pressable
@@ -136,9 +185,13 @@ function InfoSheet({
             </Pressable>
           </View>
 
-          <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 8 }} showsVerticalScrollIndicator={false}>
+          <ScrollView
+            contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 8 }}
+            showsVerticalScrollIndicator={false}>
             {!!r.description && (
-              <Text className="mb-5 text-sm leading-5" style={{ color: colors.textMuted }}>
+              <Text
+                className="mb-5 text-sm leading-5"
+                style={{ color: colors.textMuted }}>
                 {r.description}
               </Text>
             )}
@@ -149,14 +202,36 @@ function InfoSheet({
                   <>
                     <InfoRow
                       icon="bicycle"
-                      text={r.deliveryFee > 0 ? `Delivery fee ${money(r.deliveryFee)}` : "Free delivery"}
+                      text={
+                        r.deliveryFee > 0
+                          ? `Delivery fee ${money(r.deliveryFee)}`
+                          : "Free delivery"
+                      }
                     />
-                    <InfoRow icon="navigate" text={`Delivers within ${r.deliveryRadiusKm} km`} />
+                    <InfoRow
+                      icon="navigate"
+                      text={`Delivers within ${r.deliveryRadiusKm} km`}
+                    />
                   </>
                 )}
-                {r.minOrder > 0 && <InfoRow icon="cart" text={`Minimum order ${money(r.minOrder)}`} />}
-                {r.taxRate > 0 && <InfoRow icon="calculator" text={`${r.taxRate}% tax added at checkout`} />}
-                {r.services.dineIn && <InfoRow icon="people" text={`${r.seatingCapacity} seats for dine-in`} />}
+                {r.minOrder > 0 && (
+                  <InfoRow
+                    icon="cart"
+                    text={`Minimum order ${money(r.minOrder)}`}
+                  />
+                )}
+                {r.taxRate > 0 && (
+                  <InfoRow
+                    icon="calculator"
+                    text={`${r.taxRate}% tax added at checkout`}
+                  />
+                )}
+                {r.services.dineIn && (
+                  <InfoRow
+                    icon="people"
+                    text={`${r.seatingCapacity} seats for dine-in`}
+                  />
+                )}
               </SheetSection>
             )}
 
@@ -167,11 +242,18 @@ function InfoSheet({
                 {...(coords && {
                   action: "Map",
                   onPress: () =>
-                    Linking.openURL(`https://www.google.com/maps/search/?api=1&query=${coords[1]},${coords[0]}`),
+                    Linking.openURL(
+                      `https://www.google.com/maps/search/?api=1&query=${coords[1]},${coords[0]}`,
+                    ),
                 })}
               />
               {!!r.phone && (
-                <InfoRow icon="call" text={r.phone} action="Call" onPress={() => Linking.openURL(`tel:${r.phone}`)} />
+                <InfoRow
+                  icon="call"
+                  text={r.phone}
+                  action="Call"
+                  onPress={() => Linking.openURL(`tel:${r.phone}`)}
+                />
               )}
             </SheetSection>
 
@@ -182,13 +264,22 @@ function InfoSheet({
                   <View
                     key={h.day}
                     className="mb-1 flex-row items-center justify-between rounded-xl px-3 py-2"
-                    style={{ backgroundColor: isToday ? colors.brandSoft : "transparent" }}>
-                    <Text className={`text-sm text-brand-dark ${isToday ? "font-bold" : ""}`}>
+                    style={{
+                      backgroundColor: isToday
+                        ? colors.brandSoft
+                        : "transparent",
+                    }}>
+                    <Text
+                      className={`text-sm text-brand-dark ${isToday ? "font-bold" : ""}`}>
                       {DAY_LABELS[h.day]}
                       {isToday ? "  · Today" : ""}
                     </Text>
-                    <Text className="text-sm" style={{ color: h.closed ? colors.danger : colors.text }}>
-                      {h.closed ? "Closed" : `${formatTime(h.open)} – ${formatTime(h.close)}`}
+                    <Text
+                      className="text-sm"
+                      style={{ color: h.closed ? colors.danger : colors.text }}>
+                      {h.closed
+                        ? "Closed"
+                        : `${formatTime(h.open)} – ${formatTime(h.close)}`}
                     </Text>
                   </View>
                 );
@@ -226,7 +317,10 @@ export default function CustomerRestaurantScreen() {
   const load = useCallback(async () => {
     setError("");
     try {
-      const [r, m] = await Promise.all([getCustomerRestaurant(String(id)), getCustomerMenu(String(id))]);
+      const [r, m] = await Promise.all([
+        getCustomerRestaurant(String(id)),
+        getCustomerMenu(String(id)),
+      ]);
       setRestaurant(r);
       setMenu(m);
       setActiveId((prev) => prev ?? m[0]?._id ?? null);
@@ -245,7 +339,8 @@ export default function CustomerRestaurantScreen() {
   const highlightTab = (categoryId: string) => {
     setActiveId(categoryId);
     const x = tabX.current[categoryId];
-    if (x !== undefined) tabsRef.current?.scrollTo({ x: Math.max(0, x - 16), animated: true });
+    if (x !== undefined)
+      tabsRef.current?.scrollTo({ x: Math.max(0, x - 16), animated: true });
   };
 
   /** Tap a tab: scroll the page to that category */
@@ -254,14 +349,18 @@ export default function CustomerRestaurantScreen() {
     if (y === undefined) return;
     highlightTab(categoryId);
     jumping.current = true;
-    scrollRef.current?.scrollTo({ y: Math.max(0, menuTop.current + y - barHeight.current - 8), animated: true });
+    scrollRef.current?.scrollTo({
+      y: Math.max(0, menuTop.current + y - barHeight.current - 8),
+      animated: true,
+    });
     setTimeout(() => (jumping.current = false), 500);
   };
 
   /** While scrolling: highlight the category at the top */
   const onScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     if (jumping.current || menu.length === 0) return;
-    const y = e.nativeEvent.contentOffset.y + barHeight.current + 16 - menuTop.current;
+    const y =
+      e.nativeEvent.contentOffset.y + barHeight.current + 16 - menuTop.current;
     let current = menu[0]!._id;
     for (const c of menu) {
       const top = sectionY.current[c._id];
@@ -272,7 +371,10 @@ export default function CustomerRestaurantScreen() {
 
   const openItem = (item: MenuItem) => {
     // Size / add-ons / quantity sheet comes in the next step
-    Alert.alert(item.name, "Choosing options and adding to cart comes in the next step.");
+    Alert.alert(
+      item.name,
+      "Choosing options and adding to cart comes in the next step.",
+    );
   };
 
   // Floating back button (over the cover image)
@@ -280,15 +382,17 @@ export default function CustomerRestaurantScreen() {
     <Pressable
       onPress={() => router.back()}
       hitSlop={8}
-      className="absolute left-4 h-10 w-10 items-center justify-center rounded-full"
-      style={{ top: insets.top + 8, backgroundColor: "rgba(59,70,56,0.75)" }}>
+     className="absolute left-2 h-10 w-10 items-center top-4 justify-center rounded-full bg-brand-light"
+      >
       <Ionicons name="chevron-back" size={22} color={colors.white} />
     </Pressable>
   );
 
   if (loading) {
     return (
-      <View className="flex-1 items-center justify-center" style={{ backgroundColor: colors.mist }}>
+      <View
+        className="flex-1 items-center justify-center"
+        style={{ backgroundColor: colors.mist }}>
         <ActivityIndicator color={colors.brand} size="large" />
       </View>
     );
@@ -296,10 +400,14 @@ export default function CustomerRestaurantScreen() {
 
   if (error || !restaurant) {
     return (
-      <View className="flex-1 items-center justify-center px-8" style={{ backgroundColor: colors.mist }}>
+      <View
+        className="flex-1 items-center justify-center px-8"
+        style={{ backgroundColor: colors.mist }}>
         {backButton}
         <Ionicons name="alert-circle" size={44} color={colors.brandLight} />
-        <Text className="mt-3 text-center text-brand-dark">{error || "Restaurant not found"}</Text>
+        <Text className="mt-3 text-center text-brand-dark">
+          {error || "Restaurant not found"}
+        </Text>
         <Pressable
           onPress={() => {
             setLoading(true);
@@ -336,7 +444,10 @@ export default function CustomerRestaurantScreen() {
         scrollEventThrottle={32}
         // Index 1 = the category bar: it sticks to the top while the menu scrolls
         stickyHeaderIndices={[1]}
-        contentContainerStyle={{ paddingBottom: insets.bottom + 24, flexGrow: 1 }}
+        contentContainerStyle={{
+          paddingBottom: insets.bottom + 24,
+          flexGrow: 1,
+        }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -348,31 +459,51 @@ export default function CustomerRestaurantScreen() {
             colors={[colors.brand]}
           />
         }>
-        {/* [0] Cover + compact header */}
+       
         <View>
-          <View className="h-48 w-full" style={{ backgroundColor: colors.brandSoft }}>
+          <View
+            className="h-48 w-full bg-brand-soft"
+            >
             {r.coverImage ? (
-              <Image source={{ uri: r.coverImage }} style={{ width: "100%", height: "100%" }} contentFit="cover" />
+              <Image
+                source={{ uri: r.coverImage }}
+                style={{ width: "100%", height: "100%" }}
+                contentFit="cover"
+              />
             ) : (
               <View className="flex-1 items-center justify-center">
-                <Ionicons name="restaurant" size={52} color={colors.brandLight} />
+                <Ionicons
+                  name="restaurant"
+                  size={52}
+                  color={colors.brandLight}
+                />
               </View>
             )}
           </View>
 
-          <View className="-mt-10 mx-4 rounded-3xl bg-white p-4" style={cardShadow}>
+          <View
+            className="-mt-10 mx-4 rounded-3xl bg-white p-4"
+            style={cardShadow}>
             <View className="flex-row items-center">
               <View
-                className="mr-3 h-14 w-14 items-center justify-center overflow-hidden rounded-2xl"
-                style={{ backgroundColor: colors.brandSoft }}>
+                className="mr-3 h-14 w-14 items-center justify-center border-2 border-brand-light bg-brand-soft overflow-hidden rounded-2xl"
+                >
                 {r.logo ? (
-                  <Image source={{ uri: r.logo }} style={{ width: "100%", height: "100%" }} contentFit="cover" />
+                  <Image
+                    source={{ uri: r.logo }}
+                    style={{ width: "100%", height: "100%" }}
+                    contentFit="cover"
+                  />
                 ) : (
-                  <Text className="text-xl font-extrabold text-brand">{r.name[0]?.toUpperCase()}</Text>
+                  <Text className="text-xl font-extrabold text-brand">
+                    {r.name[0]?.toUpperCase()}
+                  </Text>
                 )}
               </View>
               <View className="flex-1">
-                <Text className="text-lg font-extrabold text-brand-dark" numberOfLines={1}>
+                <Text
+                  className="text-lg font-extrabold text-brand-dark"
+                  numberOfLines={1}>
                   {r.name}
                 </Text>
                 {r.cuisines.length > 0 && (
@@ -381,51 +512,60 @@ export default function CustomerRestaurantScreen() {
                   </Text>
                 )}
               </View>
-
-              
             </View>
 
             {/* Status + services in one row */}
             <View className="mt-3 flex-row flex-wrap items-center gap-1.5">
               <View
                 className="flex-row items-center rounded-full px-2.5 py-1"
-                style={{ backgroundColor: r.isOpenNow ? colors.brand : colors.text }}>
-                <Ionicons name={r.isOpenNow ? "time" : "moon"} size={12} color={colors.white} />
-                <Text className="ml-1 text-sm font-bold text-white">{statusText}</Text>
+                style={{
+                  backgroundColor: r.isOpenNow ? colors.brand : colors.text,
+                }}>
+                <Ionicons
+                  name={r.isOpenNow ? "time" : "moon"}
+                  size={12}
+                  color={colors.white}
+                />
+                <Text className="ml-1 text-sm font-bold text-white">
+                  {statusText}
+                </Text>
               </View>
-              
             </View>
             <View className="flex-row justify-between">
-            <View className="self-start mt-4 flex-row gap-2 ">
-              {services.map((s) => (
-                <View
-                  key={s.key}
-                  className="flex-row items-center rounded-full px-2.5 py-1 bg-brand-soft"
-                  >
-                  <Ionicons name={s.icon} size={12} color={colors.brand} />
-                  <Text className="ml-1 text-sm font-semibold text-brand">{s.label}</Text>
-                </View>
-              ))}
-              
-            </View>
-            {/* Info button → bottom sheet */}
+              <View className="self-start mt-4 flex-row gap-2 ">
+                {services.map((s) => (
+                  <View
+                    key={s.key}
+                    className="flex-row items-center rounded-full px-2.5 py-1 bg-brand-soft">
+                    <Ionicons name={s.icon} size={12} color={colors.brand} />
+                    <Text className="ml-1 text-sm font-semibold text-brand">
+                      {s.label}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+              {/* Info button → bottom sheet */}
               <Pressable
                 onPress={() => setInfoOpen(true)}
                 hitSlop={8}
-                className="ml-2 items-center -top-6 rounded-2xl px-3 py-2 bg-brand-soft border-2 border-blue-400"
-               >
-                <Ionicons name="information-circle" size={20} color={colors.brand} />
+                className="ml-2 items-center -top-6 rounded-2xl px-3 py-2 bg-brand-soft border-2 border-brand-light">
+                <Ionicons
+                  name="information-circle"
+                  size={20}
+                  color={colors.brand}
+                />
                 <Text className="text-[10px] font-bold text-brand">Info</Text>
               </Pressable>
-              </View>
+            </View>
           </View>
         </View>
 
-        
         <View
           className="mt-4 py-2"
           style={{ backgroundColor: colors.mist }}
-          onLayout={(e: LayoutChangeEvent) => (barHeight.current = e.nativeEvent.layout.height)}>
+          onLayout={(e: LayoutChangeEvent) =>
+            (barHeight.current = e.nativeEvent.layout.height)
+          }>
           {menu.length > 0 && (
             <ScrollView
               ref={tabsRef}
@@ -438,10 +578,16 @@ export default function CustomerRestaurantScreen() {
                   <Pressable
                     key={c._id}
                     onPress={() => jumpTo(c._id)}
-                    onLayout={(e) => (tabX.current[c._id] = e.nativeEvent.layout.x)}
+                    onLayout={(e) =>
+                      (tabX.current[c._id] = e.nativeEvent.layout.x)
+                    }
                     className="rounded-full px-4 py-2"
-                    style={{ backgroundColor: active ? colors.brand : colors.white }}>
-                    <Text className="text-sm font-semibold " style={{ color: active ? colors.white : colors.brand }}>
+                    style={{
+                      backgroundColor: active ? colors.brand : colors.white,
+                    }}>
+                    <Text
+                      className="text-sm font-semibold "
+                      style={{ color: active ? colors.white : colors.brand }}>
                       {c.name}
                     </Text>
                   </Pressable>
@@ -451,10 +597,13 @@ export default function CustomerRestaurantScreen() {
           )}
         </View>
 
-        
-        <View className="flex-1 px-4 pt-2" onLayout={(e) => (menuTop.current = e.nativeEvent.layout.y)}>
+        <View
+          className="flex-1 px-4 pt-2"
+          onLayout={(e) => (menuTop.current = e.nativeEvent.layout.y)}>
           {!r.isOpenNow && menu.length > 0 && (
-            <View className="mb-3 flex-row items-center rounded-2xl px-4 py-3" style={{ backgroundColor: colors.text }}>
+            <View
+              className="mb-3 flex-row items-center rounded-2xl px-4 py-3"
+              style={{ backgroundColor: colors.text }}>
               <Ionicons name="moon" size={16} color={colors.white} />
               <Text className="ml-2 flex-1 text-sm text-white">
                 {r.isTemporarilyClosed
@@ -465,13 +614,20 @@ export default function CustomerRestaurantScreen() {
           )}
 
           {menu.length === 0 ? (
-            <View className="items-center rounded-3xl bg-white px-6 py-12" style={cardShadow}>
-              <View className="h-16 w-16 items-center justify-center rounded-2xl" style={{ backgroundColor: colors.brandSoft }}>
+            <View
+              className="items-center rounded-3xl bg-white px-6 py-12"
+              style={cardShadow}>
+              <View
+                className="h-16 w-16 items-center justify-center rounded-2xl"
+                style={{ backgroundColor: colors.brandSoft }}>
                 <Ionicons name="fast-food" size={30} color={colors.brand} />
               </View>
-              <Text className="mt-3 text-base font-bold text-brand-dark">Menu coming soon</Text>
+              <Text className="mt-3 text-base font-bold text-brand-dark">
+                Menu coming soon
+              </Text>
               <Text className="mt-1 text-center text-sm text-brand-light">
-                This restaurant hasn't added its menu yet. Tap Info for hours and location.
+                This restaurant hasn't added its menu yet. Tap Info for hours
+                and location.
               </Text>
             </View>
           ) : (
@@ -479,20 +635,32 @@ export default function CustomerRestaurantScreen() {
               <View
                 key={category._id}
                 className="mb-2"
-                onLayout={(e) => (sectionY.current[category._id] = e.nativeEvent.layout.y)}>
+                onLayout={(e) =>
+                  (sectionY.current[category._id] = e.nativeEvent.layout.y)
+                }>
                 <View className="mb-2 mt-2 flex-row items-end">
-                  <Text className="flex-1 text-lg font-extrabold text-brand-dark">{category.name}</Text>
+                  <Text className="flex-1 text-lg font-extrabold text-brand-dark">
+                    {category.name}
+                  </Text>
                   <Text className="text-xs text-brand-light">
-                    {category.items.length} item{category.items.length === 1 ? "" : "s"}
+                    {category.items.length} item
+                    {category.items.length === 1 ? "" : "s"}
                   </Text>
                 </View>
                 {!!category.description && (
-                  <Text className="-mt-1 mb-2 text-xs" style={{ color: colors.textMuted }}>
+                  <Text
+                    className="-mt-1 mb-2 text-xs"
+                    style={{ color: colors.textMuted }}>
                     {category.description}
                   </Text>
                 )}
                 {category.items.map((item) => (
-                  <MenuItemCard key={item._id} item={item} canOrder={r.isOpenNow} onPress={() => openItem(item)} />
+                  <MenuItemCard
+                    key={item._id}
+                    item={item}
+                    canOrder={r.isOpenNow}
+                    onPress={() => openItem(item)}
+                  />
                 ))}
               </View>
             ))
@@ -502,7 +670,11 @@ export default function CustomerRestaurantScreen() {
 
       {backButton}
 
-      <InfoSheet restaurant={r} visible={infoOpen} onClose={() => setInfoOpen(false)} />
+      <InfoSheet
+        restaurant={r}
+        visible={infoOpen}
+        onClose={() => setInfoOpen(false)}
+      />
     </View>
   );
 }
