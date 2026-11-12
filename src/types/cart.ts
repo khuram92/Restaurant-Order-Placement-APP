@@ -20,3 +20,19 @@ export interface CartSelection {
   quantity: number;
   note?: string;
 }
+
+/** A line in the cart = a selection + a key (same item + same choices = same key) */
+export interface CartLine extends CartSelection {
+  key: string;
+}
+
+/** The restaurant the cart belongs to (copied so the cart screen doesn't need to reload it) */
+export interface CartRestaurant {
+  _id: string;
+  name: string;
+  logo?: string;
+  taxRate: number;
+  deliveryFee: number;
+  minOrder: number;
+  services: { dineIn: boolean; takeaway: boolean; delivery: boolean };
+}
