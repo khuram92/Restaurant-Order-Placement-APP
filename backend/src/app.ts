@@ -5,6 +5,11 @@ import authRoutes from "./routes/auth.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
 import restaurantRoutes from "./routes/restaurant.routes.js";
 import managerRoutes from "./routes/manager.routes.js";
+import orderRoutes from "./routes/order.routes.js";
+
+
+
+
 const app = express();
 
 // Middleware
@@ -26,6 +31,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/restaurants", restaurantRoutes);
 app.use("/api/manager", managerRoutes);
+app.use("/api/orders", orderRoutes);
 
 // 404 handler
 app.use((req: Request, res: Response) => {
