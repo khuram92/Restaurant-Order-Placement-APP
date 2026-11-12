@@ -382,15 +382,7 @@ export default function CustomerRestaurantScreen() {
                 )}
               </View>
 
-              {/* Info button → bottom sheet */}
-              <Pressable
-                onPress={() => setInfoOpen(true)}
-                hitSlop={8}
-                className="ml-2 items-center rounded-2xl px-3 py-2"
-                style={{ backgroundColor: colors.brandSoft }}>
-                <Ionicons name="information-circle" size={20} color={colors.brand} />
-                <Text className="text-[10px] font-bold text-brand">Info</Text>
-              </Pressable>
+              
             </View>
 
             {/* Status + services in one row */}
@@ -399,18 +391,33 @@ export default function CustomerRestaurantScreen() {
                 className="flex-row items-center rounded-full px-2.5 py-1"
                 style={{ backgroundColor: r.isOpenNow ? colors.brand : colors.text }}>
                 <Ionicons name={r.isOpenNow ? "time" : "moon"} size={12} color={colors.white} />
-                <Text className="ml-1 text-xs font-bold text-white">{statusText}</Text>
+                <Text className="ml-1 text-sm font-bold text-white">{statusText}</Text>
               </View>
+              
+            </View>
+            <View className="flex-row justify-between">
+            <View className="self-start mt-4 flex-row gap-2 ">
               {services.map((s) => (
                 <View
                   key={s.key}
-                  className="flex-row items-center rounded-full px-2.5 py-1"
-                  style={{ backgroundColor: colors.brandSoft }}>
+                  className="flex-row items-center rounded-full px-2.5 py-1 bg-brand-soft"
+                  >
                   <Ionicons name={s.icon} size={12} color={colors.brand} />
-                  <Text className="ml-1 text-xs font-semibold text-brand">{s.label}</Text>
+                  <Text className="ml-1 text-sm font-semibold text-brand">{s.label}</Text>
                 </View>
               ))}
+              
             </View>
+            {/* Info button → bottom sheet */}
+              <Pressable
+                onPress={() => setInfoOpen(true)}
+                hitSlop={8}
+                className="ml-2 items-center -top-6 rounded-2xl px-3 py-2 bg-brand-soft border-2 border-blue-400"
+               >
+                <Ionicons name="information-circle" size={20} color={colors.brand} />
+                <Text className="text-[10px] font-bold text-brand">Info</Text>
+              </Pressable>
+              </View>
           </View>
         </View>
 
