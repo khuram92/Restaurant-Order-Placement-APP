@@ -30,6 +30,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import MenuItemCard from "../../../components/customer/MenuItemCard";
 import { cardShadow, colors } from "../../../constants/theme";
 import { getErrorMessage } from "../../../lib/api";
+// import CartBar from "../../../components/customer/CartBar";
+import { useCart } from "../../../context/CartContext";
 import {
   getCustomerMenu,
   getCustomerRestaurant,
@@ -463,7 +465,7 @@ export default function CustomerRestaurantScreen() {
   const [error, setError] = useState("");
   const [infoOpen, setInfoOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
-
+  const cart = useCart();
   // ---------- Sticky category tabs ----------
   const scrollRef = useRef<ScrollViewInstance>(null);
   const tabsRef = useRef<ScrollViewInstance>(null);
@@ -531,16 +533,32 @@ export default function CustomerRestaurantScreen() {
 
     const openItem = (item: MenuItem) => setSelectedItem(item);
 
-  const addToCart = (selection: CartSelection) => {
+    const addToCart = (selection: CartSelection) => {
+    if (!restaurant) return;
     setSelectedItem(null);
-    // The cart comes in the next step; for now show what was chosen
-    const extras = [selection.sizeName, ...selection.addOns.map((a) => a.name)].filter(Boolean).join(", ");
-    Alert.alert(
-      "Added (preview)",
-      `${selection.quantity} × ${selection.name}${extras ? `\n${extras}` : ""}\nRs ${(selection.unitPrice * selection.quantity).toLocaleString("en-PK")}`,
-    );
-  };
 
+    // What the cart keeps about the restaurant (for totals on the cart screen)
+    const cartRestaurant = {
+      _id: restaurant._id,
+      name: restaurant.name,
+      ...(restaurant.logo && { logo: restaurant.logo }),
+      taxRate: restaurant.taxRate,
+      deliveryFee: restaurant.deliveryFee,
+      minOrder: restaurant.minOrder,
+      services: restaurant.services,
+    };
+
+    if (cart.add(cartRestaurant, selection) === "other-restaurant") {
+      Alert.alert(
+        "Start a new cart?",
+        `Your cart has food from ${cart.restaurant?.name}. Adding this will empty it.`,
+        [
+          { text: "Keep cart", style: "cancel" },
+          { text: "Start new cart", style: "destructive", onPress: () => cart.replaceWith(cartRestaurant, selection) },
+        ],
+      );
+    }
+  };
   const backButton = (
     <Pressable
       onPress={() => router.back()}
@@ -607,7 +625,7 @@ export default function CustomerRestaurantScreen() {
         // Index 1 = the category bar: it sticks to the top while the menu scrolls
         stickyHeaderIndices={[1]}
         contentContainerStyle={{
-          paddingBottom: insets.bottom + 24,
+          paddingBottom: insets.bottom + 96,
           flexGrow: 1,
         }}
         refreshControl={
@@ -827,7 +845,7 @@ export default function CustomerRestaurantScreen() {
       </ScrollView>
 
       {backButton}
-
+      <CartBar restaurantId={r._id} />
       <InfoSheet
         restaurant={r}
         visible={infoOpen}
