@@ -49,7 +49,7 @@ export default function MenuItemCard({ item, canOrder, onPress }: Props) {
         </View>
         {!soldOut && (
           <View
-            className={`absolute -bottom-1.5 -right-1.5 h-9 w-9 items-center justify-center rounded-full border-2 border-white ${
+            className={`absolute -bottom-1.5 right-1 h-9 w-9 items-center justify-center rounded-full border-2 border-white ${
               disabled ? "bg-mist-dark" : "bg-brand"
             }`}>
             <Ionicons name="add" size={20} color={colors.white} />
