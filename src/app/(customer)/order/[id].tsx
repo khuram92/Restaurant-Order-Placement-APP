@@ -443,7 +443,7 @@ export default function OrderScreen() {
           />
         }>
         <View
-          className="rounded-b-[22px] px-5 pb-7 "
+          className=" px-5 pb-7 "
           style={{ backgroundColor: heroColor }}>
           <SafeAreaView edges={["top"]}>
             {/* Top row */}
