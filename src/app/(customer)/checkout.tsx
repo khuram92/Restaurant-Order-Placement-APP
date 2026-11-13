@@ -83,7 +83,9 @@ function Field({
     <View className="mb-3">
       <View className="mb-1.5 flex-row justify-between">
         <Text className="text-base font-semibold text-brand-dark">{label}</Text>
-        {optional && <Text className="text-xs text-brand-dark font-">Optional</Text>}
+        {optional && (
+          <Text className="text-xs text-brand-dark font-">Optional</Text>
+        )}
       </View>
       <TextInput
         value={value}
@@ -221,7 +223,10 @@ export default function CheckoutScreen() {
     try {
       const order = await placeOrder(input);
       clear();
-        router.replace({ pathname: "/order/[id]", params: { id: order._id, placed: "1" } });
+      router.replace({
+        pathname: "/order/[id]",
+        params: { id: order._id, placed: "1" },
+      });
     } catch (err) {
       setPlacing(false);
       const message = getErrorMessage(err);
@@ -277,7 +282,6 @@ export default function CheckoutScreen() {
             paddingBottom: insets.bottom + 130,
           }}
           keyboardShouldPersistTaps="handled">
-          
           <Card title="How do you want it?" icon="options">
             <View className="flex-row gap-2">
               {(Object.keys(ORDER_TYPE_INFO) as OrderType[]).map((t) => {
@@ -320,7 +324,6 @@ export default function CheckoutScreen() {
             </View>
           </Card>
 
-          
           {type === "delivery" && (
             <Card title="Delivery address" icon="location">
               <Field
@@ -375,7 +378,6 @@ export default function CheckoutScreen() {
 
           {type === "dineIn" && (
             <Card title="Table for" icon="people">
-             
               <View
                 className="mb-4 rounded-2xl p-3"
                 style={{ backgroundColor: colors.mistLight }}>
@@ -410,7 +412,7 @@ export default function CheckoutScreen() {
                         of {seats.capacity} seats
                       </Text>
                     </View>
-                    
+
                     <View
                       className="mt-2 h-2 overflow-hidden rounded-full"
                       style={{ backgroundColor: colors.white }}>
@@ -526,7 +528,6 @@ export default function CheckoutScreen() {
             />
           </Card>
 
-          
           <Card title="Payment" icon="wallet">
             <View
               className="flex-row items-center rounded-2xl border-2 px-4 py-3"
@@ -580,12 +581,16 @@ export default function CheckoutScreen() {
                   <Text className="text-sm text-brand font-normal">
                     Tax ({restaurant.taxRate}%)
                   </Text>
-                  <Text className="text-sm text-brand-dark font-normal">{money(tax)}</Text>
+                  <Text className="text-sm text-brand-dark font-normal">
+                    {money(tax)}
+                  </Text>
                 </View>
               )}
               {type === "delivery" && (
                 <View className="flex-row justify-between py-0.5">
-                  <Text className="text-sm text-brand font-normal">Delivery fee</Text>
+                  <Text className="text-sm text-brand font-normal">
+                    Delivery fee
+                  </Text>
                   <Text className="text-sm text-brand-dark font-normal">
                     {deliveryFee > 0 ? money(deliveryFee) : "Free"}
                   </Text>
@@ -594,7 +599,7 @@ export default function CheckoutScreen() {
               <View className="mt-1 flex-row justify-between">
                 <Text className="text-lg font-extrabold text-brand-dark">
                   Total :
-                </Text> 
+                </Text>
                 <Text className="text-lg font-extrabold text-brand-dark">
                   {money(total)}
                 </Text>
@@ -626,7 +631,9 @@ export default function CheckoutScreen() {
             className="flex-row items-center justify-between rounded-2xl px-5 py-4"
             style={[
               cardShadow,
-              { backgroundColor: placing ? colors.brandLight : colors.brandDark },
+              {
+                backgroundColor: placing ? colors.brandLight : colors.brandDark,
+              },
             ]}>
             {placing ? (
               <View className="flex-1 items-center">
