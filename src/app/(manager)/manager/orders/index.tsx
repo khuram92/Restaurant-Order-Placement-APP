@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Stack, useFocusEffect } from "expo-router";
-import { useCallback, useEffect, useRef, useState } from "react";
+  import { router, Stack, useFocusEffect } from "expo-router";
+  import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -34,6 +34,8 @@ import {
   ORDER_TYPE_INFO,
   timeAgo,
 } from "../../../../utils/orderFormat";
+  import RejectSheet from "../../../../components/manager/RejectSheet";
+
 
 const TABS: { key: ManagerOrderTab; label: string }[] = [
   { key: "new", label: "New" },
@@ -182,11 +184,13 @@ function OrderCard({
   busy,
   onNext,
   onReject,
+  onOpen,
 }: {
   order: Order;
   busy: boolean;
   onNext: () => void;
   onReject: () => void;
+  onOpen: () => void;
 }) {
   const typeInfo = ORDER_TYPE_INFO[order.type];
   const statusInfo = ORDER_STATUS_INFO[order.status];
@@ -197,7 +201,7 @@ function OrderCard({
   const isNew = order.status === "pending";
 
   return (
-    <View
+    <Pressable
       className="mb-3 rounded-3xl bg-white p-4"
       style={[
         cardShadow,
@@ -387,7 +391,7 @@ function OrderCard({
           )}
         </View>
       )}
-    </View>
+    </Pressable>
   );
 }
 
@@ -633,11 +637,12 @@ export default function ManagerOrdersScreen() {
             flexGrow: 1,
           }}
           renderItem={({ item }) => (
-            <OrderCard
+             <OrderCard
               order={item}
               busy={busyId === item._id}
               onNext={() => confirmNext(item)}
               onReject={() => setRejecting(item)}
+              onOpen={() => router.push({ pathname: "/manager/orders/[id]", params: { id: item._id } })}
             />
           )}
           onEndReached={loadMore}
