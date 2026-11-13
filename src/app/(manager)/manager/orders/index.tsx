@@ -121,7 +121,7 @@ function RejectSheet({
   );
 }
 
-// ---------- One order card ----------
+
 function OrderCard({
   order,
   busy,
@@ -146,17 +146,17 @@ function OrderCard({
       {/* Top row: number + time + total */}
       <View className="flex-row items-start">
         <View className="flex-1">
-          <Text className="text-base font-extrabold text-brand-dark">#{order.orderNumber}</Text>
-          <Text className="text-xs text-brand-light">{timeAgo(order.createdAt)}</Text>
+          <Text className="text-xl font-extrabold text-brand-dark">#{order.orderNumber}</Text>
+          <Text className="text-sm text-brand-light">{timeAgo(order.createdAt)}</Text>
         </View>
-        <Text className="text-lg font-extrabold text-brand">{money(order.total)}</Text>
+        <Text className="text-lg font-extrabold text-brand-dark">{money(order.total)}</Text>
       </View>
 
       {/* Chips: type + status + paid */}
       <View className="mt-3 flex-row flex-wrap gap-2">
-        <View className="flex-row items-center rounded-full px-2.5 py-1" style={{ backgroundColor: colors.brandSoft }}>
-          <Ionicons name={typeInfo.icon} size={12} color={colors.brand} />
-          <Text className="ml-1 text-xs font-bold text-brand">
+        <View className="flex-row items-center rounded-full px-2.5 py-1" style={{ backgroundColor: colors.mistLight }}>
+          <Ionicons name={typeInfo.icon} size={14} color={colors.brand} />
+          <Text className="ml-1 text-sm font-bold text-brand-dark">
             {typeInfo.label}
             {order.dineIn ? ` · ${order.dineIn.partySize} people` : ""}
           </Text>
@@ -164,8 +164,8 @@ function OrderCard({
         <View
           className="flex-row items-center rounded-full px-2.5 py-1"
           style={{ backgroundColor: stopped ? "#fde8e6" : isNew ? colors.brand : colors.mistLight }}>
-          <Ionicons name={statusInfo.icon} size={12} color={stopped ? colors.danger : isNew ? colors.white : colors.brandDark} />
-          <Text className="ml-1 text-xs font-bold" style={{ color: stopped ? colors.danger : isNew ? colors.white : colors.brandDark }}>
+          <Ionicons name={statusInfo.icon} size={14} color={stopped ? colors.danger : isNew ? colors.white : colors.brandDark} />
+          <Text className="ml-1 text-sm font-bold" style={{ color: stopped ? colors.danger : isNew ? colors.white : colors.brandDark }}>
             {isNew ? "New order" : statusInfo.label}
           </Text>
         </View>
@@ -178,16 +178,16 @@ function OrderCard({
       </View>
 
       {/* Customer */}
-      <View className="mt-3 flex-row items-center">
-        <Ionicons name="person" size={13} color={colors.brandLight} />
+      <View className="mt-3 flex-row items-center rounded-full bg-mist-light p-2 ">
+        <Ionicons name="person" size={14} color={colors.brandDark} />
         <Text className="ml-1.5 flex-1 text-sm font-semibold text-brand-dark" numberOfLines={1}>
           {order.customerName}
-          {order.customerPhone || order.delivery?.phone ? ` · ${order.delivery?.phone ?? order.customerPhone}` : ""}
+          {order.customerPhone || order.delivery?.phone ? ` - ${order.delivery?.phone ?? order.customerPhone}` : ""}
         </Text>
       </View>
       {order.delivery && (
-        <View className="mt-1 flex-row items-center">
-          <Ionicons name="location" size={13} color={colors.brandLight} />
+        <View className="mt-1 flex-row items-center rounded-full bg-mist-light p-2">
+          <Ionicons name="location" size={14} color={colors.brandDark} />
           <Text className="ml-1.5 flex-1 text-sm text-brand-light" numberOfLines={1}>
             {[order.delivery.street, order.delivery.area, order.delivery.city].filter(Boolean).join(", ")}
           </Text>
@@ -198,19 +198,19 @@ function OrderCard({
       <View className="mt-3 rounded-2xl p-3" style={{ backgroundColor: colors.mistLight }}>
         {order.items.slice(0, 3).map((item) => (
           <View key={item._id} className="flex-row py-0.5">
-            <Text className="w-8 text-sm font-extrabold text-brand">{item.quantity}×</Text>
+            <Text className="w-8 font-extrabold text-brand">{item.quantity}×</Text>
             <View className="flex-1">
-              <Text className="text-sm font-semibold text-brand-dark" numberOfLines={1}>
+              <Text className=" font-semibold text-brand-dark" numberOfLines={1}>
                 {item.name}
                 {item.sizeName ? ` (${item.sizeName})` : ""}
               </Text>
               {item.addOns.length > 0 && (
-                <Text className="text-xs text-brand-light" numberOfLines={1}>
+                <Text className="text-sm text-brand-light" numberOfLines={1}>
                   + {item.addOns.map((a) => a.name).join(", ")}
                 </Text>
               )}
               {!!item.note && (
-                <Text className="text-xs italic text-brand-light" numberOfLines={1}>
+                <Text className="text-sm italic text-brand-light" numberOfLines={1}>
                   “{item.note}”
                 </Text>
               )}
@@ -225,9 +225,9 @@ function OrderCard({
         </Text>
       </View>
       {!!order.note && (
-        <View className="mt-2 flex-row items-start">
-          <Ionicons name="chatbox-ellipses" size={13} color={colors.brand} style={{ marginTop: 2 }} />
-          <Text className="ml-1.5 flex-1 text-xs text-brand-dark">{order.note}</Text>
+        <View className="mt-2 flex-row items-start rounded-full bg-mist-light p-2">
+          <Ionicons name="chatbox-ellipses" size={14} color={colors.brand} style={{ marginTop: 2 }} />
+          <Text className="ml-1.5 flex-1  text-brand-dark">{order.note}</Text>
         </View>
       )}
       {stopped && !!(order.rejectReason || order.cancelReason) && (
@@ -244,9 +244,9 @@ function OrderCard({
             <Pressable
               onPress={onReject}
               disabled={busy}
-              className="flex-1 flex-row items-center justify-center rounded-2xl border-2 py-3"
-              style={{ borderColor: colors.danger, opacity: busy ? 0.5 : 1 }}>
-              <Ionicons name="close" size={16} color={colors.danger} />
+              className="flex-1 flex-row items-center justify-center rounded-2xl border-2 border-red-600 py-3 bg-mist-light"
+              >
+              <Ionicons name="close" size={18} color={colors.danger} />
               <Text className="ml-1 font-bold" style={{ color: colors.danger }}>
                 Reject
               </Text>
