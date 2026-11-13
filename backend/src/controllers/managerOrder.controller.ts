@@ -70,56 +70,56 @@ export const getRestaurantOrder = async (req: Request, res: Response) => {
   res.json({ order });
 };
 
-// /** PATCH /api/manager/orders/:id/status   { status, reason? } — one step forward, or reject while pending */
-// export const updateOrderStatus = async (req: Request, res: Response) => {
-//   const restaurantId = myRestaurantId(req, res);
-//   if (!restaurantId) return;
+/** PATCH /api/manager/orders/:id/status   { status, reason? } — one step forward, or reject while pending */
+export const updateOrderStatus = async (req: Request, res: Response) => {
+  const restaurantId = myRestaurantId(req, res);
+  if (!restaurantId) return;
 
-//   const id = String(req.params.id);
-//   if (!mongoose.isValidObjectId(id)) return res.status(400).json({ message: "Invalid order id" });
+  const id = String(req.params.id);
+  if (!mongoose.isValidObjectId(id)) return res.status(400).json({ message: "Invalid order id" });
 
-//   const parsed = updateOrderStatusSchema.safeParse(req.body ?? {});
-//   if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
-//   const { status: to, reason } = parsed.data;
+  const parsed = updateOrderStatusSchema.safeParse(req.body ?? {});
+  if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
+  const { status: to, reason } = parsed.data;
 
-//   const order = await Order.findOne({ _id: id, restaurantId });
-//   if (!order) return res.status(404).json({ message: "Order not found" });
+  const order = await Order.findOne({ _id: id, restaurantId });
+  if (!order) return res.status(404).json({ message: "Order not found" });
 
-//   const from = order.status;
-//   if (!canMoveTo(order.type, from, to)) {
-//     return res.status(409).json({ message: `Can't change this order from "${from}" to "${to}"` });
-//   }
+  const from = order.status;
+  if (!canMoveTo(order.type, from, to)) {
+    return res.status(409).json({ message: `Can't change this order from "${from}" to "${to}"` });
+  }
 
-//   // ---------- What changes ----------
-//   const set: Record<string, unknown> = { status: to };
+  // ---------- What changes ----------
+  const set: Record<string, unknown> = { status: to };
 
-//   if (to === "rejected" && reason) set.rejectReason = reason;
-//   if (to === "completed") set.paymentStatus = "paid"; // cash collected
+  if (to === "rejected" && reason) set.rejectReason = reason;
+  if (to === "completed") set.paymentStatus = "paid"; // cash collected
 
-//   if (order.dineIn) {
-//     if (to === "accepted") {
-//       // Hold the seats — only if there's room
-//       const restaurant = await Restaurant.findById(restaurantId).select("seatingCapacity");
-//       const free = (restaurant?.seatingCapacity ?? 0) - (await seatsInUse(restaurantId));
-//       if (order.dineIn.partySize > free) {
-//         return res.status(409).json({
-//           message: `Only ${Math.max(0, free)} seat${free === 1 ? "" : "s"} free right now. Free up a table or reject the order.`,
-//         });
-//       }
-//       set["dineIn.seatsReserved"] = true;
-//     }
-//     if (to === "completed" || to === "rejected") set["dineIn.seatsReserved"] = false; // release
-//   }
+  if (order.dineIn) {
+    if (to === "accepted") {
+      // Hold the seats — only if there's room
+      const restaurant = await Restaurant.findById(restaurantId).select("seatingCapacity");
+      const free = (restaurant?.seatingCapacity ?? 0) - (await seatsInUse(restaurantId));
+      if (order.dineIn.partySize > free) {
+        return res.status(409).json({
+          message: `Only ${Math.max(0, free)} seat${free === 1 ? "" : "s"} free right now. Free up a table or reject the order.`,
+        });
+      }
+      set["dineIn.seatsReserved"] = true;
+    }
+    if (to === "completed" || to === "rejected") set["dineIn.seatsReserved"] = false; // release
+  }
 
-//   // Only update if nobody changed it meanwhile (e.g. the customer cancelled a second ago)
-//   const updated = await Order.findOneAndUpdate(
-//     { _id: order._id, status: from },
-//     { $set: set, $push: { statusHistory: { status: to, at: new Date(), by: req.user!._id } } },
-//     { new: true, runValidators: true },
-//   );
+  // Only update if nobody changed it meanwhile (e.g. the customer cancelled a second ago)
+  const updated = await Order.findOneAndUpdate(
+    { _id: order._id, status: from },
+    { $set: set, $push: { statusHistory: { status: to, at: new Date(), by: req.user!._id } } },
+    { new: true, runValidators: true },
+  );
 
-//   if (!updated) {
-//     return res.status(409).json({ message: "This order was just updated by someone else. Pull to refresh." });
-//   }
-//   res.json({ message: "Order updated", order: updated });
-// };
+  if (!updated) {
+    return res.status(409).json({ message: "This order was just updated by someone else. Pull to refresh." });
+  }
+  res.json({ message: "Order updated", order: updated });
+};
