@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import { Order, type OrderStatus } from "../models/Order.js";
 import { Restaurant } from "../models/Restaurant.js";
 import { canMoveTo } from "../utils/orderFlow.js";
+import { notifyCustomerOfStatus } from "../utils/orderNotifications.js";
 import { seatsInUse } from "../utils/orderPricing.js";
 import {
   listRestaurantOrdersSchema,
@@ -167,5 +168,6 @@ export const updateOrderStatus = async (req: Request, res: Response) => {
       message: "This order was just updated by someone else. Pull to refresh.",
     });
   }
+  void notifyCustomerOfStatus(updated); // push to the customer
   res.json({ message: "Order updated", order: updated });
 };

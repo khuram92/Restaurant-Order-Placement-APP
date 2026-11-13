@@ -16,6 +16,8 @@ import {
   listMyOrdersSchema,
 } from "../validators/order.validators.js";
 
+import { notifyNewOrder, notifyOrderCancelled } from "../utils/orderNotifications.js";
+
 const firstIssue = (error: { issues: { message: string }[] }) =>
   error.issues[0]?.message ?? "Invalid input";
 
@@ -137,7 +139,8 @@ export const createOrder = async (req: Request, res: Response) => {
     // A clash on the 6-letter code is very unlikely; retry a few times just in case
     for (let attempt = 0; ; attempt++) {
       try {
-        const order = await new Order(data).save();
+               const order = await new Order(data).save();
+        void notifyNewOrder(order); // push to the manager (doesn't slow the response)
         return res.status(201).json({ order });
       } catch (error) {
         const duplicate = (error as { code?: number }).code === 11000;
@@ -211,5 +214,6 @@ export const cancelMyOrder = async (req: Request, res: Response) => {
     });
   }
 
+    void notifyOrderCancelled(updated); // let the manager know
   res.json({ message: "Order cancelled", order: updated });
 };
