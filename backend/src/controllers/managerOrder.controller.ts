@@ -57,18 +57,18 @@ export const listRestaurantOrders = async (req: Request, res: Response) => {
   });
 };
 
-// /** GET /api/manager/orders/:id */
-// export const getRestaurantOrder = async (req: Request, res: Response) => {
-//   const restaurantId = myRestaurantId(req, res);
-//   if (!restaurantId) return;
+/** GET /api/manager/orders/:id */
+export const getRestaurantOrder = async (req: Request, res: Response) => {
+  const restaurantId = myRestaurantId(req, res);
+  if (!restaurantId) return;
 
-//   const id = String(req.params.id);
-//   if (!mongoose.isValidObjectId(id)) return res.status(400).json({ message: "Invalid order id" });
+  const id = String(req.params.id);
+  if (!mongoose.isValidObjectId(id)) return res.status(400).json({ message: "Invalid order id" });
 
-//   const order = await Order.findOne({ _id: id, restaurantId });
-//   if (!order) return res.status(404).json({ message: "Order not found" });
-//   res.json({ order });
-// };
+  const order = await Order.findOne({ _id: id, restaurantId });
+  if (!order) return res.status(404).json({ message: "Order not found" });
+  res.json({ order });
+};
 
 // /** PATCH /api/manager/orders/:id/status   { status, reason? } — one step forward, or reject while pending */
 // export const updateOrderStatus = async (req: Request, res: Response) => {
