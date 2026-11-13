@@ -526,7 +526,7 @@ export default function CheckoutScreen() {
             />
           </Card>
 
-          {/* 4. Payment */}
+          
           <Card title="Payment" icon="wallet">
             <View
               className="flex-row items-center rounded-2xl border-2 px-4 py-3"
@@ -539,7 +539,7 @@ export default function CheckoutScreen() {
                 <Text className="text-base font-bold text-brand-dark">
                   Cash
                 </Text>
-                <Text className="text-xs text-brand-light">
+                <Text className="text-sm text-brand">
                   {type === "delivery"
                     ? "Pay the rider when it arrives"
                     : "Pay at the restaurant"}
