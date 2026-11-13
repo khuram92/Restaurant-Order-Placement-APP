@@ -299,7 +299,6 @@ function Timeline({ order }: { order: Order }) {
   );
 }
 
-// ---------- Screen ----------
 export default function OrderScreen() {
   const { id, placed } = useLocalSearchParams<{
     id: string;
@@ -466,7 +465,7 @@ export default function OrderScreen() {
                   style={{ color: "rgba(255,255,255,0.75)" }}>
                   Order
                 </Text>
-                <Text className="text-lg font-extrabold text-white">
+                <Text className="text-xl font-extrabold text-white">
                   #{o.orderNumber}
                 </Text>
               </View>
@@ -512,13 +511,13 @@ export default function OrderScreen() {
               </Text>
             </View>
 
-            {/* Steps */}
+            
             {!stopped && <StepBar order={o} />}
           </SafeAreaView>
         </View>
 
         <View className="-mt-4 px-4">
-          {/* ---------- Summary chips ---------- */}
+         
           <View
             className="mb-4 flex-row rounded-3xl bg-white p-4"
             style={cardShadow}>
@@ -547,7 +546,7 @@ export default function OrderScreen() {
             </View>
           </View>
 
-          {/* ---------- Restaurant ---------- */}
+         
           <View
             className="mb-4 flex-row items-center rounded-3xl bg-white p-4"
             style={cardShadow}>
