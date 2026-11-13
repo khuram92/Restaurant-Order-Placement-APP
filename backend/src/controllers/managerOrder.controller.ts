@@ -8,54 +8,54 @@ import { listRestaurantOrdersSchema, updateOrderStatusSchema } from "../validato
 
 const firstIssue = (error: { issues: { message: string }[] }) => error.issues[0]?.message ?? "Invalid input";
 
-// /** Which statuses each tab shows */
-// const TAB_STATUSES: Record<"new" | "active" | "past", OrderStatus[]> = {
-//   new: ["pending"],
-//   active: ["accepted", "preparing", "ready", "outForDelivery", "served"],
-//   past: ["completed", "rejected", "cancelled"],
-// };
+/** Which statuses each tab shows */
+const TAB_STATUSES: Record<"new" | "active" | "past", OrderStatus[]> = {
+  new: ["pending"],
+  active: ["accepted", "preparing", "ready", "outForDelivery", "served"],
+  past: ["completed", "rejected", "cancelled"],
+};
 
-// /** The manager's restaurant id, or sends 403 and returns null */
-// const myRestaurantId = (req: Request, res: Response) => {
-//   const restaurantId = req.user?.restaurantId;
-//   if (!restaurantId) {
-//     res.status(403).json({ message: "You're not assigned to a restaurant" });
-//     return null;
-//   }
-//   return String(restaurantId);
-// };
+/** The manager's restaurant id, or sends 403 and returns null */
+const myRestaurantId = (req: Request, res: Response) => {
+  const restaurantId = req.user?.restaurantId;
+  if (!restaurantId) {
+    res.status(403).json({ message: "You're not assigned to a restaurant" });
+    return null;
+  }
+  return String(restaurantId);
+};
 
-// /** GET /api/manager/orders?tab=new|active|past&page= — orders + tab counts + seats */
-// export const listRestaurantOrders = async (req: Request, res: Response) => {
-//   const restaurantId = myRestaurantId(req, res);
-//   if (!restaurantId) return;
+/** GET /api/manager/orders?tab=new|active|past&page= — orders + tab counts + seats */
+export const listRestaurantOrders = async (req: Request, res: Response) => {
+  const restaurantId = myRestaurantId(req, res);
+  if (!restaurantId) return;
 
-//   const parsed = listRestaurantOrdersSchema.safeParse(req.query);
-//   if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
-//   const { tab, page, limit } = parsed.data;
+  const parsed = listRestaurantOrdersSchema.safeParse(req.query);
+  if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
+  const { tab, page, limit } = parsed.data;
 
-//   const filter = { restaurantId, status: { $in: TAB_STATUSES[tab] } };
-//   // New orders: oldest first (serve in order). Others: newest first.
-//   const sort = tab === "new" ? { createdAt: 1 as const } : { createdAt: -1 as const };
+  const filter = { restaurantId, status: { $in: TAB_STATUSES[tab] } };
+  // New orders: oldest first (serve in order). Others: newest first.
+  const sort = tab === "new" ? { createdAt: 1 as const } : { createdAt: -1 as const };
 
-//   const [orders, total, newCount, activeCount, restaurant, inUse] = await Promise.all([
-//     Order.find(filter).sort(sort).skip((page - 1) * limit).limit(limit),
-//     Order.countDocuments(filter),
-//     Order.countDocuments({ restaurantId, status: { $in: TAB_STATUSES.new } }),
-//     Order.countDocuments({ restaurantId, status: { $in: TAB_STATUSES.active } }),
-//     Restaurant.findById(restaurantId).select("seatingCapacity"),
-//     seatsInUse(restaurantId),
-//   ]);
+  const [orders, total, newCount, activeCount, restaurant, inUse] = await Promise.all([
+    Order.find(filter).sort(sort).skip((page - 1) * limit).limit(limit),
+    Order.countDocuments(filter),
+    Order.countDocuments({ restaurantId, status: { $in: TAB_STATUSES.new } }),
+    Order.countDocuments({ restaurantId, status: { $in: TAB_STATUSES.active } }),
+    Restaurant.findById(restaurantId).select("seatingCapacity"),
+    seatsInUse(restaurantId),
+  ]);
 
-//   res.json({
-//     orders,
-//     total,
-//     page,
-//     pages: Math.max(1, Math.ceil(total / limit)),
-//     counts: { new: newCount, active: activeCount },
-//     seats: { capacity: restaurant?.seatingCapacity ?? 0, inUse },
-//   });
-// };
+  res.json({
+    orders,
+    total,
+    page,
+    pages: Math.max(1, Math.ceil(total / limit)),
+    counts: { new: newCount, active: activeCount },
+    seats: { capacity: restaurant?.seatingCapacity ?? 0, inUse },
+  });
+};
 
 // /** GET /api/manager/orders/:id */
 // export const getRestaurantOrder = async (req: Request, res: Response) => {
