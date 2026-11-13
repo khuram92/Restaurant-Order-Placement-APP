@@ -78,3 +78,12 @@ export interface PlaceOrderInput {
   delivery?: { street: string; area?: string; city: string; phone: string; instructions?: string };
   dineIn?: { partySize: number };
 }
+
+
+/** Manager order board */
+export type ManagerOrderTab = "new" | "active" | "past";
+
+export interface ManagerOrderListResponse extends OrderListResponse {
+  counts: { new: number; active: number };
+  seats: { capacity: number; inUse: number };
+}

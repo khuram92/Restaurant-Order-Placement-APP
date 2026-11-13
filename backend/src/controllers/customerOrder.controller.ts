@@ -187,7 +187,7 @@ export const getMyOrder = async (req: Request, res: Response) => {
 };
 
 /** PATCH /api/orders/:id/cancel   { reason? } — only while the restaurant hasn't accepted it */
-export const /** PATCH /api/orders/:id/cancel   { reason? } — only while the restaurant hasn't accepted it */
+
 export const cancelMyOrder = async (req: Request, res: Response) => {
   const parsed = cancelOrderSchema.safeParse(req.body ?? {});
   if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
