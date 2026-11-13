@@ -32,9 +32,21 @@ export const listRestaurantOrders = async (req: Request, res: Response) => {
 
   const parsed = listRestaurantOrdersSchema.safeParse(req.query);
   if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
-  const { tab, page, limit } = parsed.data;
+  const { tab, page, limit, q } = parsed.data;
 
-  const filter = { restaurantId, status: { $in: TAB_STATUSES[tab] } };
+  const filter: Record<string, unknown> = { restaurantId, status: { $in: TAB_STATUSES[tab] } };
+
+  // Search: order number, customer name or phone ("#" is ignored, text is matched safely)
+  const search = q?.replace(/^#/, "").trim();
+  if (search) {
+    const pattern = new RegExp(search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
+    filter.$or = [
+      { orderNumber: pattern },
+      { customerName: pattern },
+      { customerPhone: pattern },
+      { "delivery.phone": pattern },
+    ];
+  }
   // New orders: oldest first (serve in order). Others: newest first.
   const sort = tab === "new" ? { createdAt: 1 as const } : { createdAt: -1 as const };
 

@@ -2,8 +2,9 @@ import { api } from "../lib/api";
 import type { ManagerOrderListResponse, ManagerOrderTab, Order, OrderStatus } from "../types/order";
 
 /** Manager: orders of their restaurant for one tab (+ tab counts and seats) */
-export const listRestaurantOrders = async (tab: ManagerOrderTab = "new", page = 1) => {
-  const { data } = await api.get<ManagerOrderListResponse>("/manager/orders", { params: { tab, page } });
+export const listRestaurantOrders = async (tab: ManagerOrderTab = "new", page = 1, q = "") => {
+  const params = q.trim() ? { tab, page, q: q.trim() } : { tab, page };
+  const { data } = await api.get<ManagerOrderListResponse>("/manager/orders", { params });
   return data;
 };
 

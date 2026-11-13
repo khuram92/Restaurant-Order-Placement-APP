@@ -5,6 +5,7 @@ export const listRestaurantOrdersSchema = z.object({
   tab: z.enum(["new", "active", "past"]).default("new"),
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(50).default(20),
+  q: z.string().trim().max(50, "Search is too long").optional(),
 });
 
 export const updateOrderStatusSchema = z
@@ -16,3 +17,4 @@ export const updateOrderStatusSchema = z
     message: "Tell the customer why you're rejecting the order",
     path: ["reason"],
   });
+
