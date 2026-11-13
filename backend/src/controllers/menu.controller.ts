@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import mongoose from "mongoose";
 import { MenuCategory } from "../models/MenuCategory.js";
 import { MenuItem } from "../models/MenuItem.js";
+import { Restaurant } from "../models/Restaurant.js";
 import {
   deleteMenuItemImage,
   uploadMenuItemImage,
@@ -14,9 +15,6 @@ import {
   updateCategorySchema,
   updateItemSchema,
 } from "../validators/menu.validators.js";
-import { Restaurant } from "../models/Restaurant.js";
-
-
 
 const firstIssue = (error: { issues: { message: string }[] }) =>
   error.issues[0]?.message ?? "Invalid input";
@@ -60,7 +58,9 @@ const nameTaken = (restaurantId: string, name: string, exceptId?: string) =>
 const resolveCuisine = async (restaurantId: string, cuisine: string) => {
   if (cuisine === "") return "";
   const restaurant = await Restaurant.findById(restaurantId).select("cuisines");
-  const match = restaurant?.cuisines.find((c) => c.toLowerCase() === cuisine.toLowerCase());
+  const match = restaurant?.cuisines.find(
+    (c) => c.toLowerCase() === cuisine.toLowerCase(),
+  );
   return match ?? null;
 };
 const nextSortOrder = async (
@@ -97,7 +97,7 @@ export const getMenu = async (_req: Request, res: Response) => {
   ]);
 
   res.json({
-    cuisines: restaurant?.cuisines ?? [], 
+    cuisines: restaurant?.cuisines ?? [],
     categories: categories.map((c) => ({
       ...c.toJSON(),
       items: items.filter((i) => String(i.categoryId) === c.id),
@@ -107,17 +107,23 @@ export const getMenu = async (_req: Request, res: Response) => {
 
 export const createCategory = async (req: Request, res: Response) => {
   const parsed = createCategorySchema.safeParse(req.body);
-  if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
+  if (!parsed.success)
+    return res.status(400).json({ message: firstIssue(parsed.error) });
   const restaurantId = restaurantOf(res);
 
   if (await nameTaken(restaurantId, parsed.data.name)) {
-    return res.status(409).json({ message: "A category with this name already exists" });
+    return res
+      .status(409)
+      .json({ message: "A category with this name already exists" });
   }
 
   const data = { ...parsed.data };
   if (data.cuisine !== undefined) {
     const cuisine = await resolveCuisine(restaurantId, data.cuisine);
-    if (cuisine === null) return res.status(400).json({ message: "Pick one of this restaurant's cuisines" });
+    if (cuisine === null)
+      return res
+        .status(400)
+        .json({ message: "Pick one of this restaurant's cuisines" });
     data.cuisine = cuisine;
   }
 
@@ -133,19 +139,28 @@ export const createCategory = async (req: Request, res: Response) => {
 
 export const updateCategory = async (req: Request, res: Response) => {
   const parsed = updateCategorySchema.safeParse(req.body);
-  if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
+  if (!parsed.success)
+    return res.status(400).json({ message: firstIssue(parsed.error) });
 
   const category = await findCategoryOr404(req, res);
   if (!category) return;
 
-  if (parsed.data.name && (await nameTaken(restaurantOf(res), parsed.data.name, category.id))) {
-    return res.status(409).json({ message: "A category with this name already exists" });
+  if (
+    parsed.data.name &&
+    (await nameTaken(restaurantOf(res), parsed.data.name, category.id))
+  ) {
+    return res
+      .status(409)
+      .json({ message: "A category with this name already exists" });
   }
 
   const data = { ...parsed.data };
   if (data.cuisine !== undefined) {
     const cuisine = await resolveCuisine(restaurantOf(res), data.cuisine);
-    if (cuisine === null) return res.status(400).json({ message: "Pick one of this restaurant's cuisines" });
+    if (cuisine === null)
+      return res
+        .status(400)
+        .json({ message: "Pick one of this restaurant's cuisines" });
     data.cuisine = cuisine;
   }
 

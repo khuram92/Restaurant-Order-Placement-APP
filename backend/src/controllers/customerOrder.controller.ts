@@ -16,7 +16,10 @@ import {
   listMyOrdersSchema,
 } from "../validators/order.validators.js";
 
-import { notifyNewOrder, notifyOrderCancelled } from "../utils/orderNotifications.js";
+import {
+  notifyNewOrder,
+  notifyOrderCancelled,
+} from "../utils/orderNotifications.js";
 
 const firstIssue = (error: { issues: { message: string }[] }) =>
   error.issues[0]?.message ?? "Invalid input";
@@ -139,7 +142,7 @@ export const createOrder = async (req: Request, res: Response) => {
     // A clash on the 6-letter code is very unlikely; retry a few times just in case
     for (let attempt = 0; ; attempt++) {
       try {
-               const order = await new Order(data).save();
+        const order = await new Order(data).save();
         void notifyNewOrder(order); // push to the manager (doesn't slow the response)
         return res.status(201).json({ order });
       } catch (error) {
@@ -193,7 +196,8 @@ export const getMyOrder = async (req: Request, res: Response) => {
 
 export const cancelMyOrder = async (req: Request, res: Response) => {
   const parsed = cancelOrderSchema.safeParse(req.body ?? {});
-  if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
+  if (!parsed.success)
+    return res.status(400).json({ message: firstIssue(parsed.error) });
 
   const order = await findMyOrderOr404(req, res);
   if (!order) return;
@@ -204,16 +208,26 @@ export const cancelMyOrder = async (req: Request, res: Response) => {
   // Cancel ONLY if it's still pending right now (the manager may have just accepted it)
   const updated = await Order.findOneAndUpdate(
     { _id: order._id, customerId: req.user!._id, status: "pending" },
-    { $set: set, $push: { statusHistory: { status: "cancelled", at: new Date(), by: req.user!._id } } },
+    {
+      $set: set,
+      $push: {
+        statusHistory: {
+          status: "cancelled",
+          at: new Date(),
+          by: req.user!._id,
+        },
+      },
+    },
     { new: true, runValidators: true },
   );
 
   if (!updated) {
     return res.status(409).json({
-      message: "The restaurant has already accepted this order. Please call them to cancel.",
+      message:
+        "The restaurant has already accepted this order. Please call them to cancel.",
     });
   }
 
-    void notifyOrderCancelled(updated); // let the manager know
+  void notifyOrderCancelled(updated); // let the manager know
   res.json({ message: "Order cancelled", order: updated });
 };
