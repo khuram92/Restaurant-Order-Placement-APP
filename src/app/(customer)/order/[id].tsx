@@ -12,7 +12,7 @@ import { formatOrderDate, ORDER_STATUS_INFO, ORDER_TYPE_INFO, trackerSteps } fro
 
 const FINISHED = ["completed", "rejected", "cancelled"];
 
-/** Progress steps: done ✓ / current (big) / to come (grey) */
+
 function Tracker({ order }: { order: Order }) {
   const steps = trackerSteps(order.type);
   const currentIndex = Math.max(0, steps.indexOf(order.status));
@@ -316,6 +316,7 @@ export default function OrderScreen() {
 
         {placed === "1" && (
           <Pressable onPress={goHome} className="mt-4 items-center py-3">
+            <Ionicons name="chevron-back" size={20} />
             <Text className="font-bold text-brand">Back to restaurants</Text>
           </Pressable>
         )}
