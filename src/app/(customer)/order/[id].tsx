@@ -485,7 +485,7 @@ export default function OrderScreen() {
               )}
             </View>
 
-            {/* Big status */}
+            
             <View className="mt-6 items-center">
               <View
                 className="h-20 w-20 items-center justify-center rounded-full"
@@ -583,7 +583,7 @@ export default function OrderScreen() {
             </Pressable>
           </View>
 
-          {/* ---------- Delivery / dine-in / pickup ---------- */}
+          
           {o.delivery && (
             <Card title="Delivering to" icon="location">
               <Text className="text-sm leading-5 text-brand-dark">
@@ -652,7 +652,7 @@ export default function OrderScreen() {
             </View>
           )}
 
-          {/* ---------- Items ---------- */}
+         
           <Card
             title={`Your order · ${itemCount} item${itemCount === 1 ? "" : "s"}`}
             icon="receipt">
