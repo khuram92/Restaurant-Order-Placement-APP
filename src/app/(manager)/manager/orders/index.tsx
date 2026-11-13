@@ -298,7 +298,7 @@ function OrderCard({
         style={{ backgroundColor: colors.mistLight }}>
         {order.items.slice(0, 3).map((item) => (
           <View key={item._id} className="flex-row py-0.5">
-            <Text className="w-8 font-extrabold text-brand">
+            <Text className="w-8 font-extrabold text-brand-dark">
               {item.quantity}×
             </Text>
             <View className="flex-1">
@@ -314,9 +314,7 @@ function OrderCard({
                 </Text>
               )}
               {!!item.note && (
-                <Text
-                  className="text-sm italic text-brand-light"
-                  numberOfLines={1}>
+                <Text className="text-sm italic text-brand" numberOfLines={1}>
                   “{item.note}”
                 </Text>
               )}
@@ -328,7 +326,7 @@ function OrderCard({
             + {order.items.length - 3} more item(s)
           </Text>
         )}
-        <Text className="mt-1 text-xs text-brand-light">
+        <Text className="mt-1 text-sm text-brand">
           {itemCount} item{itemCount === 1 ? "" : "s"} · Cash
         </Text>
       </View>
@@ -344,7 +342,9 @@ function OrderCard({
         </View>
       )}
       {stopped && !!(order.rejectReason || order.cancelReason) && (
-        <Text className="mt-2 text-xs italic" style={{ color: colors.danger }}>
+        <Text
+          className="mt-2 text-sm italic font-medium"
+          style={{ color: "red" }}>
           {order.status === "rejected" ? "Rejected: " : "Customer cancelled: "}
           {order.rejectReason || order.cancelReason}
         </Text>
