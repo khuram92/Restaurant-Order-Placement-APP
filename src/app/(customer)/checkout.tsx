@@ -49,7 +49,7 @@ function Card({
   return (
     <View className="mb-4 rounded-3xl bg-white p-4" style={cardShadow}>
       <View className="mb-4 flex-row items-center">
-        <Ionicons name={icon} size={18} color={colors.brand} />
+        <Ionicons name={icon} size={20} color={colors.brand} />
         <Text className="ml-2 text-base font-bold text-brand-dark">
           {title}
         </Text>
@@ -505,7 +505,7 @@ export default function CheckoutScreen() {
 
           {type === "takeaway" && (
             <Card title="Pick up" icon="bag-handle">
-              <Text className="text-sm text-brand-dark">
+              <Text className="text-base text-brand-dark">
                 Collect your order from{" "}
                 <Text className="font-bold">{restaurant.name}</Text>. We'll show
                 when it's ready.
