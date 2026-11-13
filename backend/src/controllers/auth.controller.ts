@@ -119,7 +119,7 @@ export const requestOtp = async (req: Request, res: Response) => {
   }
 
   // Resend cooldown
-  const last = await Otp.findOne({ identifier }).sort({ createdAt: -1 });
+    const last = await Otp.findOne({ identifier, purpose: { $ne: "contact" } }).sort({ createdAt: -1 });
   if (last) {
     const secondsSince = (Date.now() - last.createdAt.getTime()) / 1000;
     if (secondsSince < OTP_RESEND_SECONDS) {
@@ -131,7 +131,7 @@ export const requestOtp = async (req: Request, res: Response) => {
   }
 
   const code = generateOtp();
-  await Otp.deleteMany({ identifier }); // only one active code at a time
+    await Otp.deleteMany({ identifier, purpose: { $ne: "contact" } }); // only one active code at a time
   await Otp.create({
     identifier,
     channel,
@@ -173,7 +173,7 @@ export const verifyOtp = async (req: Request, res: Response) => {
   const { identifier, channel } = result;
   const { code } = parsed.data;
 
-  const otp = await Otp.findOne({ identifier });
+    const otp = await Otp.findOne({ identifier, purpose: { $ne: "contact" } });
   if (!otp || otp.expiresAt < new Date()) {
     return res.status(400).json({ message: "Code expired, please request a new one" });
   }
