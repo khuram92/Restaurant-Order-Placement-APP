@@ -626,7 +626,7 @@ export default function CheckoutScreen() {
             className="flex-row items-center justify-between rounded-2xl px-5 py-4"
             style={[
               cardShadow,
-              { backgroundColor: placing ? colors.brandLight : colors.brand },
+              { backgroundColor: placing ? colors.brandLight : colors.brandDark },
             ]}>
             {placing ? (
               <View className="flex-1 items-center">
