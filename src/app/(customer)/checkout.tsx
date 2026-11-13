@@ -567,35 +567,35 @@ export default function CheckoutScreen() {
               </View>
             ))}
             <View
-              className="mt-2 border-t pt-2"
+              className="mt-2 border-t pt-2 "
               style={{ borderColor: colors.mist }}>
               <View className="flex-row justify-between py-0.5">
-                <Text className="text-sm text-brand-light">Subtotal</Text>
-                <Text className="text-sm text-brand-dark">
+                <Text className="text-sm text-brand font-normal">Subtotal</Text>
+                <Text className="text-sm text-brand-dark font-normal">
                   {money(subtotal)}
                 </Text>
               </View>
               {restaurant.taxRate > 0 && (
                 <View className="flex-row justify-between py-0.5">
-                  <Text className="text-sm text-brand-light">
+                  <Text className="text-sm text-brand font-normal">
                     Tax ({restaurant.taxRate}%)
                   </Text>
-                  <Text className="text-sm text-brand-dark">{money(tax)}</Text>
+                  <Text className="text-sm text-brand-dark font-normal">{money(tax)}</Text>
                 </View>
               )}
               {type === "delivery" && (
                 <View className="flex-row justify-between py-0.5">
-                  <Text className="text-sm text-brand-light">Delivery fee</Text>
-                  <Text className="text-sm text-brand-dark">
+                  <Text className="text-sm text-brand font-normal">Delivery fee</Text>
+                  <Text className="text-sm text-brand-dark font-normal">
                     {deliveryFee > 0 ? money(deliveryFee) : "Free"}
                   </Text>
                 </View>
               )}
               <View className="mt-1 flex-row justify-between">
                 <Text className="text-lg font-extrabold text-brand-dark">
-                  Total
-                </Text>
-                <Text className="text-lg font-extrabold text-brand">
+                  Total :
+                </Text> 
+                <Text className="text-lg font-extrabold text-brand-dark">
                   {money(total)}
                 </Text>
               </View>
