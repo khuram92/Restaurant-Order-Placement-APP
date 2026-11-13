@@ -26,11 +26,11 @@ export const savePushToken = async (req: Request, res: Response) => {
   res.json({ message: "Notifications on" });
 };
 
-// /** POST /api/auth/push-token/remove   { token } — on sign out */
-// export const removePushToken = async (req: Request, res: Response) => {
-//   const parsed = tokenSchema.safeParse(req.body);
-//   if (!parsed.success) return res.status(400).json({ message: parsed.error.issues[0]?.message });
+/** POST /api/auth/push-token/remove   { token } — on sign out */
+export const removePushToken = async (req: Request, res: Response) => {
+  const parsed = tokenSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ message: parsed.error.issues[0]?.message });
 
-//   await User.updateOne({ _id: req.user!._id }, { $pull: { pushTokens: parsed.data.token } });
-//   res.json({ message: "Notifications off" });
-// };
+  await User.updateOne({ _id: req.user!._id }, { $pull: { pushTokens: parsed.data.token } });
+  res.json({ message: "Notifications off" });
+};
