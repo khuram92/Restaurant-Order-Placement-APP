@@ -20,6 +20,7 @@ export interface IUser {
   password?: string;
   role: Role;
   restaurantId?: Types.ObjectId;
+  pushTokens: string[];
   isActive: boolean;
   mustChangePassword: boolean;
   profileCompleted: boolean;
@@ -47,6 +48,7 @@ const userSchema = new Schema<
       trim: true,
       match: [/^03\d{9}$/, "Phone must be 03XXXXXXXXX"],
     },
+     pushTokens: { type: [String], default: [], select: false },
     password: { type: String, select: false, minlength: 8 },
     role: { type: String, enum: ROLES, default: "customer" },
     restaurantId: { type: Schema.Types.ObjectId, ref: "Restaurant" },
