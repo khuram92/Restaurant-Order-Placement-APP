@@ -250,9 +250,6 @@ export default function CustomerHome() {
                   {user?.firstName ?? "there"}
                 </Text>
               </View>
-              <Pressable onPress={signOut}>
-                <Ionicons name="log-out-outline" size={20} color="white" />
-              </Pressable>
             </View>
 
             <Text className="mt-5 text-2xl font-extrabold text-white">
