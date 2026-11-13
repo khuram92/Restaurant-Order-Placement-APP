@@ -254,11 +254,11 @@ export default function CheckoutScreen() {
               <Ionicons name="chevron-back" size={22} color={colors.white} />
             </Pressable>
             <View className="ml-3 flex-1">
-              <Text className="text-xl font-extrabold text-white">
+              <Text className="text-2xl font-extrabold text-white">
                 Checkout
               </Text>
               <Text
-                className="text-xs"
+                className="text-sm"
                 style={{ color: colors.brandSoft }}
                 numberOfLines={1}>
                 {restaurant.name}
@@ -277,7 +277,7 @@ export default function CheckoutScreen() {
             paddingBottom: insets.bottom + 130,
           }}
           keyboardShouldPersistTaps="handled">
-          {/* 1. How */}
+          
           <Card title="How do you want it?" icon="options">
             <View className="flex-row gap-2">
               {(Object.keys(ORDER_TYPE_INFO) as OrderType[]).map((t) => {

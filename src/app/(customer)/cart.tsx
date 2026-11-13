@@ -149,12 +149,12 @@ export default function CartScreen() {
               <Ionicons name="chevron-back" size={22} color={colors.white} />
             </Pressable>
             <View className="ml-3 flex-1">
-              <Text className="text-xl font-extrabold text-white">
+              <Text className="text-2xl font-extrabold text-white">
                 Your cart
               </Text>
               {!!restaurant && (
                 <Text
-                  className="text-xs"
+                  className="text-sm"
                   style={{ color: colors.brandSoft }}
                   numberOfLines={1}>
                   {restaurant.name} · {itemCount} item
