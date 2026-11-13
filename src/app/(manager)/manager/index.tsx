@@ -228,7 +228,7 @@ export default function ManagerHome() {
           icon="receipt"
           title="Orders"
           subtitle="Accept and track customer orders"
-          disabled
+          onPress={() => router.push("/manager/orders")}
         />
         <MenuCard
           icon="fast-food"
