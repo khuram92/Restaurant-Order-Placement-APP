@@ -515,7 +515,6 @@ export default function CheckoutScreen() {
             </Card>
           )}
 
-          {/* 3. Note */}
           <Card title="Note for the restaurant" icon="chatbubble-ellipses">
             <Field
               label="Note:"

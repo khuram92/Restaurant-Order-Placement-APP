@@ -114,14 +114,14 @@ export default function OrderScreen() {
           <Pressable
             onPress={() => (placed ? goHome() : router.back())}
             hitSlop={8}
-            className="h-10 w-10 items-center justify-center rounded-full"
+            className="h-12 w-12 items-center justify-center rounded-full"
             style={{ backgroundColor: colors.brandDark }}>
-            <Ionicons name={placed ? "home" : "chevron-back"} size={20} color={colors.white} />
+            <Ionicons name={placed ? "home" : "chevron-back"} size={22} color={colors.white} />
           </Pressable>
           <View className="ml-3 flex-1">
-            <Text className="text-xl font-extrabold text-white">{order ? `Order #${order.orderNumber}` : "Order"}</Text>
+            <Text className="text-2xl font-extrabold text-white">{order ? `Order #${order.orderNumber}` : "Order"}</Text>
             {!!order && (
-              <Text className="text-xs" style={{ color: colors.brandSoft }}>
+              <Text className="text-sm" style={{ color: colors.brandSoft }}>
                 {formatOrderDate(order.createdAt)}
               </Text>
             )}
