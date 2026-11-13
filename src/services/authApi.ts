@@ -2,6 +2,7 @@ import { api } from "../lib/api";
 import type {
   AuthResponse,
   CompleteProfileInput,
+  ContactChangeResponse,
   RequestOtpResponse,
   User,
 } from "../types/auth";
@@ -80,5 +81,17 @@ export const changePassword = async (currentPassword: string, newPassword: strin
     "/auth/change-password",
     { currentPassword, newPassword },
   );
+  return data.user;
+};
+
+/** Customer: send a code to a NEW phone/email (to add or change it) */
+export const requestContactChange = async (identifier: string) => {
+  const { data } = await api.post<ContactChangeResponse>("/auth/contact/request", { identifier });
+  return data;
+};
+
+/** Customer: confirm the code → the new phone/email is saved */
+export const verifyContactChange = async (identifier: string, code: string) => {
+  const { data } = await api.post<{ message: string; user: User }>("/auth/contact/verify", { identifier, code });
   return data.user;
 };

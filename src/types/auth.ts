@@ -39,3 +39,10 @@ export interface CompleteProfileInput {
   phone?: string;
   avatar?: string;
 }
+export interface ContactChangeResponse {
+  message: string;
+  channel: "email" | "phone";
+  identifier: string; // the cleaned-up value the code was sent to
+  expiresInMinutes: number;
+  devOtp?: string; // only in development
+}
