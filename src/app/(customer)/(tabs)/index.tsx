@@ -18,11 +18,11 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { cardShadow, colors } from "../../constants/theme";
-import { useAuth } from "../../context/AuthContext";
-import { getErrorMessage } from "../../lib/api";
-import { browseRestaurants } from "../../services/restaurantApi";
-import type { CustomerRestaurant, ServiceKey } from "../../types/restaurant";
+import { cardShadow, colors } from "../../../constants/theme";
+import { useAuth } from "../../../context/AuthContext";
+import { getErrorMessage } from "../../../lib/api";
+import { browseRestaurants } from "../../../services/restaurantApi";
+import type { CustomerRestaurant, ServiceKey } from "../../../types/restaurant";
 
 type IconName = ComponentProps<typeof Ionicons>["name"];
 
