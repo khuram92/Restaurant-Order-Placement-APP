@@ -189,7 +189,7 @@ export default function ProfileScreen() {
             </View>
 
             <View className="mt-5 items-center px-4">
-              <Pressable onPress={goEdit}>
+              
                 <View
                   className="h-28 w-28 items-center justify-center overflow-hidden rounded-full border-4 border-white"
                   style={{ backgroundColor: colors.brandSoft }}>
@@ -211,12 +211,8 @@ export default function ProfileScreen() {
                     />
                   )}
                 </View>
-                <View
-                  className="absolute bottom-1 right-1 h-8 w-8 items-center justify-center rounded-full border-2 border-white"
-                  style={{ backgroundColor: colors.brandDark }}>
-                  <Ionicons name="camera" size={14} color={colors.white} />
-                </View>
-              </Pressable>
+                
+              
               <Text
                 className="mt-3 text-2xl font-extrabold text-white"
                 numberOfLines={1}>
