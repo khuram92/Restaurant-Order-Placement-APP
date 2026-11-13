@@ -1,86 +1,108 @@
 import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  Pressable,
-  RefreshControl,
-  ScrollView,
-  Text,
-  View,
-} from "react-native";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { useCallback, useEffect, useState, type ComponentProps, type ReactNode } from "react";
+import { ActivityIndicator, Alert, Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { cardShadow, colors } from "../../../constants/theme";
 import { getErrorMessage } from "../../../lib/api";
 import { cancelMyOrder, getMyOrder } from "../../../services/orderApi";
-import type { Order } from "../../../types/order";
+import type { Order, OrderStatus } from "../../../types/order";
 import { money } from "../../../utils/menuFormat";
-import {
-  formatOrderDate,
-  ORDER_STATUS_INFO,
-  ORDER_TYPE_INFO,
-  trackerSteps,
-} from "../../../utils/orderFormat";
+import { formatOrderDate, ORDER_STATUS_INFO, ORDER_TYPE_INFO, trackerSteps } from "../../../utils/orderFormat";
 
-const FINISHED = ["completed", "rejected", "cancelled"];
+type IconName = ComponentProps<typeof Ionicons>["name"];
 
-function Tracker({ order }: { order: Order }) {
+const FINISHED: OrderStatus[] = ["completed", "rejected", "cancelled"];
+
+/** A friendly line under the big status, per status (and order type) */
+const statusMessage = (o: Order): string => {
+  switch (o.status) {
+    case "pending":
+      return `Waiting for ${o.restaurantName} to confirm your order`;
+    case "accepted":
+      return o.type === "dineIn" ? "Your table is held. The kitchen will start soon." : "Confirmed! The kitchen will start soon.";
+    case "preparing":
+      return "The kitchen is cooking your food";
+    case "ready":
+      return "Your order is ready. Come and pick it up!";
+    case "outForDelivery":
+      return "Your rider is on the way";
+    case "served":
+      return "Enjoy your meal!";
+    case "completed":
+      return "Thanks for ordering. See you again!";
+    case "rejected":
+      return o.rejectReason || "The restaurant couldn't take this order";
+    case "cancelled":
+      return o.cancelReason || "You cancelled this order";
+  }
+};
+
+// ---------- Small pieces ----------
+function Card({ title, icon, right, children }: { title: string; icon: IconName; right?: ReactNode; children: ReactNode }) {
+  return (
+    <View className="mb-4 rounded-3xl bg-white p-5" style={cardShadow}>
+      <View className="mb-3 flex-row items-center">
+        <View className="h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor: colors.brandSoft }}>
+          <Ionicons name={icon} size={22} color={colors.brand} />
+        </View>
+        <Text className="ml-2 flex-1 text-lg font-bold text-brand-dark">{title}</Text>
+        {right}
+      </View>
+      {children}
+    </View>
+  );
+}
+
+function BillRow({ label, value, bold }: { label: string; value: string; bold?: boolean }) {
+  return (
+    <View className="flex-row justify-between py-1">
+      <Text className={bold ? "text-lg font-extrabold text-brand-dark" : "text-sm text-brand-light"}>{label}</Text>
+      <Text className={bold ? "text-lg font-extrabold text-brand" : "text-sm font-semibold text-brand-dark"}>{value}</Text>
+    </View>
+  );
+}
+
+
+function StepBar({ order }: { order: Order }) {
   const steps = trackerSteps(order.type);
-  const currentIndex = Math.max(0, steps.indexOf(order.status));
+  const currentIndex = order.status === "completed" ? steps.length - 1 : Math.max(0, steps.indexOf(order.status));
 
   return (
-    <View className="mt-1">
+    <View className="mt-5 flex-row">
       {steps.map((step, i) => {
-        const done = i < currentIndex || order.status === "completed";
+        const reached = i <= currentIndex;
         const current = i === currentIndex && order.status !== "completed";
-        const reachedAt = order.statusHistory.find(
-          (h) => h.status === step,
-        )?.at;
-        const info = ORDER_STATUS_INFO[step];
         return (
-          <View key={step} className="flex-row">
-            {/* Dot + line */}
-            <View className="mr-3 items-center">
+          <View key={step} className="flex-1 items-center">
+            {/* line + dot */}
+            <View className="w-full flex-row items-center">
+              <View className="h-1 flex-1" style={{ backgroundColor: i === 0 ? "transparent" : reached ? colors.white : "rgba(255,255,255,0.3)" }} />
               <View
-                className="h-8 w-8 items-center justify-center rounded-full"
+                className="items-center justify-center rounded-full"
                 style={{
-                  backgroundColor: done || current ? colors.brand : colors.mist,
+                  width: current ? 30 : 22,
+                  height: current ? 30 : 22,
+                  backgroundColor: reached ? colors.white : "rgba(255,255,255,0.3)",
                 }}>
                 <Ionicons
-                  name={done ? "checkmark" : info.icon}
-                  size={16}
-                  color={done || current ? colors.white : colors.brandLight}
+                  name={reached && !current ? "checkmark" : ORDER_STATUS_INFO[step].icon}
+                  size={current ? 16 : 12}
+                  color={reached ? colors.brand : colors.white}
                 />
               </View>
-              {i < steps.length - 1 && (
-                <View
-                  className="w-0.5 flex-1"
-                  style={{
-                    minHeight: 18,
-                    backgroundColor: done ? colors.brand : colors.mist,
-                  }}
-                />
-              )}
+              <View
+                className="h-1 flex-1"
+                style={{ backgroundColor: i === steps.length - 1 ? "transparent" : i < currentIndex ? colors.white : "rgba(255,255,255,0.3)" }}
+              />
             </View>
-            <View className="flex-1 pb-4 pt-1">
-              <Text
-                className={`text-sm ${current ? "font-extrabold" : "font-semibold"}`}
-                style={{
-                  color:
-                    done || current ? colors.brandDark : colors.placeholder,
-                }}>
-                {info.label}
-              </Text>
-              {!!reachedAt && (
-                <Text className="text-xs text-brand-light">
-                  {formatOrderDate(reachedAt)}
-                </Text>
-              )}
-            </View>
+            <Text
+              className={`mt-1.5 text-center text-[10px] ${current ? "font-extrabold" : "font-semibold"}`}
+              style={{ color: reached ? colors.white : "rgba(255,255,255,0.6)" }}
+              numberOfLines={2}>
+              {ORDER_STATUS_INFO[step].label.replace("Waiting for the restaurant", "Placed")}
+            </Text>
           </View>
         );
       })}
@@ -88,17 +110,36 @@ function Tracker({ order }: { order: Order }) {
   );
 }
 
+/** Full timeline with times (inside a collapsible card) */
+function Timeline({ order }: { order: Order }) {
+  return (
+    <View>
+      {order.statusHistory.map((h, i) => (
+        <View key={`${h.status}-${i}`} className="flex-row">
+          <View className="mr-3 items-center">
+            <View className="h-3 w-3 rounded-full" style={{ backgroundColor: colors.brand, marginTop: 4 }} />
+            {i < order.statusHistory.length - 1 && <View className="w-0.5 flex-1" style={{ minHeight: 22, backgroundColor: colors.brandSoft }} />}
+          </View>
+          <View className="flex-1 flex-row justify-between pb-3">
+            <Text className="text-sm font-semibold text-brand-dark">{ORDER_STATUS_INFO[h.status].label}</Text>
+            <Text className="text-xs text-brand-light">{formatOrderDate(h.at)}</Text>
+          </View>
+        </View>
+      ))}
+    </View>
+  );
+}
+
+// ---------- Screen ----------
 export default function OrderScreen() {
-  const { id, placed } = useLocalSearchParams<{
-    id: string;
-    placed?: string;
-  }>();
+  const { id, placed } = useLocalSearchParams<{ id: string; placed?: string }>();
   const insets = useSafeAreaInsets();
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
   const [cancelling, setCancelling] = useState(false);
+  const [showTimeline, setShowTimeline] = useState(false);
 
   const load = useCallback(async () => {
     setError("");
@@ -125,82 +166,50 @@ export default function OrderScreen() {
   }, [running, load]);
 
   const confirmCancel = () =>
-    Alert.alert(
-      "Cancel this order?",
-      "The restaurant hasn't accepted it yet, so you can still cancel.",
-      [
-        { text: "Keep order", style: "cancel" },
-        {
-          text: "Cancel order",
-          style: "destructive",
-          onPress: async () => {
-            setCancelling(true);
-            try {
-              setOrder(await cancelMyOrder(String(id)));
-            } catch (err) {
-              Alert.alert("Couldn't cancel", getErrorMessage(err));
-              load();
-            } finally {
-              setCancelling(false);
-            }
-          },
+    Alert.alert("Cancel this order?", "The restaurant hasn't accepted it yet, so you can still cancel.", [
+      { text: "Keep order", style: "cancel" },
+      {
+        text: "Cancel order",
+        style: "destructive",
+        onPress: async () => {
+          setCancelling(true);
+          try {
+            setOrder(await cancelMyOrder(String(id)));
+          } catch (err) {
+            Alert.alert("Couldn't cancel", getErrorMessage(err));
+            load();
+          } finally {
+            setCancelling(false);
+          }
         },
-      ],
-    );
+      },
+    ]);
 
   const goHome = () => router.replace("/");
+  const goBack = () => (placed ? goHome() : router.back());
 
-  const header = (
-    <View style={{ backgroundColor: colors.brand }}>
-      <SafeAreaView edges={["top"]}>
-        <View className="flex-row items-center px-4 pb-4 pt-2">
-          <Pressable
-            onPress={() => (placed ? goHome() : router.back())}
-            hitSlop={8}
-            className="h-12 w-12 items-center justify-center rounded-full"
-            style={{ backgroundColor: colors.brandDark }}>
-            <Ionicons
-              name={placed ? "home" : "chevron-back"}
-              size={22}
-              color={colors.white}
-            />
-          </Pressable>
-          <View className="ml-3 flex-1">
-            <Text className="text-2xl font-extrabold text-white">
-              {order ? `Order #${order.orderNumber}` : "Order"}
-            </Text>
-            {!!order && (
-              <Text className="text-sm" style={{ color: colors.brandSoft }}>
-                {formatOrderDate(order.createdAt)}
-              </Text>
-            )}
-          </View>
-        </View>
-      </SafeAreaView>
-    </View>
-  );
-
+  // ---------- Loading / error ----------
   if (loading || error || !order) {
     return (
       <View className="flex-1" style={{ backgroundColor: colors.mist }}>
-        {header}
+        <View style={{ backgroundColor: colors.brand }}>
+          <SafeAreaView edges={["top"]}>
+            <View className="flex-row items-center px-4 pb-4 pt-2">
+              <Pressable onPress={goBack} hitSlop={8} className="h-11 w-11 items-center justify-center rounded-full" style={{ backgroundColor: colors.brandDark }}>
+                <Ionicons name={placed ? "home" : "chevron-back"} size={22} color={colors.white} />
+              </Pressable>
+              <Text className="ml-3 text-xl font-extrabold text-white">Order</Text>
+            </View>
+          </SafeAreaView>
+        </View>
         <View className="flex-1 items-center justify-center px-8">
           {loading ? (
             <ActivityIndicator size="large" color={colors.brand} />
           ) : (
             <>
-              <Ionicons
-                name="alert-circle"
-                size={44}
-                color={colors.brandLight}
-              />
-              <Text className="mt-3 text-center text-brand-dark">
-                {error || "Order not found"}
-              </Text>
-              <Pressable
-                onPress={load}
-                className="mt-4 rounded-2xl px-6 py-3"
-                style={{ backgroundColor: colors.brand }}>
+              <Ionicons name="alert-circle" size={44} color={colors.brandLight} />
+              <Text className="mt-3 text-center text-brand-dark">{error || "Order not found"}</Text>
+              <Pressable onPress={load} className="mt-4 rounded-2xl px-6 py-3" style={{ backgroundColor: colors.brand }}>
                 <Text className="font-bold text-white">Try again</Text>
               </Pressable>
             </>
@@ -213,15 +222,15 @@ export default function OrderScreen() {
   const o = order;
   const typeInfo = ORDER_TYPE_INFO[o.type];
   const stopped = o.status === "rejected" || o.status === "cancelled";
+  const done = o.status === "completed";
+  const statusInfo = ORDER_STATUS_INFO[o.status];
+  const itemCount = o.items.reduce((s, i) => s + i.quantity, 0);
+  const heroColor = stopped ? colors.text : colors.brand;
 
   return (
     <View className="flex-1" style={{ backgroundColor: colors.mist }}>
-      {header}
       <ScrollView
-        contentContainerStyle={{
-          padding: 16,
-          paddingBottom: insets.bottom + 24,
-        }}
+        contentContainerStyle={{ paddingBottom: insets.bottom + (o.status === "pending" || placed ? 110 : 24) }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -229,239 +238,251 @@ export default function OrderScreen() {
               setRefreshing(true);
               load();
             }}
-            tintColor={colors.brand}
+            tintColor={colors.white}
             colors={[colors.brand]}
           />
         }>
-        {/* Just placed */}
-        {placed === "1" && o.status === "pending" && (
-          <View
-            className="mb-4 items-center rounded-3xl p-6"
-            style={{ backgroundColor: colors.brand }}>
-            <View
-              className="h-16 w-16 items-center justify-center rounded-full"
-              style={{ backgroundColor: colors.white }}>
-              <Ionicons name="checkmark" size={36} color={colors.brand} />
+        {/* ---------- Hero: big live status ---------- */}
+        <View className="rounded-b-[22px] px-5 pb-7 " style={{ backgroundColor: heroColor }}>
+          <SafeAreaView edges={["top"]}>
+            {/* Top row */}
+            <View className="flex-row items-center pt-2">
+              <Pressable onPress={goBack} hitSlop={8} className="h-11 w-11 items-center justify-center rounded-full" style={{ backgroundColor: "rgba(0,0,0,0.18)" }}>
+                <Ionicons name={placed ? "home" : "chevron-back"} size={22} color={colors.white} />
+              </Pressable>
+              <View className="ml-3 flex-1">
+                <Text className="text-xs font-semibold uppercase tracking-wide" style={{ color: "rgba(255,255,255,0.75)" }}>
+                  Order
+                </Text>
+                <Text className="text-lg font-extrabold text-white">#{o.orderNumber}</Text>
+              </View>
+              {running && (
+                <View className="flex-row items-center rounded-full px-2.5 py-1" style={{ backgroundColor: "rgba(0,0,0,0.18)" }}>
+                  <View className="h-2 w-2 rounded-full" style={{ backgroundColor: colors.white }} />
+                  <Text className="ml-1.5 text-xs font-bold text-white">Live</Text>
+                </View>
+              )}
             </View>
-            <Text className="mt-3 text-2xl font-extrabold text-white">
-              Order placed!
-            </Text>
-            <Text
-              className="mt-1 text-center text-sm"
-              style={{ color: colors.brandSoft }}>
-              <Text className="font-bold text-base">{o.restaurantName}</Text>
-              {" will confirm it soon. Keep this screen open to see updates."}
-            </Text>
-          </View>
-        )}
 
-        <View className="mb-4 rounded-3xl bg-white p-5" style={cardShadow}>
-          <View className="mb-3 flex-row items-center">
-            <View
-              className="flex-row items-center rounded-full px-2.5 py-1"
-              style={{ backgroundColor: colors.brandSoft }}>
-              <Ionicons name={typeInfo.icon} size={13} color={colors.brand} />
-              <Text className="ml-1 text-xs font-bold text-brand">
-                {typeInfo.label}
+            {/* Big status */}
+            <View className="mt-6 items-center">
+              <View className="h-20 w-20 items-center justify-center rounded-full" style={{ backgroundColor: colors.white }}>
+                <Ionicons name={placed === "1" && o.status === "pending" ? "checkmark" : statusInfo.icon} size={40} color={heroColor} />
+              </View>
+              <Text className="mt-3 text-center text-2xl font-extrabold text-white">
+                {placed === "1" && o.status === "pending" ? "Order placed!" : statusInfo.label}
+              </Text>
+              <Text className="mt-1 px-4 text-center text-sm" style={{ color: "rgba(255,255,255,0.85)" }}>
+                {statusMessage(o)}
               </Text>
             </View>
-            <Text
-              className="ml-2 flex-1 text-sm font-semibold text-brand-dark"
-              numberOfLines={1}>
-              {o.restaurantName}
-            </Text>
+
+            {/* Steps */}
+            {!stopped && <StepBar order={o} />}
+          </SafeAreaView>
+        </View>
+
+        <View className="-mt-4 px-4">
+          {/* ---------- Summary chips ---------- */}
+          <View className="mb-4 flex-row rounded-3xl bg-white p-4" style={cardShadow}>
+            <View className="flex-1 items-center">
+              <Ionicons name={typeInfo.icon} size={20} color={colors.brand} />
+              <Text className="mt-1 text-xs text-brand-light">Type</Text>
+              <Text className="text-sm font-bold text-brand-dark">{typeInfo.label}</Text>
+            </View>
+            <View className="w-px" style={{ backgroundColor: colors.mist }} />
+            <View className="flex-1 items-center">
+              <Ionicons name="fast-food" size={20} color={colors.brand} />
+              <Text className="mt-1 text-xs text-brand-light">Items</Text>
+              <Text className="text-sm font-bold text-brand-dark">{itemCount}</Text>
+            </View>
+            <View className="w-px" style={{ backgroundColor: colors.mist }} />
+            <View className="flex-1 items-center">
+              <Ionicons name="cash" size={20} color={colors.brand} />
+              <Text className="mt-1 text-xs text-brand-light">Total</Text>
+              <Text className="text-sm font-bold text-brand-dark">{money(o.total)}</Text>
+            </View>
           </View>
 
-          {stopped ? (
-            <View
-              className="flex-row items-center rounded-2xl px-4 py-3"
-              style={{ backgroundColor: colors.text }}>
-              <Ionicons
-                name={ORDER_STATUS_INFO[o.status].icon}
-                size={20}
-                color={colors.white}
-              />
+          {/* ---------- Restaurant ---------- */}
+          <View className="mb-4 flex-row items-center rounded-3xl bg-white p-4" style={cardShadow}>
+            <View className="h-12 w-12 items-center justify-center rounded-2xl" style={{ backgroundColor: colors.brandSoft }}>
+              <Text className="text-xl font-extrabold text-brand">{o.restaurantName[0]?.toUpperCase()}</Text>
+            </View>
+            <View className="ml-3 flex-1">
+              <Text className="text-base font-bold text-brand-dark" numberOfLines={1}>
+                {o.restaurantName}
+              </Text>
+              <Text className="text-xs text-brand-light">Ordered {formatOrderDate(o.createdAt)}</Text>
+            </View>
+            <Pressable
+              onPress={() => router.push({ pathname: "/restaurant/[id]", params: { id: o.restaurantId } })}
+              hitSlop={8}
+              className="flex-row items-center rounded-full px-3 py-2"
+              style={{ backgroundColor: colors.brandSoft }}>
+              <Ionicons name="storefront" size={14} color={colors.brand} />
+              <Text className="ml-1 text-xs font-bold text-brand">Menu</Text>
+            </Pressable>
+          </View>
+
+          {/* ---------- Delivery / dine-in / pickup ---------- */}
+          {o.delivery && (
+            <Card title="Delivering to" icon="location">
+              <Text className="text-sm leading-5 text-brand-dark">
+                {[o.delivery.street, o.delivery.area, o.delivery.city].filter(Boolean).join(", ")}
+              </Text>
+              <View className="mt-2 flex-row items-center">
+                <Ionicons name="call" size={13} color={colors.brandLight} />
+                <Text className="ml-1.5 text-sm text-brand-light">{o.delivery.phone}</Text>
+              </View>
+              {!!o.delivery.instructions && (
+                <View className="mt-1 flex-row items-center">
+                  <Ionicons name="navigate" size={13} color={colors.brandLight} />
+                  <Text className="ml-1.5 flex-1 text-sm italic text-brand-light">{o.delivery.instructions}</Text>
+                </View>
+              )}
+            </Card>
+          )}
+          {o.dineIn && (
+            <View className="mb-4 flex-row items-center rounded-3xl bg-white p-4" style={cardShadow}>
+              <View className="h-12 w-12 items-center justify-center rounded-2xl" style={{ backgroundColor: colors.brandSoft }}>
+                <Ionicons name="people" size={22} color={colors.brand} />
+              </View>
               <View className="ml-3 flex-1">
-                <Text className="text-base font-bold text-white">
-                  {o.status === "rejected"
-                    ? "The restaurant couldn't take this order"
-                    : "You cancelled this order"}
+                <Text className="text-base font-bold text-brand-dark">Seates for {o.dineIn.partySize}, Person</Text>
+                <Text className="text-sm text-brand-light">
+                  {o.dineIn.seatsReserved ? "Your seats are held" : stopped || done ? "Seats released" : "Seats are held once accepted"}
                 </Text>
-                {!!(o.rejectReason || o.cancelReason) && (
-                  <Text className="text-xs" style={{ color: colors.mistDark }}>
-                    {o.rejectReason || o.cancelReason}
-                  </Text>
-                )}
+              </View>
+              <View
+                className="rounded-full px-2.5 py-1"
+                style={{ backgroundColor: o.dineIn.seatsReserved ? colors.brand : colors.mistLight }}>
+                <Text className="text-xs font-bold" style={{ color: o.dineIn.seatsReserved ? colors.white : colors.brandLight }}>
+                  {o.dineIn.seatsReserved ? "Held" : "Not held"}
+                </Text>
               </View>
             </View>
-          ) : (
-            <Tracker order={o} />
           )}
 
+          {/* ---------- Items ---------- */}
+          <Card title={`Your order · ${itemCount} item${itemCount === 1 ? "" : "s"}`} icon="receipt">
+            {o.items.map((item, i) => (
+              <View
+                key={item._id}
+                className={`flex-row py-3 ${i < o.items.length - 1 ? "border-b" : ""}`}
+                style={{ borderColor: colors.mist }}>
+                <View className="mr-3 h-14 w-14 items-center justify-center overflow-hidden rounded-xl" style={{ backgroundColor: colors.brandSoft }}>
+                  {item.image ? (
+                    <Image source={{ uri: item.image }} style={{ width: "100%", height: "100%" }} contentFit="cover" />
+                  ) : (
+                    <Ionicons name="fast-food" size={20} color={colors.brandLight} />
+                  )}
+                  <View className="absolute bottom-0 right-0 rounded-tl-lg px-1.5" style={{ backgroundColor: colors.brand }}>
+                    <Text className="text-[10px] font-extrabold text-white">×{item.quantity}</Text>
+                  </View>
+                </View>
+                <View className="flex-1">
+                  <View className="flex-row justify-between">
+                    <Text className="flex-1 pr-2 text-sm font-bold text-brand-dark" numberOfLines={2}>
+                      {item.name}
+                    </Text>
+                    <Text className="text-sm font-bold text-brand-dark">{money(item.lineTotal)}</Text>
+                  </View>
+                  {(!!item.sizeName || item.addOns.length > 0) && (
+                    <Text className="mt-0.5 text-xs text-brand-light" numberOfLines={3}>
+                      {[item.sizeName, ...item.addOns.map((a) => a.name)].filter(Boolean).join(" · ")}
+                    </Text>
+                  )}
+                  {!!item.note && (
+                    <View className="mt-1 flex-row items-center">
+                      <Ionicons name="chatbubble-ellipses" size={11} color={colors.brandLight} />
+                      <Text className="ml-1 flex-1 text-xs italic text-brand-light">{item.note}</Text>
+                    </View>
+                  )}
+                </View>
+              </View>
+            ))}
+            {!!o.note && (
+              <View className="mt-2 flex-row items-start rounded-2xl p-3" style={{ backgroundColor: colors.mistLight }}>
+                <Ionicons name="chatbox-ellipses" size={14} color={colors.brand} style={{ marginTop: 2 }} />
+                <Text className="ml-2 flex-1 text-xs text-brand-dark">{o.note}</Text>
+              </View>
+            )}
+          </Card>
+
+          {/* ---------- Bill ---------- */}
+          <Card title="Bill" icon="wallet">
+            <BillRow label="Subtotal" value={money(o.subtotal)} />
+            {o.tax > 0 && <BillRow label={`Tax (${o.taxRate}%)`} value={money(o.tax)} />}
+            {o.type === "delivery" && <BillRow label="Delivery fee" value={o.deliveryFee > 0 ? money(o.deliveryFee) : "Free"} />}
+            <View className="my-2 border-t border-dashed" style={{ borderColor: colors.mistDark }} />
+            <BillRow label="Total" value={money(o.total)} bold />
+            <View
+              className="mt-3 flex-row items-center rounded-2xl px-3 py-2.5"
+              style={{ backgroundColor: o.paymentStatus === "paid" ? colors.brandSoft : colors.mist }}>
+              <Ionicons name={o.paymentStatus === "paid" ? "checkmark-circle" : "cash"} size={20} color={colors.brand} />
+              <Text className="ml-2 flex-1 text-sm font-semibold text-brand-dark">
+                {o.paymentStatus === "paid"
+                  ? "Paid in cash"
+                  : `Cash · pay ${o.type === "delivery" ? "the rider on delivery" : "at the restaurant"}`}
+              </Text>
+            </View>
+          </Card>
+
+          {/* ---------- Timeline (collapsible) ---------- */}
+          <Card
+            title="Order timeline"
+            icon="time"
+            right={
+              <Pressable onPress={() => setShowTimeline((v) => !v)} hitSlop={8} className="flex-row items-center">
+                <Text className="mr-1 text-sm font-bold text-brand">{showTimeline ? "Hide" : "Show"}</Text>
+                <Ionicons name={showTimeline ? "chevron-up" : "chevron-down"} size={16} color={colors.brand} />
+              </Pressable>
+            }>
+            {showTimeline ? (
+              <Timeline order={o} />
+            ) : (
+              <Text className="text-sm text-brand">
+                Last update: {ORDER_STATUS_INFO[o.statusHistory[o.statusHistory.length - 1]?.status ?? o.status].label} ·{" "}
+                {formatOrderDate(o.statusHistory[o.statusHistory.length - 1]?.at ?? o.updatedAt)}
+              </Text>
+            )}
+          </Card>
+        </View>
+      </ScrollView>
+
+      {/* ---------- Bottom action ---------- */}
+      {(o.status === "pending" || placed === "1") && (
+        <View className="absolute bottom-0 left-0 right-0 flex-row gap-3 px-4 pt-3" style={{ backgroundColor: colors.mist, paddingBottom: insets.bottom + 12 }}>
           {o.status === "pending" && (
             <Pressable
               onPress={confirmCancel}
               disabled={cancelling}
-              className="mt-1 flex-row items-center justify-center rounded-2xl border-2 py-3"
-              style={{
-                borderColor: colors.danger,
-                opacity: cancelling ? 0.6 : 1,
-              }}>
+              className="flex-1 flex-row items-center justify-center rounded-2xl border-2 bg-mist-light py-4"
+              style={{ borderColor: colors.danger, opacity: cancelling ? 0.6 : 1 }}>
               {cancelling ? (
                 <ActivityIndicator color={colors.danger} />
               ) : (
                 <>
-                  <Ionicons
-                    name="close-circle"
-                    size={18}
-                    color={colors.danger}
-                  />
-                  <Text
-                    className="ml-1.5 font-bold"
-                    style={{ color: colors.danger }}>
+                  <Ionicons name="close-circle" size={18} color={colors.danger} />
+                  <Text className="ml-1.5 font-bold" style={{ color: colors.danger }}>
                     Cancel order
                   </Text>
                 </>
               )}
+            </Pressable> 
+          )}
+          {placed === "1" && (
+            <Pressable
+              onPress={goHome}
+              className="flex-1 flex-row items-center justify-center rounded-2xl py-4"
+              style={[cardShadow, { backgroundColor: colors.brand }]}>
+              <Ionicons name="home" size={18} color={colors.white} />
+              <Text className="ml-1.5 font-bold text-white">Back to home</Text>
             </Pressable>
           )}
         </View>
-
-        {/* Delivery / dine-in details */}
-        {o.delivery && (
-          <View className="mb-4 rounded-3xl bg-white p-5" style={cardShadow}>
-            <View className="mb-2 flex-row items-center">
-              <Ionicons name="location" size={18} color={colors.brand} />
-              <Text className="ml-2 text-base font-bold text-brand-dark">
-                Delivering to
-              </Text>
-            </View>
-            <Text className="text-sm text-brand-dark">
-              {[o.delivery.street, o.delivery.area, o.delivery.city]
-                .filter(Boolean)
-                .join(", ")}
-            </Text>
-            <Text className="mt-1 text-sm text-brand-light">
-              {o.delivery.phone}
-            </Text>
-            {!!o.delivery.instructions && (
-              <Text className="mt-1 text-xs italic text-brand-light">
-                {o.delivery.instructions}
-              </Text>
-            )}
-          </View>
-        )}
-        {o.dineIn && (
-          <View
-            className="mb-4 flex-row items-center rounded-3xl bg-white p-5"
-            style={cardShadow}>
-            <Ionicons name="people" size={18} color={colors.brand} />
-            <Text className="ml-2 flex-1 text-base font-bold text-brand-dark">
-              Table for {o.dineIn.partySize}
-            </Text>
-            <Text
-              className="text-xs font-semibold"
-              style={{
-                color: o.dineIn.seatsReserved
-                  ? colors.brand
-                  : colors.brandLight,
-              }}>
-              {o.dineIn.seatsReserved ? "Seats held" : "Not held yet"}
-            </Text>
-          </View>
-        )}
-
-        {/* Items + bill */}
-        <View className="rounded-3xl bg-white p-5" style={cardShadow}>
-          <View className="mb-2 flex-row items-center">
-            <Ionicons name="receipt" size={18} color={colors.brand} />
-            <Text className="ml-2 text-base font-bold text-brand-dark">
-              Your order
-            </Text>
-          </View>
-          {o.items.map((item) => (
-            <View
-              key={item._id}
-              className="border-b py-2"
-              style={{ borderColor: colors.mist }}>
-              <View className="flex-row justify-between">
-                <Text className="flex-1 pr-3 text-sm font-semibold text-brand-dark">
-                  {item.quantity} × {item.name}
-                  {item.sizeName ? ` (${item.sizeName})` : ""}
-                </Text>
-                <Text className="text-sm text-brand-dark">
-                  {money(item.lineTotal)}
-                </Text>
-              </View>
-              {item.addOns.length > 0 && (
-                <Text className="text-xs text-brand-light">
-                  {item.addOns.map((a) => a.name).join(" · ")}
-                </Text>
-              )}
-              {!!item.note && (
-                <Text className="text-xs italic text-brand-light">
-                  "{item.note}"
-                </Text>
-              )}
-            </View>
-          ))}
-          {!!o.note && (
-            <Text className="mt-2 text-xs italic text-brand-light">
-              Note: {o.note}
-            </Text>
-          )}
-
-          <View className="mt-2">
-            <View className="flex-row justify-between py-0.5">
-              <Text className="text-sm text-brand-light">Subtotal</Text>
-              <Text className="text-sm text-brand-dark">
-                {money(o.subtotal)}
-              </Text>
-            </View>
-            {o.tax > 0 && (
-              <View className="flex-row justify-between py-0.5">
-                <Text className="text-sm text-brand-light">
-                  Tax ({o.taxRate}%)
-                </Text>
-                <Text className="text-sm text-brand-dark">{money(o.tax)}</Text>
-              </View>
-            )}
-            {o.type === "delivery" && (
-              <View className="flex-row justify-between py-0.5">
-                <Text className="text-sm text-brand-light">Delivery fee</Text>
-                <Text className="text-sm text-brand-dark">
-                  {o.deliveryFee > 0 ? money(o.deliveryFee) : "Free"}
-                </Text>
-              </View>
-            )}
-            <View className="mt-1 flex-row justify-between">
-              <Text className="text-lg font-extrabold text-brand-dark">
-                Total
-              </Text>
-              <Text className="text-lg font-extrabold text-brand">
-                {money(o.total)}
-              </Text>
-            </View>
-            <View className="mt-2 flex-row items-center">
-              <Ionicons name="cash" size={14} color={colors.brandLight} />
-              <Text className="ml-1 text-xs text-brand-light">
-                Cash ·{" "}
-                {o.paymentStatus === "paid"
-                  ? "Paid"
-                  : "Pay on " +
-                    (o.type === "delivery" ? "delivery" : "collection")}
-              </Text>
-            </View>
-          </View>
-        </View>
-
-        {placed === "1" && (
-          <Pressable onPress={goHome} className="mt-4 items-center py-3">
-            <Ionicons name="chevron-back" size={20} />
-            <Text className="font-bold text-brand">Back to restaurants</Text>
-          </Pressable>
-        )}
-      </ScrollView>
+      )}
     </View>
   );
 }
