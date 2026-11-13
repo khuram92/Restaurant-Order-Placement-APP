@@ -375,12 +375,12 @@ export default function CheckoutScreen() {
 
           {type === "dineIn" && (
             <Card title="Table for" icon="people">
-              {/* Free seats right now */}
+             
               <View
                 className="mb-4 rounded-2xl p-3"
                 style={{ backgroundColor: colors.mistLight }}>
                 <View className="flex-row items-center">
-                  <Ionicons name="grid" size={16} color={colors.brand} />
+                  <Ionicons name="grid" size={18} color={colors.brand} />
                   <Text className="ml-2 flex-1 text-sm font-semibold text-brand-dark">
                     Seats free right now
                   </Text>
@@ -406,11 +406,11 @@ export default function CheckoutScreen() {
                         }}>
                         {seats.free}
                       </Text>
-                      <Text className="mb-1 ml-1 text-sm text-brand-light">
+                      <Text className="mb-1 ml-1 text-sm text-brand">
                         of {seats.capacity} seats
                       </Text>
                     </View>
-                    {/* Bar: taken seats */}
+                    
                     <View
                       className="mt-2 h-2 overflow-hidden rounded-full"
                       style={{ backgroundColor: colors.white }}>
@@ -425,7 +425,7 @@ export default function CheckoutScreen() {
                         }}
                       />
                     </View>
-                    <Text className="mt-1 text-xs text-brand-light">
+                    <Text className="mt-1 text-sm text-brand">
                       {seats.inUse} taken by other tables
                     </Text>
                   </>
@@ -439,7 +439,7 @@ export default function CheckoutScreen() {
               </View>
 
               <View className="flex-row items-center justify-between">
-                <Text className="text-sm text-brand-dark">
+                <Text className="text-sm text-brand-dark font-semibold">
                   How many people?
                 </Text>
                 <View
@@ -489,14 +489,14 @@ export default function CheckoutScreen() {
 
               {seats && partySize > seats.free ? (
                 <Text
-                  className="mt-2 text-xs font-semibold"
+                  className="mt-2 text-sm font-semibold"
                   style={{ color: colors.danger }}>
                   {seats.free > 0
                     ? `Only ${seats.free} seat${seats.free === 1 ? " is" : "s are"} free. Lower the number or try Takeaway.`
                     : "No seats are free right now. Try Takeaway or come back a bit later."}
                 </Text>
               ) : (
-                <Text className="mt-2 text-xs text-brand-light">
+                <Text className="mt-2 text-sm text-brand-light">
                   Your seats are held once the restaurant accepts the order.
                 </Text>
               )}
