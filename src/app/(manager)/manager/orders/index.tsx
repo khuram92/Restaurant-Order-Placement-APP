@@ -17,10 +17,23 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { cardShadow, colors } from "../../../../constants/theme";
 import { getErrorMessage } from "../../../../lib/api";
-import { listRestaurantOrders, updateOrderStatus } from "../../../../services/managerOrderApi";
-import type { ManagerOrderListResponse, ManagerOrderTab, Order } from "../../../../types/order";
+import {
+  listRestaurantOrders,
+  updateOrderStatus,
+} from "../../../../services/managerOrderApi";
+import type {
+  ManagerOrderListResponse,
+  ManagerOrderTab,
+  Order,
+} from "../../../../types/order";
 import { money } from "../../../../utils/menuFormat";
-import { NEXT_ACTION, nextOrderStatus, ORDER_STATUS_INFO, ORDER_TYPE_INFO, timeAgo } from "../../../../utils/orderFormat";
+import {
+  NEXT_ACTION,
+  nextOrderStatus,
+  ORDER_STATUS_INFO,
+  ORDER_TYPE_INFO,
+  timeAgo,
+} from "../../../../utils/orderFormat";
 
 const TABS: { key: ManagerOrderTab; label: string }[] = [
   { key: "new", label: "New" },
@@ -28,7 +41,12 @@ const TABS: { key: ManagerOrderTab; label: string }[] = [
   { key: "past", label: "Past" },
 ];
 
-const REJECT_REASONS = ["Too busy right now", "An item is not available", "Closing soon", "Outside delivery area"];
+const REJECT_REASONS = [
+  "Too busy right now",
+  "An item is not available",
+  "Closing soon",
+  "Outside delivery area",
+];
 
 // ---------- Reject sheet ----------
 function RejectSheet({
@@ -60,13 +78,32 @@ function RejectSheet({
   const valid = reason.trim().length >= 3;
 
   return (
-    <Modal visible={!!order} transparent animationType="slide" onRequestClose={onClose}>
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} className="flex-1">
-        <Pressable className="flex-1" style={{ backgroundColor: "rgba(0,0,0,0.35)" }} onPress={onClose} />
-        <View className="rounded-t-[28px] bg-white px-5 pt-3" style={{ paddingBottom: insets.bottom + 16 }}>
-          <View className="mb-4 h-1.5 w-12 self-center rounded-full" style={{ backgroundColor: colors.mistDark }} />
-          <Text className="text-xl font-extrabold text-brand-dark">Reject order</Text>
-          <Text className="mb-4 text-sm text-brand-light">#{order?.orderNumber} · The customer will see this reason</Text>
+    <Modal
+      visible={!!order}
+      transparent
+      animationType="slide"
+      onRequestClose={onClose}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        className="flex-1">
+        <Pressable
+          className="flex-1"
+          style={{ backgroundColor: "rgba(0,0,0,0.35)" }}
+          onPress={onClose}
+        />
+        <View
+          className="rounded-t-[28px] bg-white px-5 pt-3"
+          style={{ paddingBottom: insets.bottom + 16 }}>
+          <View
+            className="mb-4 h-1.5 w-12 self-center rounded-full"
+            style={{ backgroundColor: colors.mistDark }}
+          />
+          <Text className="text-xl font-extrabold text-brand-dark">
+            Reject order
+          </Text>
+          <Text className="mb-4 text-sm text-brand-light">
+            #{order?.orderNumber} · The customer will see this reason
+          </Text>
 
           <View className="mb-3 flex-row flex-wrap gap-2">
             {REJECT_REASONS.map((r) => {
@@ -76,8 +113,14 @@ function RejectSheet({
                   key={r}
                   onPress={() => setReason(r)}
                   className="rounded-full px-3.5 py-2"
-                  style={{ backgroundColor: selected ? colors.brand : colors.mistLight }}>
-                  <Text className="text-sm font-semibold" style={{ color: selected ? colors.white : colors.brandDark }}>
+                  style={{
+                    backgroundColor: selected ? colors.brand : colors.mistLight,
+                  }}>
+                  <Text
+                    className="text-sm font-semibold"
+                    style={{
+                      color: selected ? colors.white : colors.brandDark,
+                    }}>
                     {r}
                   </Text>
                 </Pressable>
@@ -93,23 +136,36 @@ function RejectSheet({
             maxLength={200}
             multiline
             className="mb-4 min-h-[70px] rounded-2xl px-4 py-3 text-base text-brand-dark"
-            style={{ backgroundColor: colors.mistLight, textAlignVertical: "top" }}
+            style={{
+              backgroundColor: colors.mistLight,
+              textAlignVertical: "top",
+            }}
           />
 
           <View className="flex-row gap-3">
-            <Pressable onPress={onClose} className="flex-1 items-center rounded-2xl py-4" style={{ backgroundColor: colors.mistLight }}>
+            <Pressable
+              onPress={onClose}
+              className="flex-1 items-center rounded-2xl py-4"
+              style={{ backgroundColor: colors.mistLight }}>
               <Text className="font-bold text-brand-dark">Keep</Text>
             </Pressable>
             <Pressable
               onPress={submit}
               disabled={!valid || saving}
               className="flex-1 flex-row items-center justify-center rounded-2xl py-4"
-              style={{ backgroundColor: colors.danger, opacity: !valid || saving ? 0.5 : 1 }}>
+              style={{
+                backgroundColor: colors.danger,
+                opacity: !valid || saving ? 0.5 : 1,
+              }}>
               {saving ? (
                 <ActivityIndicator color={colors.white} />
               ) : (
                 <>
-                  <Ionicons name="close-circle" size={18} color={colors.white} />
+                  <Ionicons
+                    name="close-circle"
+                    size={18}
+                    color={colors.white}
+                  />
                   <Text className="ml-1.5 font-bold text-white">Reject</Text>
                 </>
               )}
@@ -120,7 +176,6 @@ function RejectSheet({
     </Modal>
   );
 }
-
 
 function OrderCard({
   order,
@@ -142,19 +197,32 @@ function OrderCard({
   const isNew = order.status === "pending";
 
   return (
-    <View className="mb-3 rounded-3xl bg-white p-4" style={[cardShadow, isNew && { borderWidth: 2, borderColor: colors.brand }]}>
+    <View
+      className="mb-3 rounded-3xl bg-white p-4"
+      style={[
+        cardShadow,
+        isNew && { borderWidth: 2, borderColor: colors.brand },
+      ]}>
       {/* Top row: number + time + total */}
       <View className="flex-row items-start">
         <View className="flex-1">
-          <Text className="text-xl font-extrabold text-brand-dark">#{order.orderNumber}</Text>
-          <Text className="text-sm text-brand-light">{timeAgo(order.createdAt)}</Text>
+          <Text className="text-xl font-extrabold text-brand-dark">
+            #{order.orderNumber}
+          </Text>
+          <Text className="text-sm text-brand-light">
+            {timeAgo(order.createdAt)}
+          </Text>
         </View>
-        <Text className="text-lg font-extrabold text-brand-dark">{money(order.total)}</Text>
+        <Text className="text-lg font-extrabold text-brand-dark">
+          {money(order.total)}
+        </Text>
       </View>
 
       {/* Chips: type + status + paid */}
       <View className="mt-3 flex-row flex-wrap gap-2">
-        <View className="flex-row items-center rounded-full px-2.5 py-1" style={{ backgroundColor: colors.mistLight }}>
+        <View
+          className="flex-row items-center rounded-full px-2.5 py-1"
+          style={{ backgroundColor: colors.mistLight }}>
           <Ionicons name={typeInfo.icon} size={14} color={colors.brand} />
           <Text className="ml-1 text-sm font-bold text-brand-dark">
             {typeInfo.label}
@@ -163,14 +231,36 @@ function OrderCard({
         </View>
         <View
           className="flex-row items-center rounded-full px-2.5 py-1"
-          style={{ backgroundColor: stopped ? "#fde8e6" : isNew ? colors.brand : colors.mistLight }}>
-          <Ionicons name={statusInfo.icon} size={14} color={stopped ? colors.danger : isNew ? colors.white : colors.brandDark} />
-          <Text className="ml-1 text-sm font-bold" style={{ color: stopped ? colors.danger : isNew ? colors.white : colors.brandDark }}>
+          style={{
+            backgroundColor: stopped
+              ? "#fde8e6"
+              : isNew
+                ? colors.brand
+                : colors.mistLight,
+          }}>
+          <Ionicons
+            name={statusInfo.icon}
+            size={14}
+            color={
+              stopped ? colors.danger : isNew ? colors.white : colors.brandDark
+            }
+          />
+          <Text
+            className="ml-1 text-sm font-bold"
+            style={{
+              color: stopped
+                ? colors.danger
+                : isNew
+                  ? colors.white
+                  : colors.brandDark,
+            }}>
             {isNew ? "New order" : statusInfo.label}
           </Text>
         </View>
         {order.paymentStatus === "paid" && (
-          <View className="flex-row items-center rounded-full px-2.5 py-1" style={{ backgroundColor: colors.mistLight }}>
+          <View
+            className="flex-row items-center rounded-full px-2.5 py-1"
+            style={{ backgroundColor: colors.mistLight }}>
             <Ionicons name="checkmark-circle" size={12} color={colors.brand} />
             <Text className="ml-1 text-xs font-bold text-brand">Paid</Text>
           </View>
@@ -180,27 +270,41 @@ function OrderCard({
       {/* Customer */}
       <View className="mt-3 flex-row items-center rounded-full bg-mist-light p-2 ">
         <Ionicons name="person" size={14} color={colors.brandDark} />
-        <Text className="ml-1.5 flex-1 text-sm font-semibold text-brand-dark" numberOfLines={1}>
+        <Text
+          className="ml-1.5 flex-1 text-sm font-semibold text-brand-dark"
+          numberOfLines={1}>
           {order.customerName}
-          {order.customerPhone || order.delivery?.phone ? ` - ${order.delivery?.phone ?? order.customerPhone}` : ""}
+          {order.customerPhone || order.delivery?.phone
+            ? ` - ${order.delivery?.phone ?? order.customerPhone}`
+            : ""}
         </Text>
       </View>
       {order.delivery && (
         <View className="mt-1 flex-row items-center rounded-full bg-mist-light p-2">
           <Ionicons name="location" size={14} color={colors.brandDark} />
-          <Text className="ml-1.5 flex-1 text-sm text-brand-light" numberOfLines={1}>
-            {[order.delivery.street, order.delivery.area, order.delivery.city].filter(Boolean).join(", ")}
+          <Text
+            className="ml-1.5 flex-1 text-sm text-brand-light"
+            numberOfLines={1}>
+            {[order.delivery.street, order.delivery.area, order.delivery.city]
+              .filter(Boolean)
+              .join(", ")}
           </Text>
         </View>
       )}
 
       {/* Items */}
-      <View className="mt-3 rounded-2xl p-3" style={{ backgroundColor: colors.mistLight }}>
+      <View
+        className="mt-3 rounded-2xl p-3"
+        style={{ backgroundColor: colors.mistLight }}>
         {order.items.slice(0, 3).map((item) => (
           <View key={item._id} className="flex-row py-0.5">
-            <Text className="w-8 font-extrabold text-brand">{item.quantity}×</Text>
+            <Text className="w-8 font-extrabold text-brand">
+              {item.quantity}×
+            </Text>
             <View className="flex-1">
-              <Text className=" font-semibold text-brand-dark" numberOfLines={1}>
+              <Text
+                className=" font-semibold text-brand-dark"
+                numberOfLines={1}>
                 {item.name}
                 {item.sizeName ? ` (${item.sizeName})` : ""}
               </Text>
@@ -210,7 +314,9 @@ function OrderCard({
                 </Text>
               )}
               {!!item.note && (
-                <Text className="text-sm italic text-brand-light" numberOfLines={1}>
+                <Text
+                  className="text-sm italic text-brand-light"
+                  numberOfLines={1}>
                   “{item.note}”
                 </Text>
               )}
@@ -218,7 +324,9 @@ function OrderCard({
           </View>
         ))}
         {order.items.length > 3 && (
-          <Text className="mt-1 text-xs font-bold text-brand-light">+ {order.items.length - 3} more item(s)</Text>
+          <Text className="mt-1 text-xs font-bold text-brand-light">
+            + {order.items.length - 3} more item(s)
+          </Text>
         )}
         <Text className="mt-1 text-xs text-brand-light">
           {itemCount} item{itemCount === 1 ? "" : "s"} · Cash
@@ -226,7 +334,12 @@ function OrderCard({
       </View>
       {!!order.note && (
         <View className="mt-2 flex-row items-start rounded-full bg-mist-light p-2">
-          <Ionicons name="chatbox-ellipses" size={14} color={colors.brand} style={{ marginTop: 2 }} />
+          <Ionicons
+            name="chatbox-ellipses"
+            size={14}
+            color={colors.brand}
+            style={{ marginTop: 2 }}
+          />
           <Text className="ml-1.5 flex-1  text-brand-dark">{order.note}</Text>
         </View>
       )}
@@ -244,8 +357,7 @@ function OrderCard({
             <Pressable
               onPress={onReject}
               disabled={busy}
-              className="flex-1 flex-row items-center justify-center rounded-2xl border-2 border-red-600 py-3 bg-mist-light"
-              >
+              className="flex-1 flex-row items-center justify-center rounded-2xl border-2 border-red-600 py-3 bg-mist-light">
               <Ionicons name="close" size={18} color={colors.danger} />
               <Text className="ml-1 font-bold" style={{ color: colors.danger }}>
                 Reject
@@ -257,13 +369,18 @@ function OrderCard({
               onPress={onNext}
               disabled={busy}
               className={`${isNew ? "flex-[1.4]" : "flex-1"} flex-row items-center justify-center rounded-2xl py-3`}
-              style={{ backgroundColor: colors.brand, opacity: busy ? 0.6 : 1 }}>
+              style={{
+                backgroundColor: colors.brand,
+                opacity: busy ? 0.6 : 1,
+              }}>
               {busy ? (
                 <ActivityIndicator color={colors.white} />
               ) : (
                 <>
                   <Ionicons name={action.icon} size={17} color={colors.white} />
-                  <Text className="ml-1.5 font-bold text-white">{action.label}</Text>
+                  <Text className="ml-1.5 font-bold text-white">
+                    {action.label}
+                  </Text>
                 </>
               )}
             </Pressable>
@@ -284,7 +401,7 @@ export default function ManagerOrdersScreen() {
   const [error, setError] = useState("");
   const [busyId, setBusyId] = useState<string | null>(null);
   const [rejecting, setRejecting] = useState<Order | null>(null);
-    const [query, setQuery] = useState(""); // what's typed
+  const [query, setQuery] = useState(""); // what's typed
   const [search, setSearch] = useState(""); // what we search (after a short pause)
   const tabRef = useRef(tab);
   tabRef.current = tab;
@@ -300,10 +417,11 @@ export default function ManagerOrdersScreen() {
   const load = useCallback(async (which: ManagerOrderTab) => {
     setError("");
     try {
-                 const term = searchRef.current;
+      const term = searchRef.current;
       const result = await listRestaurantOrders(which, 1, term);
-      
-      if (tabRef.current === which && searchRef.current === term) setData(result);
+
+      if (tabRef.current === which && searchRef.current === term)
+        setData(result);
     } catch (err) {
       if (tabRef.current === which) setError(getErrorMessage(err));
     } finally {
@@ -312,7 +430,7 @@ export default function ManagerOrdersScreen() {
     }
   }, []);
 
-    // Load when the tab or the search changes
+  // Load when the tab or the search changes
   useEffect(() => {
     setLoading(true);
     setData(null);
@@ -332,8 +450,10 @@ export default function ManagerOrdersScreen() {
     if (!data || loadingMore || data.page >= data.pages) return;
     setLoadingMore(true);
     try {
-            const more = await listRestaurantOrders(tab, data.page + 1, search);
-      setData((d) => (d ? { ...more, orders: [...d.orders, ...more.orders] } : more));
+      const more = await listRestaurantOrders(tab, data.page + 1, search);
+      setData((d) =>
+        d ? { ...more, orders: [...d.orders, ...more.orders] } : more,
+      );
     } catch {
       // keep what we have
     } finally {
@@ -342,7 +462,11 @@ export default function ManagerOrdersScreen() {
   };
 
   /** Move one order forward (or reject) and refresh the list */
-  const changeStatus = async (order: Order, status: Order["status"], reason?: string) => {
+  const changeStatus = async (
+    order: Order,
+    status: Order["status"],
+    reason?: string,
+  ) => {
     setBusyId(order._id);
     try {
       await updateOrderStatus(order._id, status, reason);
@@ -359,10 +483,14 @@ export default function ManagerOrdersScreen() {
     const next = nextOrderStatus(order.type, order.status);
     if (!next) return;
     if (next === "completed") {
-      Alert.alert("Complete this order?", `Collect ${money(order.total)} in cash before completing.`, [
-        { text: "Not yet", style: "cancel" },
-        { text: "Cash collected", onPress: () => changeStatus(order, next) },
-      ]);
+      Alert.alert(
+        "Complete this order?",
+        `Collect ${money(order.total)} in cash before completing.`,
+        [
+          { text: "Not yet", style: "cancel" },
+          { text: "Cash collected", onPress: () => changeStatus(order, next) },
+        ],
+      );
       return;
     }
     changeStatus(order, next);
@@ -381,21 +509,38 @@ export default function ManagerOrdersScreen() {
         <View className="flex-row rounded-2xl bg-white p-1" style={cardShadow}>
           {TABS.map((t) => {
             const active = tab === t.key;
-            const count = t.key === "new" ? counts?.new : t.key === "active" ? counts?.active : undefined;
+            const count =
+              t.key === "new"
+                ? counts?.new
+                : t.key === "active"
+                  ? counts?.active
+                  : undefined;
             return (
               <Pressable
                 key={t.key}
                 onPress={() => setTab(t.key)}
                 className="flex-1 flex-row items-center justify-center rounded-xl py-2.5"
-                style={{ backgroundColor: active ? colors.brand : "transparent" }}>
-                <Text className="text-sm font-bold" style={{ color: active ? colors.white : colors.brandDark }}>
+                style={{
+                  backgroundColor: active ? colors.brand : "transparent",
+                }}>
+                <Text
+                  className="text-sm font-bold"
+                  style={{ color: active ? colors.white : colors.brandDark }}>
                   {t.label}
                 </Text>
                 {!!count && (
                   <View
                     className="ml-1.5 min-w-[20px] items-center rounded-full px-1.5"
-                    style={{ backgroundColor: active ? colors.white : t.key === "new" ? colors.danger : colors.brand }}>
-                    <Text className="text-xs font-extrabold" style={{ color: active ? colors.brand : colors.white }}>
+                    style={{
+                      backgroundColor: active
+                        ? colors.white
+                        : t.key === "new"
+                          ? colors.danger
+                          : colors.brand,
+                    }}>
+                    <Text
+                      className="text-xs font-extrabold"
+                      style={{ color: active ? colors.brand : colors.white }}>
                       {count}
                     </Text>
                   </View>
@@ -405,7 +550,9 @@ export default function ManagerOrdersScreen() {
           })}
         </View>
         {/* Search */}
-        <View className="mt-3 flex-row items-center rounded-2xl bg-white px-4" style={cardShadow}>
+        <View
+          className="mt-3 flex-row items-center rounded-2xl bg-white px-4"
+          style={cardShadow}>
           <Ionicons name="search" size={18} color={colors.brandLight} />
           <TextInput
             value={query}
@@ -420,28 +567,40 @@ export default function ManagerOrdersScreen() {
           />
           {query.length > 0 && (
             <Pressable onPress={() => setQuery("")} hitSlop={8}>
-              <Ionicons name="close-circle" size={18} color={colors.brandLight} />
+              <Ionicons
+                name="close-circle"
+                size={18}
+                color={colors.brandLight}
+              />
             </Pressable>
           )}
         </View>
         {/* Seats (only if the restaurant has dine-in seats) */}
-               {!!seats && seats.capacity > 0 && !search && (
-          <View className="mt-3 rounded-2xl bg-white px-4 py-3" style={cardShadow}>
+        {!!seats && seats.capacity > 0 && !search && (
+          <View
+            className="mt-3 rounded-2xl bg-white px-4 py-3"
+            style={cardShadow}>
             <View className="flex-row items-center justify-between">
               <View className="flex-row items-center">
                 <Ionicons name="people" size={15} color={colors.brand} />
-                <Text className="ml-1.5 text-sm font-bold text-brand-dark">Seats</Text>
+                <Text className="ml-1.5 text-sm font-bold text-brand-dark">
+                  Seats
+                </Text>
               </View>
               <Text className="text-sm text-brand-light">
-                <Text className="font-extrabold text-brand">{seatsFree}</Text> free of {seats.capacity}
+                <Text className="font-extrabold text-brand">{seatsFree}</Text>{" "}
+                free of {seats.capacity}
               </Text>
             </View>
-            <View className="mt-2 h-2 overflow-hidden rounded-full" style={{ backgroundColor: colors.mistLight }}>
+            <View
+              className="mt-2 h-2 overflow-hidden rounded-full"
+              style={{ backgroundColor: colors.mistLight }}>
               <View
                 className="h-2 rounded-full"
                 style={{
                   width: `${Math.min(100, (seats.inUse / seats.capacity) * 100)}%`,
-                  backgroundColor: seatsFree === 0 ? colors.danger : colors.brand,
+                  backgroundColor:
+                    seatsFree === 0 ? colors.danger : colors.brand,
                 }}
               />
             </View>
@@ -457,7 +616,10 @@ export default function ManagerOrdersScreen() {
         <View className="flex-1 items-center justify-center px-8">
           <Ionicons name="alert-circle" size={44} color={colors.brandLight} />
           <Text className="mt-3 text-center text-brand-dark">{error}</Text>
-          <Pressable onPress={() => load(tab)} className="mt-4 rounded-2xl px-6 py-3" style={{ backgroundColor: colors.brand }}>
+          <Pressable
+            onPress={() => load(tab)}
+            className="mt-4 rounded-2xl px-6 py-3"
+            style={{ backgroundColor: colors.brand }}>
             <Text className="font-bold text-white">Try again</Text>
           </Pressable>
         </View>
@@ -465,7 +627,11 @@ export default function ManagerOrdersScreen() {
         <FlatList
           data={data?.orders ?? []}
           keyExtractor={(o) => o._id}
-          contentContainerStyle={{ padding: 16, paddingBottom: 32, flexGrow: 1 }}
+          contentContainerStyle={{
+            padding: 16,
+            paddingBottom: 32,
+            flexGrow: 1,
+          }}
           renderItem={({ item }) => (
             <OrderCard
               order={item}
@@ -487,12 +653,22 @@ export default function ManagerOrdersScreen() {
               colors={[colors.brand]}
             />
           }
-          ListFooterComponent={loadingMore ? <ActivityIndicator color={colors.brand} /> : undefined}
+          ListFooterComponent={
+            loadingMore ? <ActivityIndicator color={colors.brand} /> : undefined
+          }
           ListEmptyComponent={
             <View className="flex-1 items-center justify-center py-20">
               <View className="h-20 w-20 items-center justify-center rounded-full bg-white">
-                               <Ionicons
-                  name={search ? "search" : tab === "new" ? "notifications" : tab === "active" ? "flame" : "archive"}
+                <Ionicons
+                  name={
+                    search
+                      ? "search"
+                      : tab === "new"
+                        ? "notifications"
+                        : tab === "active"
+                          ? "flame"
+                          : "archive"
+                  }
                   size={34}
                   color={colors.brandLight}
                 />
