@@ -47,8 +47,8 @@ function Card({
   children: ReactNode;
 }) {
   return (
-    <View className="mb-4 rounded-3xl bg-white p-5" style={cardShadow}>
-      <View className="mb-3 flex-row items-center">
+    <View className="mb-4 rounded-3xl bg-white p-4" style={cardShadow}>
+      <View className="mb-4 flex-row items-center">
         <Ionicons name={icon} size={18} color={colors.brand} />
         <Text className="ml-2 text-base font-bold text-brand-dark">
           {title}
@@ -82,8 +82,8 @@ function Field({
   return (
     <View className="mb-3">
       <View className="mb-1.5 flex-row justify-between">
-        <Text className="text-sm font-semibold text-brand-dark">{label}</Text>
-        {optional && <Text className="text-xs text-brand-light">Optional</Text>}
+        <Text className="text-base font-semibold text-brand-dark">{label}</Text>
+        {optional && <Text className="text-xs text-brand-dark font-">Optional</Text>}
       </View>
       <TextInput
         value={value}
@@ -295,7 +295,7 @@ export default function CheckoutScreen() {
                     style={{
                       borderColor: selected ? colors.brand : colors.mist,
                       backgroundColor: selected
-                        ? colors.brandSoft
+                        ? colors.mistLight
                         : colors.white,
                       opacity: offered ? 1 : 0.4,
                     }}>
@@ -311,7 +311,7 @@ export default function CheckoutScreen() {
                       }}>
                       {ORDER_TYPE_INFO[t].label}
                     </Text>
-                    <Text className="text-center text-[10px] text-brand-light">
+                    <Text className="text-center text-[10px] font-semibold text-brand-light">
                       {offered ? TYPE_HINT[t] : "Not offered"}
                     </Text>
                   </Pressable>
@@ -320,7 +320,7 @@ export default function CheckoutScreen() {
             </View>
           </Card>
 
-          {/* 2. Details for the chosen type */}
+          
           {type === "delivery" && (
             <Card title="Delivery address" icon="location">
               <Field
@@ -516,7 +516,7 @@ export default function CheckoutScreen() {
           {/* 3. Note */}
           <Card title="Note for the restaurant" icon="chatbubble-ellipses">
             <Field
-              label="Note"
+              label="Note:"
               value={note}
               onChangeText={setNote}
               placeholder="e.g. Please pack the sauces separately"
