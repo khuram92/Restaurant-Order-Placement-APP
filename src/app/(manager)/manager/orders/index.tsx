@@ -506,7 +506,7 @@ export default function ManagerOrdersScreen() {
 
       {/* Tabs */}
       <View className="px-4 pt-4">
-        <View className="flex-row rounded-2xl bg-white p-1" style={cardShadow}>
+        <View className="flex-row rounded-2xl bg-white p-1 " style={cardShadow}>
           {TABS.map((t) => {
             const active = tab === t.key;
             const count =
