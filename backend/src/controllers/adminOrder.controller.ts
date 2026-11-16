@@ -71,20 +71,20 @@ export const listAllOrders = async (req: Request, res: Response) => {
   });
 };
 
-// /** GET /api/admin/orders/restaurants — names + logos for the "Restaurant" filter */
-// export const orderFilterRestaurants = async (_req: Request, res: Response) => {
-//   const restaurants = await Restaurant.find().select("name logo isActive").sort({ name: 1 }).lean();
-//   res.json({ restaurants });
-// };
+/** GET /api/admin/orders/restaurants — names + logos for the "Restaurant" filter */
+export const orderFilterRestaurants = async (_req: Request, res: Response) => {
+  const restaurants = await Restaurant.find().select("name logo isActive").sort({ name: 1 }).lean();
+  res.json({ restaurants });
+};
 
-// /** GET /api/admin/orders/:id — any order */
-// export const getAnyOrder = async (req: Request, res: Response) => {
-//   const id = String(req.params.id);
-//   if (!mongoose.isValidObjectId(id)) return res.status(400).json({ message: "Invalid order id" });
+/** GET /api/admin/orders/:id — any order */
+export const getAnyOrder = async (req: Request, res: Response) => {
+  const id = String(req.params.id);
+  if (!mongoose.isValidObjectId(id)) return res.status(400).json({ message: "Invalid order id" });
 
-//   const order = await Order.findById(id);
-//   if (!order) return res.status(404).json({ message: "Order not found" });
+  const order = await Order.findById(id);
+  if (!order) return res.status(404).json({ message: "Order not found" });
 
-//   const restaurant = await Restaurant.findById(order.restaurantId).select("name logo phone address").lean();
-//   res.json({ order, restaurant });
-// };
+  const restaurant = await Restaurant.findById(order.restaurantId).select("name logo phone address").lean();
+  res.json({ order, restaurant });
+};
