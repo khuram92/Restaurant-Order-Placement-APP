@@ -251,6 +251,12 @@ export default function ManagerHome() {
           subtitle="Hours, services, details and Close now"
           onPress={() => router.push("/manager/restaurant")}
         />
+         <MenuCard
+          icon="stats-chart"
+          title="Dashboard"
+          subtitle="Revenue, orders and best sellers"
+          // onPress={() => router.push("/manager/dashboard")}
+        />
       </ScrollView>
     </View>
   );
