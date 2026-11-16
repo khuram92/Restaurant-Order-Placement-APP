@@ -65,7 +65,44 @@ export const getMyOrderReview = async (req: Request, res: Response) => {
   const review = await Review.findOne({ orderId: id, customerId: req.user!._id });
   res.json({ review });
 };
+/** GET /api/orders/reviews/mine?page= — every review I've written (newest first) */
+export const listMyReviews = async (req: Request, res: Response) => {
+  const parsed = listSchema.safeParse(req.query);
+  if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
+  const { page, limit } = parsed.data;
+  const filter = { customerId: req.user!._id };
 
+  const [reviews, total] = await Promise.all([
+    Review.find(filter)
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .populate<{ restaurantId: { _id: unknown; name: string; logo?: string } | null }>("restaurantId", "name logo")
+      .populate<{ orderId: { _id: unknown; orderNumber: string } | null }>("orderId", "orderNumber")
+      .lean(),
+    Review.countDocuments(filter),
+  ]);
+
+  res.json({
+    reviews: reviews.map((r) => ({
+      _id: String(r._id),
+      rating: r.rating,
+      comment: r.comment,
+      tags: r.tags,
+      reply: r.reply?.text ? r.reply : undefined,
+      orderType: r.orderType,
+      createdAt: r.createdAt,
+      orderId: String(r.orderId?._id ?? ""),
+      orderNumber: r.orderId?.orderNumber,
+      restaurantId: String(r.restaurantId?._id ?? ""),
+      restaurantName: r.restaurantId?.name ?? "Restaurant",
+      restaurantLogo: r.restaurantId?.logo,
+    })),
+    total,
+    page,
+    pages: Math.max(1, Math.ceil(total / limit)),
+  });
+};
 /** GET /api/restaurants/:id/reviews?page=&rating= — what customers see on the restaurant page */
 export const listRestaurantReviews = async (req: Request, res: Response) => {
   const id = String(req.params.id);

@@ -32,3 +32,26 @@ export interface NewReviewInput {
   comment?: string;
   tags: ReviewTag[];
 }
+
+/** A review I wrote (My reviews screen) */
+export interface MyReview {
+  _id: string;
+  rating: number;
+  comment?: string;
+  tags: string[];
+  reply?: { text: string; at: string };
+  orderType?: string;
+  createdAt: string;
+  orderId: string;
+  orderNumber?: string;
+  restaurantId: string;
+  restaurantName: string;
+  restaurantLogo?: string;
+}
+
+export interface MyReviewListResponse {
+  reviews: MyReview[];
+  total: number;
+  page: number;
+  pages: number;
+}
