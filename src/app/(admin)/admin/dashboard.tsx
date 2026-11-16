@@ -1,15 +1,22 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router, Stack, useFocusEffect } from "expo-router";
 import { useCallback, useRef, useState } from "react";
-import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
 import {
   OutcomeRow,
   RANGE_LABEL,
   RangeTabs,
   RankedList,
+  shortMoney,
   StatTile,
   TypeSplit,
-  shortMoney,
 } from "../../../components/stats/StatsParts";
 import { cardShadow, colors } from "../../../constants/theme";
 import { getErrorMessage } from "../../../lib/api";
@@ -76,7 +83,9 @@ export default function AdminStatsDashboard() {
           />
         }>
         {/* Olive band with the range switch */}
-        <View className=" px-4 pb-8 pt-2" style={{ backgroundColor: colors.brand }}>
+        <View
+          className=" px-4 pb-8 pt-2"
+          style={{ backgroundColor: colors.brand }}>
           <RangeTabs value={range} onChange={changeRange} />
         </View>
 
@@ -86,34 +95,89 @@ export default function AdminStatsDashboard() {
               <ActivityIndicator size="large" color={colors.brand} />
             </View>
           ) : error && !stats ? (
-            <View className="items-center rounded-3xl bg-white p-6" style={cardShadow}>
-              <Ionicons name="alert-circle" size={40} color={colors.brandLight} />
+            <View
+              className="items-center rounded-3xl bg-white p-6"
+              style={cardShadow}>
+              <Ionicons
+                name="alert-circle"
+                size={40}
+                color={colors.brandLight}
+              />
               <Text className="mt-2 text-center text-brand-dark">{error}</Text>
-              <Pressable onPress={() => load(range)} className="mt-4 rounded-2xl px-6 py-3" style={{ backgroundColor: colors.brand }}>
+              <Pressable
+                onPress={() => load(range)}
+                className="mt-4 rounded-2xl px-6 py-3"
+                style={{ backgroundColor: colors.brand }}>
                 <Text className="font-bold text-white">Try again</Text>
               </Pressable>
             </View>
           ) : stats && s && p ? (
-            <View className="mt-8" style={{ opacity: loading ? 0.5 : 1 }}>
-              
+            <View style={{ opacity: loading ? 0.5 : 1 }}>
+              <Pressable
+                onPress={() =>
+                  router.push({
+                    pathname: "/admin/orders",
+                    params: { tab: "active" },
+                  })
+                }
+                className="mb-4 flex-row items-center rounded-3xl bg-white p-4"
+                style={cardShadow}>
+                <View
+                  className="h-11 w-11 items-center justify-center rounded-2xl"
+                  style={{ backgroundColor: colors.danger }}>
+                  <Ionicons name="flame" size={20} color={colors.white} />
+                </View>
+                <View className="ml-3 flex-1">
+                  <Text className="text-xs font-bold uppercase tracking-wide text-brand-light">
+                    Live now · all restaurants
+                  </Text>
+                
+                </View>
+                <Ionicons
+                  name="chevron-forward"
+                  size={18}
+                  color={colors.brandLight}
+                />
+              </Pressable>
 
               {/* Money + orders */}
               <View className="mb-3 flex-row gap-3">
-                <StatTile icon="cash" label={`Revenue · ${RANGE_LABEL[range]}`} value={shortMoney(s.revenue)} hint="Completed orders" highlight />
-                <StatTile icon="receipt" label="Orders" value={String(s.orders)} hint={`${s.completed} completed`} />
+                <StatTile
+                  icon="cash"
+                  label={`Revenue · ${RANGE_LABEL[range]}`}
+                  value={shortMoney(s.revenue)}
+                  hint="Completed orders"
+                  highlight
+                />
+                <StatTile
+                  icon="receipt"
+                  label="Orders"
+                  value={String(s.orders)}
+                  hint={`${s.completed} completed`}
+                />
               </View>
               <View className="mb-4 flex-row gap-3">
-                <StatTile icon="pricetag" label="Avg order" value={s.avgOrderValue ? shortMoney(s.avgOrderValue) : "–"} />
+                <StatTile
+                  icon="pricetag"
+                  label="Avg order"
+                  value={s.avgOrderValue ? shortMoney(s.avgOrderValue) : "–"}
+                />
                 <StatTile
                   icon="trending-up"
                   label="Success rate"
-                  value={s.orders ? `${Math.round((s.completed / s.orders) * 100)}%` : "–"}
+                  value={
+                    s.orders
+                      ? `${Math.round((s.completed / s.orders) * 100)}%`
+                      : "–"
+                  }
                   hint="Completed of all orders"
                 />
               </View>
 
               {/* Platform */}
-              <Text className="mb-2 ml-1 text-xs font-bold uppercase tracking-wide text-brand-light">Platform</Text>
+              <Text className="mb-2 ml-1 text-xs font-bold uppercase tracking-wide text-brand-light">
+                Platform
+              </Text>
               <View className="mb-4 flex-row gap-3">
                 <StatTile
                   icon="restaurant"
@@ -121,7 +185,12 @@ export default function AdminStatsDashboard() {
                   value={String(p.activeRestaurants)}
                   hint={`${p.restaurants} total`}
                 />
-                <StatTile icon="briefcase" label="Managers" value={String(p.activeManagers)} hint="Active" />
+                <StatTile
+                  icon="briefcase"
+                  label="Managers"
+                  value={String(p.activeManagers)}
+                  hint="Active"
+                />
                 <StatTile
                   icon="people"
                   label="Customers"
@@ -131,7 +200,7 @@ export default function AdminStatsDashboard() {
               </View>
 
               <OutcomeRow summary={s} />
-              
+              {/* <SeriesChart series={stats.series} range={range} /> */}
 
               <RankedList
                 title="Top restaurants"
@@ -143,7 +212,11 @@ export default function AdminStatsDashboard() {
                   ...(r.logo && { image: r.logo }),
                   main: shortMoney(r.revenue),
                   sub: `${r.orders} order${r.orders === 1 ? "" : "s"}`,
-                  onPress: () => router.push({ pathname: "/admin/restaurants/[id]", params: { id: r.restaurantId } }),
+                  onPress: () =>
+                    router.push({
+                      pathname: "/admin/restaurants/[id]",
+                      params: { id: r.restaurantId },
+                    }),
                 }))}
               />
 
