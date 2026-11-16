@@ -9,13 +9,13 @@ import { ORDER_TYPE_INFO } from "../../utils/orderFormat";
 
 type IconName = ComponentProps<typeof Ionicons>["name"];
 
-/** Rs 12,500 → "Rs 12.5k" (for small tiles) */
+
 export const shortMoney = (n: number) =>
   n >= 1_000_000 ? `Rs ${(n / 1_000_000).toFixed(1)}M` : n >= 10_000 ? `Rs ${(n / 1000).toFixed(1)}k` : money(n);
 
 export const RANGE_LABEL: Record<StatsRange, string> = { today: "Today", "7d": "7 days", "30d": "30 days" };
 
-// ---------- Range switch ----------
+
 export function RangeTabs({ value, onChange }: { value: StatsRange; onChange: (r: StatsRange) => void }) {
   return (
     <View className="flex-row rounded-2xl p-1" style={{ backgroundColor: "rgba(0,0,0,0.18)" }}>
@@ -37,15 +37,15 @@ export function RangeTabs({ value, onChange }: { value: StatsRange; onChange: (r
   );
 }
 
-// ---------- Card wrapper ----------
+
 export function StatsCard({ title, icon, right, children }: { title: string; icon: IconName; right?: ReactNode; children: ReactNode }) {
   return (
     <View className="mb-4 rounded-3xl bg-white p-5" style={cardShadow}>
       <View className="mb-4 flex-row items-center">
         <View className="h-8 w-8 items-center justify-center rounded-xl" style={{ backgroundColor: colors.brandSoft }}>
-          <Ionicons name={icon} size={16} color={colors.brand} />
+          <Ionicons name={icon} size={18} color={colors.brand} />
         </View>
-        <Text className="ml-2 flex-1 text-base font-bold text-brand-dark">{title}</Text>
+        <Text className="ml-2 flex-1 text-xl font-bold text-brand-dark">{title}</Text>
         {right}
       </View>
       {children}
@@ -53,7 +53,7 @@ export function StatsCard({ title, icon, right, children }: { title: string; ico
   );
 }
 
-// ---------- Big number tile ----------
+
 export function StatTile({
   icon,
   label,
@@ -79,7 +79,7 @@ export function StatTile({
       <Text className="mt-3 text-2xl font-extrabold" style={{ color: highlight ? colors.white : colors.text }} numberOfLines={1}>
         {value}
       </Text>
-      <Text className="text-xs font-semibold" style={{ color: highlight ? colors.brandSoft : colors.brandLight }}>
+      <Text className="text-sm font-semibold" style={{ color: highlight ? colors.brandSoft : colors.brandLight }}>
         {label}
       </Text>
       {!!hint && (
@@ -91,7 +91,7 @@ export function StatTile({
   );
 }
 
-// ---------- Bar chart (orders or revenue over time) ----------
+
 const barLabel = (label: string, range: StatsRange) => {
   if (range === "today") return `${Number(label) % 12 || 12}${Number(label) < 12 ? "a" : "p"}`; // 9a, 2p
   const d = new Date(`${label}T00:00:00`);
@@ -130,7 +130,7 @@ export function SeriesChart({ series, range }: { series: OrderStats["series"]; r
           ))}
         </View>
       }>
-      {/* Selected bar / total */}
+     
       <Text className="mb-3 text-sm text-brand-light">
         {shown ? (
           <>

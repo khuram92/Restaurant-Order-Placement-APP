@@ -75,8 +75,8 @@ export default function ManagerDashboard() {
             colors={[colors.brand]}
           />
         }>
-        {/* Olive band with the range switch */}
-        <View className="rounded-b-[28px] px-4 pb-8 pt-2" style={{ backgroundColor: colors.brand }}>
+        
+        <View className=" px-4 pb-8 pt-2" style={{ backgroundColor: colors.brand }}>
           <RangeTabs value={range} onChange={changeRange} />
         </View>
 
@@ -95,7 +95,7 @@ export default function ManagerDashboard() {
             </View>
           ) : stats && s ? (
             <View style={{ opacity: loading ? 0.5 : 1 }}>
-              {/* Live now */}
+             
               <Pressable
                 onPress={() => router.push("/manager/orders")}
                 className="mb-4 flex-row items-center rounded-3xl bg-white p-4"
@@ -112,7 +112,7 @@ export default function ManagerDashboard() {
                 <Ionicons name="chevron-forward" size={18} color={colors.brandLight} />
               </Pressable>
 
-              {/* Big numbers */}
+              
               <View className="mb-3 flex-row gap-3">
                 <StatTile icon="cash" label={`Revenue · ${RANGE_LABEL[range]}`} value={shortMoney(s.revenue)} hint="Completed orders" highlight />
                 <StatTile icon="receipt" label="Orders" value={String(s.orders)} hint={`${s.completed} completed`} />
