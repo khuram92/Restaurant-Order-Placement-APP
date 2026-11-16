@@ -130,22 +130,22 @@ export const listMyRestaurantReviews = async (req: Request, res: Response) => {
   });
 };
 
-// /** PATCH /api/manager/reviews/:id/reply   { text } — answer (or edit the answer) */
-// export const replyToReview = async (req: Request, res: Response) => {
-//   const restaurantId = req.user?.restaurantId;
-//   if (!restaurantId) return res.status(403).json({ message: "You're not assigned to a restaurant" });
+/** PATCH /api/manager/reviews/:id/reply   { text } — answer (or edit the answer) */
+export const replyToReview = async (req: Request, res: Response) => {
+  const restaurantId = req.user?.restaurantId;
+  if (!restaurantId) return res.status(403).json({ message: "You're not assigned to a restaurant" });
 
-//   const id = String(req.params.id);
-//   if (!mongoose.isValidObjectId(id)) return res.status(400).json({ message: "Invalid review id" });
+  const id = String(req.params.id);
+  if (!mongoose.isValidObjectId(id)) return res.status(400).json({ message: "Invalid review id" });
 
-//   const parsed = replySchema.safeParse(req.body ?? {});
-//   if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
+  const parsed = replySchema.safeParse(req.body ?? {});
+  if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
 
-//   const review = await Review.findOneAndUpdate(
-//     { _id: id, restaurantId },
-//     { $set: { reply: { text: parsed.data.text, at: new Date() } } },
-//     { new: true },
-//   );
-//   if (!review) return res.status(404).json({ message: "Review not found" });
-//   res.json({ message: "Reply posted", review });
-// };
+  const review = await Review.findOneAndUpdate(
+    { _id: id, restaurantId },
+    { $set: { reply: { text: parsed.data.text, at: new Date() } } },
+    { new: true },
+  );
+  if (!review) return res.status(404).json({ message: "Review not found" });
+  res.json({ message: "Reply posted", review });
+};
