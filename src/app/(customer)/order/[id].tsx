@@ -21,6 +21,7 @@ import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
+import OrderReviewCard from "../../../components/customer/OrderReviewCard";
 import { cardShadow, colors } from "../../../constants/theme";
 import { getErrorMessage } from "../../../lib/api";
 import { cancelMyOrder, getMyOrder } from "../../../services/orderApi";
@@ -442,9 +443,7 @@ export default function OrderScreen() {
             colors={[colors.brand]}
           />
         }>
-        <View
-          className=" px-5 pb-7 "
-          style={{ backgroundColor: heroColor }}>
+        <View className=" px-5 pb-7 " style={{ backgroundColor: heroColor }}>
           <SafeAreaView edges={["top"]}>
             {/* Top row */}
             <View className="flex-row items-center pt-2">
@@ -484,7 +483,6 @@ export default function OrderScreen() {
               )}
             </View>
 
-            
             <View className="mt-6 items-center">
               <View
                 className="h-20 w-20 items-center justify-center rounded-full"
@@ -511,13 +509,11 @@ export default function OrderScreen() {
               </Text>
             </View>
 
-            
             {!stopped && <StepBar order={o} />}
           </SafeAreaView>
         </View>
 
         <View className="-mt-4 px-4">
-         
           <View
             className="mb-4 flex-row rounded-3xl bg-white p-4"
             style={cardShadow}>
@@ -545,8 +541,14 @@ export default function OrderScreen() {
               </Text>
             </View>
           </View>
-
          
+          {o.status === "completed" && (
+            <OrderReviewCard
+              orderId={o._id}
+              restaurantName={o.restaurantName}
+            />
+          )}
+
           <View
             className="mb-4 flex-row items-center rounded-3xl bg-white p-4"
             style={cardShadow}>
@@ -582,7 +584,6 @@ export default function OrderScreen() {
             </Pressable>
           </View>
 
-          
           {o.delivery && (
             <Card title="Delivering to" icon="location">
               <Text className="text-sm leading-5 text-brand-dark">
@@ -651,7 +652,6 @@ export default function OrderScreen() {
             </View>
           )}
 
-         
           <Card
             title={`Your order · ${itemCount} item${itemCount === 1 ? "" : "s"}`}
             icon="receipt">

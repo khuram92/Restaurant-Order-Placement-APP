@@ -44,6 +44,7 @@ import type {
 } from "../../../types/restaurant";
 import ItemSheet from "@/components/customer/ItemSheet";
 import { CartSelection } from "@/types/cart";
+import RatingBadge from "../../../components/customer/RatingBadge";
 type IconName = ComponentProps<typeof Ionicons>["name"];
 
 const DAY_LABELS: Record<Day, string> = {
@@ -689,7 +690,7 @@ export default function CustomerRestaurantScreen() {
               </View>
             </View>
 
-            {/* Status + services in one row */}
+           
             <View className="mt-3 flex-row flex-wrap items-center gap-1.5">
               <View
                 className="flex-row items-center rounded-full px-2.5 py-1"
@@ -705,6 +706,24 @@ export default function CustomerRestaurantScreen() {
                   {statusText}
                 </Text>
               </View>
+               <Pressable
+                onPress={() =>
+                  router.push({
+                    pathname: "/reviews/[id]",
+                    params: { id: r._id, name: r.name },
+                  })
+                }
+                hitSlop={6}
+                className="flex-row items-center rounded-full border"
+                style={{ borderColor: colors.mistDark }}>
+                <RatingBadge avg={r.ratingAvg} count={r.ratingCount} size="md" />
+                <Ionicons
+                  name="chevron-forward"
+                  size={13}
+                  color={colors.brandLight}
+                  style={{ marginRight: 6, marginLeft: -4 }}
+                />
+              </Pressable>
             </View>
             <View className="flex-row justify-between">
               <View className="self-start mt-4 flex-row gap-2 ">

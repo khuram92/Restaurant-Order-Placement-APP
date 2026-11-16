@@ -174,9 +174,13 @@ function BookingCard({ order }: { order: Order }) {
         </Text>
         <View className="flex-row items-center">
           <Text className="mr-0.5 text-sm font-bold text-brand">
-            {running ? "Track" : "Details"}
+                        {running ? "Track" : done && !order.reviewed ? "Rate" : "Details"}
           </Text>
-          <Ionicons name="chevron-forward" size={16} color={colors.brand} />
+          <Ionicons
+            name={done && !order.reviewed ? "star" : "chevron-forward"}
+            size={done && !order.reviewed ? 14 : 16}
+            color={done && !order.reviewed ? "#e8a33d" : colors.brand}
+          />
         </View>
       </View>
     </Pressable>
