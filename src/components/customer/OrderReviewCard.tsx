@@ -86,7 +86,6 @@ export default function OrderReviewCard({
     );
   }
 
-  
   return (
     <View
       className="mb-4 rounded-3xl p-5"
@@ -96,9 +95,7 @@ export default function OrderReviewCard({
           ? "How was your experience with us?"
           : "How was your order?"}
       </Text>
-      <Text
-        className="mb-3 mt-0.5 text-center text-sm text-white"
-        >
+      <Text className="mb-3 mt-0.5 text-center text-sm text-white">
         Rate {restaurantName}
       </Text>
       <View className="self-center rounded-2xl bg-white px-3 py-2">
