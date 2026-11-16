@@ -10,6 +10,8 @@ import {
 import { getToken, removeToken, saveToken } from "../lib/storage";
 import { getMe } from "../services/authApi";
 import type { User } from "../types/auth";
+import { getCurrentPushToken } from "../lib/notifications";
+import { removePushToken } from "../services/pushApi";
 
 interface AuthContextValue {
   user: User | null;
