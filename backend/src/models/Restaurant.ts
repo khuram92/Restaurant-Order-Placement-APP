@@ -47,6 +47,8 @@ export interface IRestaurant {
   seatingCapacity: number; // total dine-in seats
   isActive: boolean;
   isTemporarilyClosed: boolean;
+  ratingAvg: number;
+  ratingCount: number;
   createdBy?: Types.ObjectId;
 }
 
@@ -151,6 +153,8 @@ const restaurantSchema = new Schema<IRestaurant>(
     },
     isActive: { type: Boolean, default: true },
     isTemporarilyClosed: { type: Boolean, default: false },
+    ratingAvg: { type: Number, default: 0, min: 0, max: 5 },
+    ratingCount: { type: Number, default: 0, min: 0 },
     createdBy: { type: Schema.Types.ObjectId, ref: "User" },
   },
   { timestamps: true },
