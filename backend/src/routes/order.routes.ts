@@ -1,7 +1,15 @@
 import { Router } from "express";
-import { cancelMyOrder, createOrder, getMyOrder, listMyOrders } from "../controllers/customerOrder.controller.js";
+import {
+  cancelMyOrder,
+  createOrder,
+  getMyOrder,
+  listMyOrders,
+} from "../controllers/customerOrder.controller.js";
+import {
+  createReview,
+  getMyOrderReview,
+} from "../controllers/review.controller.js";
 import { authorize, protect } from "../middleware/auth.middleware.js";
-import { createReview, getMyOrderReview } from "../controllers/review.controller.js";
 
 const router = Router();
 
