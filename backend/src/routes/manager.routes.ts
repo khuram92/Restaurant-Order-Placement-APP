@@ -11,6 +11,7 @@ import { restaurantImagesUpload } from "../middleware/upload.middleware.js";
 import menuRoutes from "./menu.routes.js";
 import managerOrderRoutes from "./managerOrder.routes.js";
 import { getManagerStats } from "../controllers/managerStats.controller.js";
+import { listMyRestaurantReviews, replyToReview } from "../controllers/review.controller.js";
 
 const router = Router();
 
@@ -27,4 +28,6 @@ router.patch("/restaurant/temporary-close", setTemporarilyClosed);
 router.use("/menu", managerMenuAccess, menuRoutes);
 router.use("/orders", managerOrderRoutes);
 router.get("/stats", getManagerStats);
+router.get("/reviews", listMyRestaurantReviews);
+router.patch("/reviews/:id/reply", replyToReview);
 export default router;

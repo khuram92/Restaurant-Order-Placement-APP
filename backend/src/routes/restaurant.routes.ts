@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { getRestaurant, getRestaurantMenu, getSeatAvailability, listRestaurants } from "../controllers/customerRestaurant.controller.js";
 import { protect } from "../middleware/auth.middleware.js";
+import { listRestaurantReviews } from "../controllers/review.controller.js";
 
 const router = Router();
 
@@ -11,5 +12,5 @@ router.get("/", listRestaurants);
 router.get("/:id", getRestaurant);
 router.get("/:id/menu", getRestaurantMenu);
 router.get("/:id/seats", getSeatAvailability);
-
+router.get("/:id/reviews", listRestaurantReviews);
 export default router;
