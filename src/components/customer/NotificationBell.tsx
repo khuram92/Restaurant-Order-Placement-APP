@@ -33,7 +33,7 @@ export default function NotificationBell() {
 
   return (
     <Pressable
-    //   onPress={() => router.push("/notifications")}
+      onPress={() => router.push("/notifications")}
       hitSlop={8}
       className="h-12 w-12 items-center justify-center rounded-full"
       style={{ backgroundColor: "rgba(0,0,0,0.18)" }}>
