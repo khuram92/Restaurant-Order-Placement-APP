@@ -18,12 +18,13 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import NotificationBell from "../../../components/customer/NotificationBell";
+import RatingBadge from "../../../components/customer/RatingBadge";
 import { cardShadow, colors } from "../../../constants/theme";
 import { useAuth } from "../../../context/AuthContext";
 import { getErrorMessage } from "../../../lib/api";
 import { browseRestaurants } from "../../../services/restaurantApi";
 import type { CustomerRestaurant, ServiceKey } from "../../../types/restaurant";
-import NotificationBell from "../../../components/customer/NotificationBell";
 
 type IconName = ComponentProps<typeof Ionicons>["name"];
 
@@ -79,6 +80,9 @@ function RestaurantCard({ item }: { item: CustomerRestaurant }) {
           <Text className="ml-1 text-xs font-bold text-white">
             {item.isOpenNow ? "Open now" : "Closed"}
           </Text>
+        </View>
+        <View className="absolute right-3 top-3">
+          <RatingBadge avg={item.ratingAvg} count={item.ratingCount} />
         </View>
       </View>
 
