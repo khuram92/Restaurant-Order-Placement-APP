@@ -10,6 +10,8 @@ export interface INotification {
   orderId?: Types.ObjectId;
   orderStatus?: string; // status the order moved to (for the icon in the app)
   readAt?: Date;
+  restaurantName?: string;
+  restaurantImage?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -22,6 +24,8 @@ const notificationSchema = new Schema<INotification>(
     body: { type: String, required: true, maxlength: 400 },
     orderId: { type: Schema.Types.ObjectId, ref: "Order" },
     orderStatus: { type: String },
+    restaurantName: { type: String },
+    restaurantImage: { type: String },
     readAt: { type: Date },
   },
   { timestamps: true },
@@ -32,6 +36,12 @@ notificationSchema.index({ userId: 1, createdAt: -1 });
 // Unread count
 notificationSchema.index({ userId: 1, readAt: 1 });
 // Auto-delete after 90 days
-notificationSchema.index({ createdAt: 1 }, { expireAfterSeconds: 90 * 24 * 60 * 60 });
+notificationSchema.index(
+  { createdAt: 1 },
+  { expireAfterSeconds: 90 * 24 * 60 * 60 },
+);
 
-export const Notification = model<INotification>("Notification", notificationSchema);
+export const Notification = model<INotification>(
+  "Notification",
+  notificationSchema,
+);

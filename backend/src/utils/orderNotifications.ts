@@ -3,6 +3,7 @@ import type { IOrder, OrderStatus } from "../models/Order.js";
 import { User } from "../models/User.js";
 import { sendPushToUsers } from "./push.js";
 import { Notification } from "../models/Notification.js";
+import { Restaurant } from "../models/Restaurant.js";
 
 type OrderDoc = HydratedDocument<IOrder>;
 
@@ -63,13 +64,17 @@ const CUSTOMER_TEXT: Partial<Record<OrderStatus, (o: OrderDoc) => { title: strin
 
 /** Status changed by the restaurant → the customer (saved in their inbox + push) */
 export const notifyCustomerOfStatus = async (order: OrderDoc) => {
-  console.log("🔔 notifyCustomerOfStatus", order.orderNumber, order.status, "customer:", String(order.customerId));
   const text = CUSTOMER_TEXT[order.status]?.(order);
   if (!text) return;
 
   // Inbox entry (the Notifications screen) — a failure here must not stop the push
   try {
+    const restaurant = await Restaurant.findById(order.restaurantId).select("logo coverImage");
+    const restaurantImage = restaurant?.logo || restaurant?.coverImage;
     await Notification.create({
+      userId: order.customerId,
+      restaurantName: order.restaurantName,
+      ...(restaurantImage && { restaurantImage }),
       userId: order.customerId,
       type: "order",
       title: text.title,
