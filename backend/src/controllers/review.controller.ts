@@ -91,44 +91,44 @@ export const listRestaurantReviews = async (req: Request, res: Response) => {
   });
 };
 
-// // ======================= Manager =======================
 
-// /** GET /api/manager/reviews?page=&rating= — reviews of my restaurant (with order number) */
-// export const listMyRestaurantReviews = async (req: Request, res: Response) => {
-//   const restaurantId = req.user?.restaurantId;
-//   if (!restaurantId) return res.status(403).json({ message: "You're not assigned to a restaurant" });
 
-//   const parsed = listSchema.safeParse(req.query);
-//   if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
-//   const { page, limit, rating } = parsed.data;
+/** GET /api/manager/reviews?page=&rating= — reviews of my restaurant (with order number) */
+export const listMyRestaurantReviews = async (req: Request, res: Response) => {
+  const restaurantId = req.user?.restaurantId;
+  if (!restaurantId) return res.status(403).json({ message: "You're not assigned to a restaurant" });
 
-//   const filter = { restaurantId, ...(rating && { rating }) };
-//   const [reviews, total, summary, unanswered] = await Promise.all([
-//     Review.find(filter)
-//       .sort({ createdAt: -1 })
-//       .skip((page - 1) * limit)
-//       .limit(limit)
-//       .populate<{ orderId: { _id: unknown; orderNumber: string } }>("orderId", "orderNumber")
-//       .lean(),
-//     Review.countDocuments(filter),
-//     ratingSummary(String(restaurantId)),
-//     Review.countDocuments({ restaurantId, "reply.text": { $exists: false } }),
-//   ]);
+  const parsed = listSchema.safeParse(req.query);
+  if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
+  const { page, limit, rating } = parsed.data;
 
-//   res.json({
-//     reviews: reviews.map((r) => ({
-//       ...toPublicReview(r as never),
-//       customerName: r.customerName, // manager sees the full name
-//       orderId: String(r.orderId?._id ?? ""),
-//       orderNumber: r.orderId?.orderNumber,
-//     })),
-//     total,
-//     page,
-//     pages: Math.max(1, Math.ceil(total / limit)),
-//     summary,
-//     unanswered,
-//   });
-// };
+  const filter = { restaurantId, ...(rating && { rating }) };
+  const [reviews, total, summary, unanswered] = await Promise.all([
+    Review.find(filter)
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .populate<{ orderId: { _id: unknown; orderNumber: string } }>("orderId", "orderNumber")
+      .lean(),
+    Review.countDocuments(filter),
+    ratingSummary(String(restaurantId)),
+    Review.countDocuments({ restaurantId, "reply.text": { $exists: false } }),
+  ]);
+
+  res.json({
+    reviews: reviews.map((r) => ({
+      ...toPublicReview(r as never),
+      customerName: r.customerName, // manager sees the full name
+      orderId: String(r.orderId?._id ?? ""),
+      orderNumber: r.orderId?.orderNumber,
+    })),
+    total,
+    page,
+    pages: Math.max(1, Math.ceil(total / limit)),
+    summary,
+    unanswered,
+  });
+};
 
 // /** PATCH /api/manager/reviews/:id/reply   { text } — answer (or edit the answer) */
 // export const replyToReview = async (req: Request, res: Response) => {
