@@ -11,6 +11,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import NotificationBell from "../../../components/customer/NotificationBell";
 import { cardShadow, colors } from "../../../constants/theme";
 import { useAuth } from "../../../context/AuthContext";
 import { getErrorMessage } from "../../../lib/api";
@@ -99,15 +100,18 @@ export default function ManagerHome() {
                   Manager
                 </Text>
               </View>
-              <Pressable
-                onPress={signOut}
-                hitSlop={8}
-                className="flex-row items-center">
-                <Ionicons name="log-out" size={20} color={colors.white} />
-                <Text className="ml-1 text-sm font-semibold text-white">
-                  Log out
-                </Text>
-              </Pressable>
+              <View className="flex-row items-center gap-4">
+                <NotificationBell href="/manager/notifications" />
+                <Pressable
+                  onPress={signOut}
+                  hitSlop={8}
+                  className="flex-row items-center">
+                  <Ionicons name="log-out" size={20} color={colors.white} />
+                  <Text className="ml-1 text-sm font-semibold text-white">
+                    Log out
+                  </Text>
+                </Pressable>
+              </View>
             </View>
 
             <Text className="mt-6 text-sm" style={{ color: colors.brandSoft }}>

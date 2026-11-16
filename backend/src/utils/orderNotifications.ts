@@ -25,6 +25,31 @@ const managerIdsOf = async (order: OrderDoc) =>
     }).select("_id")
   ).map((u) => u._id);
 
+/** Save an entry in these users' Notifications screen (never throws) */
+const saveToInbox = async (
+  userIds: unknown[],
+  order: OrderDoc,
+  text: { title: string; body: string },
+  orderStatus: OrderStatus,
+) => {
+  try {
+    if (userIds.length === 0) return;
+    await Notification.insertMany(
+      userIds.map((userId) => ({
+        userId,
+        type: "order",
+        title: text.title,
+        body: text.body,
+        orderId: order._id,
+        orderStatus,
+        restaurantName: order.restaurantName,
+      })),
+    );
+  } catch (error) {
+    console.error("❌ Saving notification failed:", (error as Error).message);
+  }
+};
+
 // ---------- Manager ----------
 
 /** 🛎️ New order → the restaurant's manager */
@@ -34,18 +59,30 @@ export const notifyNewOrder = async (order: OrderDoc) => {
     ? `Dine-in · ${order.dineIn.partySize} people`
     : TYPE_LABEL[order.type];
 
-  await sendPushToUsers(await managerIdsOf(order), {
+  const managerIds = await managerIdsOf(order);
+  const text = {
     title: `🛎️ New order #${order.orderNumber}`,
     body: `${money(order.total)} · ${type} · ${items} item${items === 1 ? "" : "s"} · ${order.customerName}`,
+  };
+
+  await saveToInbox(managerIds, order, text, "pending");
+  await sendPushToUsers(managerIds, {
+    ...text,
     data: { type: "manager-order", orderId: String(order._id) },
   });
 };
 
 /** ❌ Customer cancelled → the restaurant's manager */
 export const notifyOrderCancelled = async (order: OrderDoc) => {
-  await sendPushToUsers(await managerIdsOf(order), {
+  const managerIds = await managerIdsOf(order);
+  const text = {
     title: `❌ Order #${order.orderNumber} cancelled`,
     body: `${order.customerName} cancelled the order${order.cancelReason ? `: ${order.cancelReason}` : "."}`,
+  };
+
+  await saveToInbox(managerIds, order, text, "cancelled");
+  await sendPushToUsers(managerIds, {
+    ...text,
     data: { type: "manager-order", orderId: String(order._id) },
   });
 };

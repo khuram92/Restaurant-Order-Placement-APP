@@ -7,7 +7,11 @@ import { colors } from "../../constants/theme";
 import { getUnreadCount } from "../../services/notificationApi";
 
 /** 🔔 with a red unread count — opens the Notifications screen */
-export default function NotificationBell() {
+export default function NotificationBell({
+  href = "/notifications",
+}: {
+  href?: "/notifications" | "/manager/notifications";
+}) {
   const [unread, setUnread] = useState(0);
 
   const refresh = useCallback(() => {
@@ -33,7 +37,7 @@ export default function NotificationBell() {
 
   return (
     <Pressable
-      onPress={() => router.push("/notifications")}
+      onPress={() => router.push(href)}
       hitSlop={8}
       className="h-12 w-12 items-center justify-center rounded-full"
       style={{ backgroundColor: "rgba(0,0,0,0.18)" }}>
