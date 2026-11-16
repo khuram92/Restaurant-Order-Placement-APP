@@ -15,6 +15,7 @@ import {
   createOrderSchema,
   listMyOrdersSchema,
 } from "../validators/order.validators.js";
+import { Review } from "../models/Review.js";
 
 import {
   notifyNewOrder,
@@ -177,8 +178,12 @@ export const listMyOrders = async (req: Request, res: Response) => {
     Order.countDocuments(filter),
   ]);
 
+  const reviewed = new Set(
+    (await Review.find({ orderId: { $in: orders.map((o) => o._id) } }).distinct("orderId")).map(String),
+  );
+
   res.json({
-    orders,
+    orders: orders.map((o) => ({ ...o.toJSON(), reviewed: reviewed.has(String(o._id)) })),
     total,
     page,
     pages: Math.max(1, Math.ceil(total / limit)),
