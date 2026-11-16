@@ -2,6 +2,8 @@ import type { Request, Response } from "express";
 import mongoose from "mongoose";
 import { z } from "zod";
 import { Notification } from "../models/Notification.js";
+import { Order } from "../models/Order.js";
+import { Restaurant } from "../models/Restaurant.js";
 
 const listSchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
@@ -15,14 +17,36 @@ export const listMyNotifications = async (req: Request, res: Response) => {
   const { page, limit } = parsed.data;
   const userId = req.user!._id;
 
-  const [notifications, total, unread] = await Promise.all([
+  const [found, total, unread] = await Promise.all([
     Notification.find({ userId })
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
-      .limit(limit),
+      .limit(limit)
+      .lean(),
     Notification.countDocuments({ userId }),
     Notification.countDocuments({ userId, readAt: { $exists: false } }),
   ]);
+
+  // Add the restaurant's name + current logo (also fills in older notifications saved without them)
+  const orderIds = [...new Set(found.map((n) => n.orderId).filter(Boolean).map(String))];
+  const orders = await Order.find({ _id: { $in: orderIds } }).select("restaurantId restaurantName").lean();
+  const restaurants = await Restaurant.find({ _id: { $in: orders.map((o) => o.restaurantId) } })
+    .select("logo coverImage")
+    .lean();
+
+  const imageOf = new Map(restaurants.map((r) => [String(r._id), r.logo || r.coverImage]));
+  const orderInfo = new Map(
+    orders.map((o) => [String(o._id), { name: o.restaurantName, image: imageOf.get(String(o.restaurantId)) }]),
+  );
+
+  const notifications = found.map((n) => {
+    const info = n.orderId ? orderInfo.get(String(n.orderId)) : undefined;
+    return {
+      ...n,
+      restaurantName: info?.name ?? n.restaurantName,
+      restaurantImage: info?.image ?? n.restaurantImage,
+    };
+  });
 
   res.json({ notifications, total, page, pages: Math.max(1, Math.ceil(total / limit)), unread });
 };

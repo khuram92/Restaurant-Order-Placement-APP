@@ -15,6 +15,7 @@ import {
 import type { AppNotification } from "../../types/notification";
 import type { OrderStatus } from "../../types/order";
 import { ORDER_STATUS_INFO, timeAgo } from "../../utils/orderFormat";
+import { Image } from "expo-image";
 
 // ---------- Helpers ----------
 const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
@@ -45,16 +46,17 @@ function NotificationRow({ item, onPress }: { item: AppNotification; onPress: ()
       className="mb-2.5 flex-row rounded-3xl p-4 active:opacity-80"
       style={[cardShadow, { backgroundColor: unread ? colors.white : colors.mistLight }]}>
       {/* Status icon */}
-      <View
-        className="h-12 w-12 items-center justify-center rounded-2xl"
-        style={{ backgroundColor: stop ? "#fde8e6" : done ? colors.brandSoft : unread ? colors.brand : colors.brandSoft }}>
-        <Ionicons
-          name={iconFor(item.orderStatus)}
-          size={22}
-          color={stop ? colors.danger : unread && !done ? colors.white : colors.brand}
-        />
-      </View>
-
+     
+        <View
+          className="h-14 w-14 items-center justify-center overflow-hidden rounded-2xl"
+          style={{ backgroundColor: colors.brandSoft }}>
+          {item.restaurantImage ? (
+            <Image source={{ uri: item.restaurantImage }} style={{ width: "100%", height: "100%" }} contentFit="cover" />
+          ) : (
+            <Text className="text-xl font-extrabold text-brand">{item.restaurantName?.[0]?.toUpperCase() ?? "•"}</Text>
+          )}
+        </View>
+        
       
       <View className="ml-3 flex-1">
         <View className="flex-row items-start">

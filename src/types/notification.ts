@@ -5,6 +5,8 @@ export interface AppNotification {
   body: string;
   orderId?: string;
   orderStatus?: string;
+  restaurantName?: string;
+  restaurantImage?: string;
   readAt?: string;
   createdAt: string;
 }
