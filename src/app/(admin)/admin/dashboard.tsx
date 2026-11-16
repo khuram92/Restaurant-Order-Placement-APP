@@ -7,7 +7,6 @@ import {
   RANGE_LABEL,
   RangeTabs,
   RankedList,
-  SeriesChart,
   StatTile,
   TypeSplit,
   shortMoney,
@@ -77,7 +76,7 @@ export default function AdminStatsDashboard() {
           />
         }>
         {/* Olive band with the range switch */}
-        <View className="rounded-b-[28px] px-4 pb-8 pt-2" style={{ backgroundColor: colors.brand }}>
+        <View className=" px-4 pb-8 pt-2" style={{ backgroundColor: colors.brand }}>
           <RangeTabs value={range} onChange={changeRange} />
         </View>
 
@@ -95,19 +94,8 @@ export default function AdminStatsDashboard() {
               </Pressable>
             </View>
           ) : stats && s && p ? (
-            <View style={{ opacity: loading ? 0.5 : 1 }}>
-              {/* Live now (all restaurants) */}
-              <View className="mb-4 flex-row items-center rounded-3xl bg-white p-4" style={cardShadow}>
-                <View className="h-11 w-11 items-center justify-center rounded-2xl" style={{ backgroundColor: colors.danger }}>
-                  <Ionicons name="flame" size={20} color={colors.white} />
-                </View>
-                <View className="ml-3 flex-1">
-                  <Text className="text-xs font-bold uppercase tracking-wide text-brand-light">Live now · all restaurants</Text>
-                  <Text className="text-base font-bold text-brand-dark">
-                    {stats.live.pending} waiting · {stats.live.inProgress} in progress
-                  </Text>
-                </View>
-              </View>
+            <View className="mt-8" style={{ opacity: loading ? 0.5 : 1 }}>
+              
 
               {/* Money + orders */}
               <View className="mb-3 flex-row gap-3">
@@ -143,7 +131,7 @@ export default function AdminStatsDashboard() {
               </View>
 
               <OutcomeRow summary={s} />
-              {/* <SeriesChart series={stats.series} range={range} /> */}
+              
 
               <RankedList
                 title="Top restaurants"
