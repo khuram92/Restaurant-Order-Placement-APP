@@ -6,7 +6,7 @@ import adminRoutes from "./routes/admin.routes.js";
 import restaurantRoutes from "./routes/restaurant.routes.js";
 import managerRoutes from "./routes/manager.routes.js";
 import orderRoutes from "./routes/order.routes.js";
-
+import notificationRoutes from "./routes/notification.routes.js";
 
 
 
@@ -32,6 +32,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/restaurants", restaurantRoutes);
 app.use("/api/manager", managerRoutes);
 app.use("/api/orders", orderRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 // 404 handler
 app.use((req: Request, res: Response) => {

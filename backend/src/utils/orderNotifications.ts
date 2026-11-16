@@ -2,6 +2,7 @@ import type { HydratedDocument } from "mongoose";
 import type { IOrder, OrderStatus } from "../models/Order.js";
 import { User } from "../models/User.js";
 import { sendPushToUsers } from "./push.js";
+import { Notification } from "../models/Notification.js";
 
 type OrderDoc = HydratedDocument<IOrder>;
 
@@ -57,10 +58,25 @@ const CUSTOMER_TEXT: Partial<Record<OrderStatus, (o: OrderDoc) => { title: strin
   completed: (o) => ({ title: "🎉 Order completed", body: `Thanks for ordering from ${o.restaurantName}!` }),
 };
 
-/** Status changed by the restaurant → the customer */
+/** Status changed by the restaurant → the customer (saved in their inbox + push) */
 export const notifyCustomerOfStatus = async (order: OrderDoc) => {
   const text = CUSTOMER_TEXT[order.status]?.(order);
   if (!text) return;
+
+  // Inbox entry (the Notifications screen) — a failure here must not stop the push
+  try {
+    await Notification.create({
+      userId: order.customerId,
+      type: "order",
+      title: text.title,
+      body: text.body,
+      orderId: order._id,
+      orderStatus: order.status,
+    });
+  } catch (error) {
+    console.error("❌ Saving notification failed:", (error as Error).message);
+  }
+
   await sendPushToUsers([order.customerId], {
     ...text,
     data: { type: "customer-order", orderId: String(order._id) },
