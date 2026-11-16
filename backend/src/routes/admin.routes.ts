@@ -23,6 +23,7 @@ import {
 import { adminMenuAccess } from "../middleware/menuAccess.middleware.js";
 import menuRoutes from "./menu.routes.js"
 import { getAdminStats } from "../controllers/adminStats.controller.js";
+import { getAnyOrder, listAllOrders, orderFilterRestaurants } from "../controllers/adminOrder.controller.js";
 
 const router = Router();
 
@@ -30,6 +31,9 @@ const router = Router();
 router.use(protect, authorize("superadmin"));
 // Dashboard numbers
 router.get("/stats", getAdminStats);
+router.get("/orders", listAllOrders);
+router.get("/orders/restaurants", orderFilterRestaurants);
+router.get("/orders/:id", getAnyOrder);
 
 // Restaurants
 router.post("/restaurants", createRestaurant);
