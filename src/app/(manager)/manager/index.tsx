@@ -138,7 +138,6 @@ export default function ManagerHome() {
             colors={[colors.brand]}
           />
         }>
-     
         <View className="mb-5 rounded-3xl bg-white p-4" style={cardShadow}>
           {loading ? (
             <ActivityIndicator color={colors.brand} className="py-6" />
@@ -251,11 +250,17 @@ export default function ManagerHome() {
           subtitle="Hours, services, details and Close now"
           onPress={() => router.push("/manager/restaurant")}
         />
-         <MenuCard
+        <MenuCard
           icon="stats-chart"
           title="Dashboard"
           subtitle="Revenue, orders and best sellers"
           onPress={() => router.push("/manager/dashboard")}
+        />
+        <MenuCard
+          icon="star"
+          title="Reviews"
+          subtitle="Ratings and replies to customers"
+          onPress={() => router.push("/manager/reviews")}
         />
       </ScrollView>
     </View>
