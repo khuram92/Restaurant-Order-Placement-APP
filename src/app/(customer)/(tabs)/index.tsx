@@ -255,7 +255,16 @@ export default function CustomerHome() {
                   {user?.firstName ?? "there"}
                 </Text>
               </View>
-              <NotificationBell />
+              <View className="flex-row items-center gap-2">
+                <Pressable
+                  onPress={() => router.push("/my-reviews")}
+                  hitSlop={8}
+                  className="h-12 w-12 items-center justify-center rounded-full"
+                  style={{ backgroundColor: "rgba(0,0,0,0.18)" }}>
+                  <Ionicons name="heart" size={22} color={colors.white} />
+                </Pressable>
+                <NotificationBell />
+              </View>
             </View>
             <Text className="mt-5 text-2xl font-extrabold text-white">
               What are you craving?
