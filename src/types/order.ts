@@ -87,3 +87,30 @@ export interface ManagerOrderListResponse extends OrderListResponse {
   counts: { new: number; active: number };
   seats: { capacity: number; inUse: number };
 }
+
+
+/** Super admin: orders of every restaurant */
+export type AdminOrderTab = "all" | "active" | "past";
+export type AdminOrderRange = "today" | "7d" | "30d" | "all";
+
+export interface AdminOrderListResponse extends OrderListResponse {
+  counts: { all: number; active: number; past: number };
+}
+
+export interface AdminOrderRestaurant {
+  _id: string;
+  name: string;
+  logo?: string;
+  isActive?: boolean;
+}
+
+export interface AdminOrderDetail {
+  order: Order;
+  restaurant: {
+    _id: string;
+    name: string;
+    logo?: string;
+    phone?: string;
+    address?: { street?: string; area?: string; city?: string };
+  } | null;
+}
