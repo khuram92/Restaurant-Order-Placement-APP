@@ -58,38 +58,38 @@ export const createReview = async (req: Request, res: Response) => {
   res.status(201).json({ message: "Thanks for your review!", review });
 };
 
-// /** GET /api/orders/:id/review — my review of this order (or null) */
-// export const getMyOrderReview = async (req: Request, res: Response) => {
-//   const id = String(req.params.id);
-//   if (!mongoose.isValidObjectId(id)) return res.status(400).json({ message: "Invalid order id" });
-//   const review = await Review.findOne({ orderId: id, customerId: req.user!._id });
-//   res.json({ review });
-// };
+/** GET /api/orders/:id/review — my review of this order (or null) */
+export const getMyOrderReview = async (req: Request, res: Response) => {
+  const id = String(req.params.id);
+  if (!mongoose.isValidObjectId(id)) return res.status(400).json({ message: "Invalid order id" });
+  const review = await Review.findOne({ orderId: id, customerId: req.user!._id });
+  res.json({ review });
+};
 
-// /** GET /api/restaurants/:id/reviews?page=&rating= — what customers see on the restaurant page */
-// export const listRestaurantReviews = async (req: Request, res: Response) => {
-//   const id = String(req.params.id);
-//   if (!mongoose.isValidObjectId(id)) return res.status(400).json({ message: "Invalid restaurant id" });
+/** GET /api/restaurants/:id/reviews?page=&rating= — what customers see on the restaurant page */
+export const listRestaurantReviews = async (req: Request, res: Response) => {
+  const id = String(req.params.id);
+  if (!mongoose.isValidObjectId(id)) return res.status(400).json({ message: "Invalid restaurant id" });
 
-//   const parsed = listSchema.safeParse(req.query);
-//   if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
-//   const { page, limit, rating } = parsed.data;
+  const parsed = listSchema.safeParse(req.query);
+  if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
+  const { page, limit, rating } = parsed.data;
 
-//   const filter = { restaurantId: id, ...(rating && { rating }) };
-//   const [reviews, total, summary] = await Promise.all([
-//     Review.find(filter).sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit).lean(),
-//     Review.countDocuments(filter),
-//     ratingSummary(id),
-//   ]);
+  const filter = { restaurantId: id, ...(rating && { rating }) };
+  const [reviews, total, summary] = await Promise.all([
+    Review.find(filter).sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit).lean(),
+    Review.countDocuments(filter),
+    ratingSummary(id),
+  ]);
 
-//   res.json({
-//     reviews: reviews.map(toPublicReview),
-//     total,
-//     page,
-//     pages: Math.max(1, Math.ceil(total / limit)),
-//     summary,
-//   });
-// };
+  res.json({
+    reviews: reviews.map(toPublicReview),
+    total,
+    page,
+    pages: Math.max(1, Math.ceil(total / limit)),
+    summary,
+  });
+};
 
 // // ======================= Manager =======================
 
