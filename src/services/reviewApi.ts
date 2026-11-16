@@ -1,5 +1,5 @@
 import { api } from "../lib/api";
-import type { NewReviewInput, Review, ReviewListResponse } from "../types/review";
+import type { MyReviewListResponse, NewReviewInput, Review, ReviewListResponse  } from "../types/review";
 
 /** Customer: rate a completed order (once) */
 export const createReview = async (orderId: string, input: NewReviewInput) => {
@@ -22,5 +22,11 @@ export const listRestaurantReviews = async (restaurantId: string, page = 1, rati
   const { data } = await api.get<ReviewListResponse>(`/restaurants/${restaurantId}/reviews`, {
     params: { page, ...(rating && { rating }) },
   });
+  return data;
+};
+
+/** Customer: every review I've written */
+export const listMyReviews = async (page = 1) => {
+  const { data } = await api.get<MyReviewListResponse>("/orders/reviews/mine", { params: { page } });
   return data;
 };
