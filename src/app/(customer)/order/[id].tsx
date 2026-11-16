@@ -543,10 +543,7 @@ export default function OrderScreen() {
           </View>
          
           {o.status === "completed" && (
-            <OrderReviewCard
-              orderId={o._id}
-              restaurantName={o.restaurantName}
-            />
+            <OrderReviewCard orderId={o._id} restaurantName={o.restaurantName} orderType={o.type} />
           )}
 
           <View
