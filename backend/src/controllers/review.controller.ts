@@ -25,38 +25,38 @@ const replySchema = z.object({
 
 
 
-// /** POST /api/orders/:id/review   { rating, comment?, tags? } — once, after the order is completed */
-// export const createReview = async (req: Request, res: Response) => {
-//   const id = String(req.params.id);
-//   if (!mongoose.isValidObjectId(id)) return res.status(400).json({ message: "Invalid order id" });
+/** POST /api/orders/:id/review   { rating, comment?, tags? } — once, after the order is completed */
+export const createReview = async (req: Request, res: Response) => {
+  const id = String(req.params.id);
+  if (!mongoose.isValidObjectId(id)) return res.status(400).json({ message: "Invalid order id" });
 
-//   const parsed = createReviewSchema.safeParse(req.body ?? {});
-//   if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
+  const parsed = createReviewSchema.safeParse(req.body ?? {});
+  if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
 
-//   const order = await Order.findOne({ _id: id, customerId: req.user!._id });
-//   if (!order) return res.status(404).json({ message: "Order not found" });
-//   if (order.status !== "completed") {
-//     return res.status(409).json({ message: "You can rate an order once it's completed" });
-//   }
-//   if (await Review.exists({ orderId: order._id })) {
-//     return res.status(409).json({ message: "You've already rated this order" });
-//   }
+  const order = await Order.findOne({ _id: id, customerId: req.user!._id });
+  if (!order) return res.status(404).json({ message: "Order not found" });
+  if (order.status !== "completed") {
+    return res.status(409).json({ message: "You can rate an order once it's completed" });
+  }
+  if (await Review.exists({ orderId: order._id })) {
+    return res.status(409).json({ message: "You've already rated this order" });
+  }
 
-//   const { rating, comment, tags } = parsed.data;
-//   const review = await Review.create({
-//     orderId: order._id,
-//     restaurantId: order.restaurantId,
-//     customerId: req.user!._id,
-//     customerName: order.customerName,
-//     orderType: order.type,
-//     rating,
-//     ...(comment && { comment }),
-//     tags: [...new Set(tags)],
-//   });
+  const { rating, comment, tags } = parsed.data;
+  const review = await Review.create({
+    orderId: order._id,
+    restaurantId: order.restaurantId,
+    customerId: req.user!._id,
+    customerName: order.customerName,
+    orderType: order.type,
+    rating,
+    ...(comment && { comment }),
+    tags: [...new Set(tags)],
+  });
 
-//   await refreshRestaurantRating(order.restaurantId);
-//   res.status(201).json({ message: "Thanks for your review!", review });
-// };
+  await refreshRestaurantRating(order.restaurantId);
+  res.status(201).json({ message: "Thanks for your review!", review });
+};
 
 // /** GET /api/orders/:id/review — my review of this order (or null) */
 // export const getMyOrderReview = async (req: Request, res: Response) => {
