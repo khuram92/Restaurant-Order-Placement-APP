@@ -27,6 +27,8 @@ export interface Restaurant {
   seatingCapacity: number;
   isActive: boolean;
   isTemporarilyClosed?: boolean;
+  ratingAvg?: number;
+  ratingCount?: number;
   createdAt: string;
   updatedAt: string;
 }

@@ -49,7 +49,13 @@ export interface Order {
   total: number;
   customerName: string;
   customerPhone?: string;
-  delivery?: { street: string; area?: string; city: string; phone: string; instructions?: string };
+  delivery?: {
+    street: string;
+    area?: string;
+    city: string;
+    phone: string;
+    instructions?: string;
+  };
   dineIn?: { partySize: number; seatsReserved: boolean };
   note?: string;
   paymentMethod: "cash";
@@ -58,6 +64,7 @@ export interface Order {
   statusHistory: { status: OrderStatus; at: string; by?: string }[];
   rejectReason?: string;
   cancelReason?: string;
+  reviewed?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -73,12 +80,23 @@ export interface OrderListResponse {
 export interface PlaceOrderInput {
   restaurantId: string;
   type: OrderType;
-  items: { itemId: string; sizeId?: string; addOnOptionIds: string[]; quantity: number; note?: string }[];
+  items: {
+    itemId: string;
+    sizeId?: string;
+    addOnOptionIds: string[];
+    quantity: number;
+    note?: string;
+  }[];
   note?: string;
-  delivery?: { street: string; area?: string; city: string; phone: string; instructions?: string };
+  delivery?: {
+    street: string;
+    area?: string;
+    city: string;
+    phone: string;
+    instructions?: string;
+  };
   dineIn?: { partySize: number };
 }
-
 
 /** Manager order board */
 export type ManagerOrderTab = "new" | "active" | "past";
@@ -87,7 +105,6 @@ export interface ManagerOrderListResponse extends OrderListResponse {
   counts: { new: number; active: number };
   seats: { capacity: number; inUse: number };
 }
-
 
 /** Super admin: orders of every restaurant */
 export type AdminOrderTab = "all" | "active" | "past";
