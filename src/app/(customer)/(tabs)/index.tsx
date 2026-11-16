@@ -23,6 +23,7 @@ import { useAuth } from "../../../context/AuthContext";
 import { getErrorMessage } from "../../../lib/api";
 import { browseRestaurants } from "../../../services/restaurantApi";
 import type { CustomerRestaurant, ServiceKey } from "../../../types/restaurant";
+import NotificationBell from "../../../components/customer/NotificationBell";
 
 type IconName = ComponentProps<typeof Ionicons>["name"];
 
@@ -250,8 +251,8 @@ export default function CustomerHome() {
                   {user?.firstName ?? "there"}
                 </Text>
               </View>
+              <NotificationBell />
             </View>
-
             <Text className="mt-5 text-2xl font-extrabold text-white">
               What are you craving?
             </Text>
