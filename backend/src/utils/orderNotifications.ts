@@ -93,9 +93,9 @@ export const notifyCustomerOfStatus = async (order: OrderDoc) => {
   // Inbox entry (the Notifications screen) — a failure here must not stop the push
   try {
     const restaurant = await Restaurant.findById(order.restaurantId).select(
-      "logo coverImage",
+      "logo",
     );
-    const restaurantImage = restaurant?.logo || restaurant?.coverImage;
+    const restaurantImage = restaurant?.logo;
     await Notification.create({
       userId: order.customerId,
       restaurantName: order.restaurantName,

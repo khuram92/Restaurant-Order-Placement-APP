@@ -13,7 +13,8 @@ const listSchema = z.object({
 /** GET /api/notifications?page= — newest first, + unread count */
 export const listMyNotifications = async (req: Request, res: Response) => {
   const parsed = listSchema.safeParse(req.query);
-  if (!parsed.success) return res.status(400).json({ message: parsed.error.issues[0]?.message });
+  if (!parsed.success)
+    return res.status(400).json({ message: parsed.error.issues[0]?.message });
   const { page, limit } = parsed.data;
   const userId = req.user!._id;
 
@@ -28,15 +29,29 @@ export const listMyNotifications = async (req: Request, res: Response) => {
   ]);
 
   // Add the restaurant's name + current logo (also fills in older notifications saved without them)
-  const orderIds = [...new Set(found.map((n) => n.orderId).filter(Boolean).map(String))];
-  const orders = await Order.find({ _id: { $in: orderIds } }).select("restaurantId restaurantName").lean();
-  const restaurants = await Restaurant.find({ _id: { $in: orders.map((o) => o.restaurantId) } })
-    .select("logo coverImage")
+  const orderIds = [
+    ...new Set(
+      found
+        .map((n) => n.orderId)
+        .filter(Boolean)
+        .map(String),
+    ),
+  ];
+  const orders = await Order.find({ _id: { $in: orderIds } })
+    .select("restaurantId restaurantName")
+    .lean();
+  const restaurants = await Restaurant.find({
+    _id: { $in: orders.map((o) => o.restaurantId) },
+  })
+    .select("logo")
     .lean();
 
-  const imageOf = new Map(restaurants.map((r) => [String(r._id), r.logo || r.coverImage]));
+  const imageOf = new Map(restaurants.map((r) => [String(r._id), r.logo]));
   const orderInfo = new Map(
-    orders.map((o) => [String(o._id), { name: o.restaurantName, image: imageOf.get(String(o.restaurantId)) }]),
+    orders.map((o) => [
+      String(o._id),
+      { name: o.restaurantName, image: imageOf.get(String(o.restaurantId)) },
+    ]),
   );
 
   const notifications = found.map((n) => {
@@ -48,26 +63,37 @@ export const listMyNotifications = async (req: Request, res: Response) => {
     };
   });
 
-  res.json({ notifications, total, page, pages: Math.max(1, Math.ceil(total / limit)), unread });
+  res.json({
+    notifications,
+    total,
+    page,
+    pages: Math.max(1, Math.ceil(total / limit)),
+    unread,
+  });
 };
 
 /** GET /api/notifications/unread-count — for the bell badge */
 export const unreadCount = async (req: Request, res: Response) => {
-  const unread = await Notification.countDocuments({ userId: req.user!._id, readAt: { $exists: false } });
+  const unread = await Notification.countDocuments({
+    userId: req.user!._id,
+    readAt: { $exists: false },
+  });
   res.json({ unread });
 };
 
 /** PATCH /api/notifications/:id/read */
 export const markRead = async (req: Request, res: Response) => {
   const id = String(req.params.id);
-  if (!mongoose.isValidObjectId(id)) return res.status(400).json({ message: "Invalid notification id" });
+  if (!mongoose.isValidObjectId(id))
+    return res.status(400).json({ message: "Invalid notification id" });
 
   const notification = await Notification.findOneAndUpdate(
     { _id: id, userId: req.user!._id },
     { $set: { readAt: new Date() } },
     { new: true },
   );
-  if (!notification) return res.status(404).json({ message: "Notification not found" });
+  if (!notification)
+    return res.status(404).json({ message: "Notification not found" });
   res.json({ notification });
 };
 
