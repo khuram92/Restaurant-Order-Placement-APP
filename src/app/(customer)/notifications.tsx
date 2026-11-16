@@ -33,7 +33,7 @@ const isStop = (status?: string) => status === "rejected" || status === "cancell
 const iconFor = (status?: string) =>
   status && status in ORDER_STATUS_INFO ? ORDER_STATUS_INFO[status as OrderStatus].icon : "notifications";
 
-// ---------- One notification ----------
+
 function NotificationRow({ item, onPress }: { item: AppNotification; onPress: () => void }) {
   const unread = !item.readAt;
   const stop = isStop(item.orderStatus);
@@ -55,7 +55,7 @@ function NotificationRow({ item, onPress }: { item: AppNotification; onPress: ()
         />
       </View>
 
-      {/* Text */}
+      
       <View className="ml-3 flex-1">
         <View className="flex-row items-start">
           <Text
@@ -77,7 +77,7 @@ function NotificationRow({ item, onPress }: { item: AppNotification; onPress: ()
         )}
       </View>
 
-      {/* Unread dot */}
+     
       {unread && <View className="ml-2 mt-1.5 h-2.5 w-2.5 rounded-full" style={{ backgroundColor: colors.danger }} />}
     </Pressable>
   );
@@ -190,10 +190,10 @@ export default function NotificationsScreen() {
 
   return (
     <View className="flex-1 bg-mist">
-      {/* Header */}
+    
       <View className=" bg-brand">
         <SafeAreaView edges={["top"]}>
-          <View className="flex-row items-center px-4 pb-5 pt-2">
+          <View className="flex-row items-center px-4 pb-5 pt-2 gap-2">
             <Pressable
               onPress={() => router.back()}
               hitSlop={8}
@@ -203,7 +203,7 @@ export default function NotificationsScreen() {
             </Pressable>
             <View className="ml-3 flex-1">
               <Text className="text-2xl font-extrabold text-white">Notifications</Text>
-              <Text className="text-xs text-brand-soft">
+              <Text className="text-sm text-brand-soft">
                 {unread > 0 ? `${unread} unread` : items.length > 0 ? "You're all caught up" : "Order updates show here"}
               </Text>
             </View>

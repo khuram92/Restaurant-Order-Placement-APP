@@ -8,6 +8,9 @@ type OrderDoc = HydratedDocument<IOrder>;
 
 const money = (n: number) => `Rs ${Math.round(n).toLocaleString("en-PK")}`;
 
+
+
+
 const TYPE_LABEL = { delivery: "Delivery", takeaway: "Takeaway", dineIn: "Dine-in" } as const;
 
 /** The active manager(s) of the order's restaurant */
@@ -60,6 +63,7 @@ const CUSTOMER_TEXT: Partial<Record<OrderStatus, (o: OrderDoc) => { title: strin
 
 /** Status changed by the restaurant → the customer (saved in their inbox + push) */
 export const notifyCustomerOfStatus = async (order: OrderDoc) => {
+  console.log("🔔 notifyCustomerOfStatus", order.orderNumber, order.status, "customer:", String(order.customerId));
   const text = CUSTOMER_TEXT[order.status]?.(order);
   if (!text) return;
 
