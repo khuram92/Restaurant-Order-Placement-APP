@@ -115,6 +115,12 @@ export default function AdminDashboard() {
           subtitle="Add managers and assign them to restaurants"
           onPress={() => router.push("/admin/managers")}
         />
+        <MenuCard
+          icon="stats-chart"
+          title="Dashboard"
+          subtitle="Revenue, orders and top restaurants"
+          onPress={() => router.push("/admin/dashboard")}
+        />
       </View>
     </View>
   );
