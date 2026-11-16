@@ -714,13 +714,13 @@ export default function CustomerRestaurantScreen() {
                   })
                 }
                 hitSlop={6}
-                className="flex-row items-center rounded-full border"
-                style={{ borderColor: colors.mistDark }}>
+                className="flex-row items-center rounded-full  bg-brand-light"
+                >
                 <RatingBadge avg={r.ratingAvg} count={r.ratingCount} size="md" />
                 <Ionicons
                   name="chevron-forward"
                   size={13}
-                  color={colors.brandLight}
+                  color="white"
                   style={{ marginRight: 6, marginLeft: -4 }}
                 />
               </Pressable>

@@ -15,17 +15,17 @@ export default function RatingBadge({
   const text = size === "md" ? "text-sm" : "text-xs";
   if (!count) {
     return (
-      <View className="flex-row items-center rounded-full bg-white px-2.5 py-1">
+      <View className="flex-row items-center rounded-full bg-brand-light px-2.5 py-1">
         <Ionicons name="sparkles" size={size === "md" ? 13 : 11} color={STAR_GOLD} />
-        <Text className={`ml-1 font-bold text-brand-dark ${text}`}>New</Text>
+        <Text className={`ml-1 font-bold text-white ${text}`}>New</Text>
       </View>
     );
   }
   return (
-    <View className="flex-row items-center rounded-full bg-white px-2.5 py-1">
+    <View className="flex-row items-center rounded-full bg-brand-light px-2.5 py-1">
       <Ionicons name="star" size={size === "md" ? 13 : 11} color={STAR_GOLD} />
-      <Text className={`ml-1 font-extrabold text-brand-dark ${text}`}>{(avg ?? 0).toFixed(1)}</Text>
-      <Text className={`ml-0.5 text-brand-light ${text}`}>({count})</Text>
+      <Text className={`ml-1 font-extrabold text-white ${text}`}>{(avg ?? 0).toFixed(1)}</Text>
+      <Text className={`ml-0.5 text-white ${text}`}>({count})</Text>
     </View>
   );
 }
