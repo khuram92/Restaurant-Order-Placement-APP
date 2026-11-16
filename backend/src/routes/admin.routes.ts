@@ -22,12 +22,14 @@ import {
 } from "../controllers/adminManager.controller.js";
 import { adminMenuAccess } from "../middleware/menuAccess.middleware.js";
 import menuRoutes from "./menu.routes.js"
-
+import { getAdminStats } from "../controllers/adminStats.controller.js";
 
 const router = Router();
 
 // Every route below: logged in + Super Admin only
 router.use(protect, authorize("superadmin"));
+// Dashboard numbers
+router.get("/stats", getAdminStats);
 
 // Restaurants
 router.post("/restaurants", createRestaurant);
