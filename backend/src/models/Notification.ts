@@ -1,7 +1,6 @@
 import { Schema, model, type Types } from "mongoose";
 
-export const NOTIFICATION_TYPES = ["order"] as const;
-
+export const NOTIFICATION_TYPES = ["order", "review"] as const;
 export interface INotification {
   userId: Types.ObjectId;
   type: (typeof NOTIFICATION_TYPES)[number];

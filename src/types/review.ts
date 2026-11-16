@@ -49,9 +49,25 @@ export interface MyReview {
   restaurantLogo?: string;
 }
 
+
+
 export interface MyReviewListResponse {
   reviews: MyReview[];
   total: number;
   page: number;
   pages: number;
 }
+
+
+/** Manager: a review of my restaurant */
+export interface ManagerReview extends Review {
+  orderId: string;
+  orderNumber?: string;
+}
+
+export interface ManagerReviewListResponse extends ReviewListResponse {
+  reviews: ManagerReview[];
+  unanswered: number;
+}
+
+export type ManagerReviewFilter = "all" | "unanswered" | 1 | 2 | 3 | 4 | 5;

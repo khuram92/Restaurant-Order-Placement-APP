@@ -6,7 +6,7 @@ import { Pressable, Text, View } from "react-native";
 import { colors } from "../../constants/theme";
 import { getUnreadCount } from "../../services/notificationApi";
 
-/** 🔔 with a red unread count — opens the Notifications screen */
+
 export default function NotificationBell({
   href = "/notifications",
 }: {

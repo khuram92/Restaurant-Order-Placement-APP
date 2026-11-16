@@ -4,6 +4,7 @@ import { z } from "zod";
 import { Order } from "../models/Order.js";
 import { REVIEW_TAGS, Review } from "../models/Review.js";
 import { ratingSummary, refreshRestaurantRating, toPublicReview } from "../utils/reviews.js";
+import { notifyReviewReply } from "../utils/orderNotifications.js";
 
 const firstIssue = (error: { issues: { message: string }[] }) => error.issues[0]?.message ?? "Invalid input";
 
@@ -12,11 +13,11 @@ const createReviewSchema = z.object({
   comment: z.string().trim().max(500, "Keep it under 500 characters").optional(),
   tags: z.array(z.enum(REVIEW_TAGS)).max(6).default([]),
 });
-
 const listSchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(50).default(20),
   rating: z.coerce.number().int().min(1).max(5).optional(), // only 5★, only 1★…
+  unanswered: z.enum(["true", "false"]).optional(), // manager: only reviews without a reply
 });
 
 const replySchema = z.object({
@@ -137,9 +138,13 @@ export const listMyRestaurantReviews = async (req: Request, res: Response) => {
 
   const parsed = listSchema.safeParse(req.query);
   if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
-  const { page, limit, rating } = parsed.data;
+   const { page, limit, rating, unanswered: onlyUnanswered } = parsed.data;
 
-  const filter = { restaurantId, ...(rating && { rating }) };
+  const filter = {
+    restaurantId,
+    ...(rating && { rating }),
+    ...(onlyUnanswered === "true" && { "reply.text": { $exists: false } }),
+  };
   const [reviews, total, summary, unanswered] = await Promise.all([
     Review.find(filter)
       .sort({ createdAt: -1 })
@@ -183,6 +188,8 @@ export const replyToReview = async (req: Request, res: Response) => {
     { $set: { reply: { text: parsed.data.text, at: new Date() } } },
     { new: true },
   );
-  if (!review) return res.status(404).json({ message: "Review not found" });
+    if (!review) return res.status(404).json({ message: "Review not found" });
+
+  void notifyReviewReply(review); 
   res.json({ message: "Reply posted", review });
 };

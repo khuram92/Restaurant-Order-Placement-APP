@@ -1,4 +1,4 @@
-import type { HydratedDocument } from "mongoose";
+import type { HydratedDocument,Types } from "mongoose";
 import { Notification } from "../models/Notification.js";
 import type { IOrder, OrderStatus } from "../models/Order.js";
 import { Restaurant } from "../models/Restaurant.js";
@@ -52,7 +52,7 @@ const saveToInbox = async (
 
 // ---------- Manager ----------
 
-/** 🛎️ New order → the restaurant's manager */
+
 export const notifyNewOrder = async (order: OrderDoc) => {
   const items = order.items.reduce((sum, i) => sum + i.quantity, 0);
   const type = order.dineIn
@@ -72,7 +72,7 @@ export const notifyNewOrder = async (order: OrderDoc) => {
   });
 };
 
-/** ❌ Customer cancelled → the restaurant's manager */
+
 export const notifyOrderCancelled = async (order: OrderDoc) => {
   const managerIds = await managerIdsOf(order);
   const text = {
@@ -152,4 +152,39 @@ export const notifyCustomerOfStatus = async (order: OrderDoc) => {
     ...text,
     data: { type: "customer-order", orderId: String(order._id) },
   });
+};
+
+// ---------- Reviews ----------
+
+/** 💬 The restaurant replied to a review → the customer */
+export const notifyReviewReply = async (review: {
+  customerId: Types.ObjectId;
+  restaurantId: Types.ObjectId;
+  orderId: Types.ObjectId;
+  reply?: { text: string } | undefined;
+}) => {
+  try {
+    const restaurant = await Restaurant.findById(review.restaurantId).select("name");
+    const name = restaurant?.name ?? "The restaurant";
+    const reply = review.reply?.text ?? "";
+    const text = {
+      title: `💬 ${name} replied to your review`,
+      body: reply.length > 120 ? `${reply.slice(0, 117)}…` : reply,
+    };
+
+    await Notification.create({
+      userId: review.customerId,
+      type: "review",
+      title: text.title,
+      body: text.body,
+      orderId: review.orderId,
+      restaurantName: name,
+    });
+    await sendPushToUsers([review.customerId], {
+      ...text,
+      data: { type: "customer-order", orderId: String(review.orderId) },
+    });
+  } catch (error) {
+    console.error("❌ Review reply notification failed:", (error as Error).message);
+  }
 };

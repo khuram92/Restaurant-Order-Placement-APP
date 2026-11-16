@@ -138,7 +138,7 @@ export default function ManagerHome() {
             colors={[colors.brand]}
           />
         }>
-        {/* My restaurant card */}
+     
         <View className="mb-5 rounded-3xl bg-white p-4" style={cardShadow}>
           {loading ? (
             <ActivityIndicator color={colors.brand} className="py-6" />
