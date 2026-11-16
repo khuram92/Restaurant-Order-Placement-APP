@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import "../../global.css";
 import { AuthProvider, useAuth } from "../context/AuthContext";
 import { CartProvider } from "../context/CartContext";
+import { usePushNotifications } from "../hooks/usePushNotifications";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -25,7 +26,10 @@ function RootNavigator() {
   const isManager = user?.role === "manager";
   const needsProfile = isCustomer && !user?.profileCompleted;
   const mustChangePassword = isManager && !!user?.mustChangePassword;
-
+  const canOpenOrders =
+    (isManager && !mustChangePassword) || (isCustomer && !needsProfile);
+  usePushNotifications(user, !isLoading && canOpenOrders);
+  
   useEffect(() => {
     if (isLoading) return;
     const group = segments[0];
