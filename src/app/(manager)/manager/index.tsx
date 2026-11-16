@@ -255,7 +255,7 @@ export default function ManagerHome() {
           icon="stats-chart"
           title="Dashboard"
           subtitle="Revenue, orders and best sellers"
-          // onPress={() => router.push("/manager/dashboard")}
+          onPress={() => router.push("/manager/dashboard")}
         />
       </ScrollView>
     </View>
