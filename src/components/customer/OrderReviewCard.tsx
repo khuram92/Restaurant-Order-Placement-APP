@@ -86,19 +86,19 @@ export default function OrderReviewCard({
     );
   }
 
-  // Not rated yet → tap a star to start
+  
   return (
     <View
       className="mb-4 rounded-3xl p-5"
-      style={[cardShadow, { backgroundColor: colors.brandLight }]}>
+      style={[cardShadow, { backgroundColor: colors.brand }]}>
       <Text className="text-center text-lg font-extrabold text-white">
         {orderType === "dineIn"
           ? "How was your experience with us?"
           : "How was your order?"}
       </Text>
       <Text
-        className="mb-3 mt-0.5 text-center text-sm"
-        style={{ color: colors.brandSoft }}>
+        className="mb-3 mt-0.5 text-center text-sm text-white"
+        >
         Rate {restaurantName}
       </Text>
       <View className="self-center rounded-2xl bg-white px-3 py-2">
