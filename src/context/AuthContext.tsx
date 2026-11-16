@@ -55,7 +55,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(newUser);
   }, []);
 
-  const signOut = useCallback(async () => {
+    const signOut = useCallback(async () => {
+    // Stop this phone getting the old user's notifications (needs the login token, so do it first)
+    const pushToken = getCurrentPushToken();
+    if (pushToken) await removePushToken(pushToken).catch(() => {});
     await removeToken();
     setUser(null);
   }, []);
