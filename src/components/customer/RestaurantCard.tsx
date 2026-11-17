@@ -21,13 +21,12 @@ export default function RestaurantCard({
   onFavoriteChange,
 }: {
   item: CustomerRestaurant;
- 
+
   onFavoriteChange?: (favorite: boolean) => void;
 }) {
   const services = SERVICES.filter((s) => item.services[s.key]);
 
   return (
-    
     <Pressable
       onPress={() =>
         router.push({ pathname: "/restaurant/[id]", params: { id: item._id } })
@@ -65,19 +64,19 @@ export default function RestaurantCard({
           </Text>
         </View>
         <View className="absolute right-3 top-3">
-                  <View className="absolute right-3 top-3">
-          <RatingBadge avg={item.ratingAvg} count={item.ratingCount} />
-        </View>
-
-        {onFavoriteChange && (
-          <View className="absolute bottom-3 right-3">
-            <FavoriteButton
-              restaurantId={item._id}
-              isFavorite={!!item.isFavorite}
-              onChange={onFavoriteChange}
-            />
+          <View className="absolute right-3 top-3">
+            <RatingBadge avg={item.ratingAvg} count={item.ratingCount} />
           </View>
-        )}
+
+          {onFavoriteChange && (
+            <View className="absolute bottom-3 right-3">
+              <FavoriteButton
+                restaurantId={item._id}
+                isFavorite={!!item.isFavorite}
+                onChange={onFavoriteChange}
+              />
+            </View>
+          )}
         </View>
       </View>
 
