@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { cardShadow, colors } from "../../../constants/theme";
+import { useReorder } from "../../../hooks/useReorder";
 import { getErrorMessage } from "../../../lib/api";
 import { listMyOrders } from "../../../services/orderApi";
 import type {
@@ -66,6 +67,7 @@ function BookingCard({ order }: { order: Order }) {
   const stopped = STOPPED.includes(order.status);
   const done = order.status === "completed";
   const running = !stopped && !done;
+  const { reorder, busyId } = useReorder();
 
   // Progress through this order type's steps
   const steps = trackerSteps(order.type);
@@ -156,7 +158,6 @@ function BookingCard({ order }: { order: Order }) {
         </Text>
       )}
 
-  
       <View
         className="mt-3 flex-row items-center border-t pt-3"
         style={{ borderColor: colors.mist }}>
@@ -172,9 +173,24 @@ function BookingCard({ order }: { order: Order }) {
         <Text className="ml-2 flex-1 text-base font-extrabold text-brand-dark">
           {money(order.total)}
         </Text>
+                {!running && (
+          <Pressable
+            onPress={() => reorder(order._id)}
+            disabled={!!busyId}
+            hitSlop={6}
+            className="mr-3 flex-row items-center rounded-full px-3 py-1.5 active:opacity-70"
+            style={{ backgroundColor: colors.brand }}>
+            {busyId ? (
+              <ActivityIndicator size="small" color={colors.white} />
+            ) : (
+              <Ionicons name="repeat" size={13} color={colors.white} />
+            )}
+            <Text className="ml-1 text-xs font-bold text-white">Order again</Text>
+          </Pressable>
+        )}
         <View className="flex-row items-center">
           <Text className="mr-0.5 text-sm font-bold text-brand">
-                        {running ? "Track" : done && !order.reviewed ? "Rate" : "Details"}
+            {running ? "Track" : done && !order.reviewed ? "Rate" : "Details"}
           </Text>
           <Ionicons
             name={done && !order.reviewed ? "star" : "chevron-forward"}

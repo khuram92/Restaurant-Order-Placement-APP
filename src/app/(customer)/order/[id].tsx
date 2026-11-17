@@ -543,12 +543,12 @@ export default function OrderScreen() {
               </Text>
             </View>
           </View>
-                    {FINISHED.includes(o.status) && (
+          {FINISHED.includes(o.status) && (
             <Pressable
               onPress={() => reorder(o._id)}
               disabled={!!busyId}
               className="mb-4 flex-row items-center justify-center rounded-2xl py-4 active:opacity-80"
-              style={[cardShadow, { backgroundColor: colors.brandDark }]}>
+              style={[cardShadow, { backgroundColor: colors.brand }]}>
               {busyId ? (
                 <ActivityIndicator color={colors.white} />
               ) : (
