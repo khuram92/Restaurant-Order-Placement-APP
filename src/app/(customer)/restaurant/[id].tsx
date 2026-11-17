@@ -1,3 +1,5 @@
+import ItemSheet from "@/components/customer/ItemSheet";
+import { CartSelection } from "@/types/cart";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
@@ -27,11 +29,14 @@ import {
   type ScrollViewInstance,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import MenuItemCard from "../../../components/customer/MenuItemCard";
-import { cardShadow, colors } from "../../../constants/theme";
-import { getErrorMessage } from "../../../lib/api";
 import CartBar from "../../../components/customer/CartBar";
+import FavoriteButton from "../../../components/customer/FavoriteButton";
+import MenuItemCard from "../../../components/customer/MenuItemCard";
+import RatingBadge from "../../../components/customer/RatingBadge";
+import { cardShadow, colors } from "../../../constants/theme";
 import { useCart } from "../../../context/CartContext";
+import { getErrorMessage } from "../../../lib/api";
+import { getQuickPosition } from "../../../lib/location";
 import {
   getCustomerMenu,
   getCustomerRestaurant,
@@ -42,11 +47,8 @@ import type {
   Day,
   ServiceKey,
 } from "../../../types/restaurant";
-import ItemSheet from "@/components/customer/ItemSheet";
-import { CartSelection } from "@/types/cart";
-import RatingBadge from "../../../components/customer/RatingBadge";
-import FavoriteButton from "../../../components/customer/FavoriteButton";
 
+import { distanceKm, formatKm } from "../../../utils/geo";
 
 type IconName = ComponentProps<typeof Ionicons>["name"];
 
@@ -479,7 +481,23 @@ export default function CustomerRestaurantScreen() {
   const tabX = useRef<Record<string, number>>({}); // x of each tab chip
   const jumping = useRef(false); // true while scrolling after a tab tap
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [here, setHere] = useState<{ lat: number; lng: number } | null>(null);
+  const [checkingArea, setCheckingArea] = useState(false);
+  const [areaUnknown, setAreaUnknown] = useState(false); // no permission / no fix yet
 
+  const checkArea = useCallback(async (ask: boolean) => {
+    setCheckingArea(true);
+    const pos = await getQuickPosition(ask);
+    setHere(pos);
+    setAreaUnknown(!pos);
+    setCheckingArea(false);
+  }, []);
+
+  // Silent check (no popup) once we know the restaurant delivers and has a location
+  const canCheckArea = !!restaurant?.services.delivery && !!restaurant.location;
+  useEffect(() => {
+    if (canCheckArea) checkArea(false);
+  }, [canCheckArea, checkArea]);
   const load = useCallback(async () => {
     setError("");
     try {
@@ -535,9 +553,9 @@ export default function CustomerRestaurantScreen() {
     if (current !== activeId) highlightTab(current);
   };
 
-    const openItem = (item: MenuItem) => setSelectedItem(item);
+  const openItem = (item: MenuItem) => setSelectedItem(item);
 
-    const addToCart = (selection: CartSelection) => {
+  const addToCart = (selection: CartSelection) => {
     if (!restaurant) return;
     setSelectedItem(null);
 
@@ -558,7 +576,11 @@ export default function CustomerRestaurantScreen() {
         `Your cart has food from ${cart.restaurant?.name}. Adding this will empty it.`,
         [
           { text: "Keep cart", style: "cancel" },
-          { text: "Start new cart", style: "destructive", onPress: () => cart.replaceWith(cartRestaurant, selection) },
+          {
+            text: "Start new cart",
+            style: "destructive",
+            onPress: () => cart.replaceWith(cartRestaurant, selection),
+          },
         ],
       );
     }
@@ -608,7 +630,15 @@ export default function CustomerRestaurantScreen() {
   const r = restaurant;
   const todayHours = r.openingHours.find((h) => h.day === todayKey());
   const services = SERVICES.filter((s) => r.services[s.key]);
-
+  const center = r.location?.coordinates; // [lng, lat]
+  const away =
+    here && center && r.services.delivery
+      ? distanceKm(here, { lat: center[1], lng: center[0] })
+      : null;
+  const outsideArea = away !== null && away > r.deliveryRadiusKm;
+  const otherWays = services
+    .filter((s) => s.key !== "delivery")
+    .map((s) => s.label);
   const statusText = r.isOpenNow
     ? todayHours && !todayHours.closed
       ? `Open · closes ${formatTime(todayHours.close)}`
@@ -693,7 +723,6 @@ export default function CustomerRestaurantScreen() {
               </View>
             </View>
 
-           
             <View className="mt-3 flex-row flex-wrap items-center gap-1.5">
               <View
                 className="flex-row items-center rounded-full px-2.5 py-1"
@@ -709,7 +738,7 @@ export default function CustomerRestaurantScreen() {
                   {statusText}
                 </Text>
               </View>
-               <Pressable
+              <Pressable
                 onPress={() =>
                   router.push({
                     pathname: "/reviews/[id]",
@@ -717,9 +746,12 @@ export default function CustomerRestaurantScreen() {
                   })
                 }
                 hitSlop={6}
-                className="flex-row items-center rounded-full  bg-brand-light"
-                >
-                <RatingBadge avg={r.ratingAvg} count={r.ratingCount} size="md" />
+                className="flex-row items-center rounded-full  bg-brand-light">
+                <RatingBadge
+                  avg={r.ratingAvg}
+                  count={r.ratingCount}
+                  size="md"
+                />
                 <Ionicons
                   name="chevron-forward"
                   size={13}
@@ -741,6 +773,7 @@ export default function CustomerRestaurantScreen() {
                   </View>
                 ))}
               </View>
+
               {/* Info button → bottom sheet */}
               <Pressable
                 onPress={() => setInfoOpen(true)}
@@ -754,6 +787,53 @@ export default function CustomerRestaurantScreen() {
                 <Text className="text-[10px] font-bold text-brand">Info</Text>
               </Pressable>
             </View>
+            {/* ---------- Delivery area ---------- */}
+            {away !== null ? (
+              <View
+                className="mt-1 flex-row items-center rounded-2xl px-3 py-2.5"
+                style={{
+                  backgroundColor: outsideArea ? "#fdecea" : colors.mistLight,
+                }}>
+                <Ionicons
+                  name={outsideArea ? "close-circle" : "checkmark-circle"}
+                  size={18}
+                  color={outsideArea ? colors.danger : colors.brand}
+                />
+                <View className="ml-2 flex-1">
+                  <Text
+                    className="text-sm font-bold"
+                    style={{
+                      color: outsideArea ? colors.danger : colors.brandDark,
+                    }}>
+                    {outsideArea
+                      ? `Doesn't deliver to your location${otherWays.length ? ` · ${otherWays.join(" / ")} only` : ""}`
+                      : "Delivers to you"}
+                  </Text>
+                  <Text className="text-xs text-brand-light">
+                    {formatKm(away)} away · delivers within {r.deliveryRadiusKm}{" "}
+                    km
+                  </Text>
+                </View>
+              </View>
+            ) : (
+              canCheckArea &&
+              areaUnknown && (
+                <Pressable
+                  onPress={() => checkArea(true)}
+                  disabled={checkingArea}
+                  className="mt-1 flex-row items-center self-start rounded-full px-3 py-1.5 active:opacity-70"
+                  style={{ backgroundColor: colors.brandSoft }}>
+                  {checkingArea ? (
+                    <ActivityIndicator size="small" color={colors.brand} />
+                  ) : (
+                    <Ionicons name="navigate" size={14} color={colors.brand} />
+                  )}
+                  <Text className="ml-1.5 text-sm font-semibold text-brand">
+                    Check if they deliver to you
+                  </Text>
+                </Pressable>
+              )
+            )}
           </View>
         </View>
 
@@ -873,18 +953,20 @@ export default function CustomerRestaurantScreen() {
           isFavorite={!!r.isFavorite}
           size="md"
           onChange={(favorite) =>
-            setRestaurant((prev) => (prev ? { ...prev, isFavorite: favorite } : prev))
+            setRestaurant((prev) =>
+              prev ? { ...prev, isFavorite: favorite } : prev,
+            )
           }
         />
       </View>
       <CartBar restaurantId={r._id} />
-      
+
       <InfoSheet
         restaurant={r}
         visible={infoOpen}
         onClose={() => setInfoOpen(false)}
       />
-            <ItemSheet
+      <ItemSheet
         item={selectedItem}
         visible={!!selectedItem}
         canOrder={r.isOpenNow}

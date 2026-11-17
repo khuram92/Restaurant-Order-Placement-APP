@@ -87,7 +87,7 @@ function ActionChip({
       onPress={onPress}
       className="flex-row items-center rounded-full px-3.5 py-2"
       style={{ backgroundColor: colors.brand }}>
-      <Ionicons name={icon} size={14} color={colors.white} />
+      <Ionicons name={icon} size={16} color={colors.white} />
       <Text className="ml-1.5 text-sm font-bold text-white">{label}</Text>
     </Pressable>
   );
@@ -408,7 +408,7 @@ export default function ManagerOrderDetailScreen() {
                 size={13}
                 color={o.delivery.location ? colors.brand : colors.brandLight}
               />
-              <Text className="ml-1 text-xs text-brand-light">
+              <Text className="ml-1 text-sm text-brand">
                 {o.delivery.location
                   ? "Exact GPS pin from the customer"
                   : "No GPS pin · maps will search the address"}
