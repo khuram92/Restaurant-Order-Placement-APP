@@ -18,6 +18,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import NoLocationWarning from "../../../../components/admin/NoLocationWarning";
 import { cardShadow, colors } from "../../../../constants/theme";
 import { getErrorMessage } from "../../../../lib/api";
 import {
@@ -259,7 +260,6 @@ export default function ManagerRestaurantScreen() {
             colors={[colors.brand]}
           />
         }>
-    
         <View
           className="h-40 w-full"
           style={{ backgroundColor: colors.brandSoft }}>
@@ -382,8 +382,11 @@ export default function ManagerRestaurantScreen() {
               />
             )}
           </View>
-
-          {/* Services */}
+          {r.services.delivery && !r.location && (
+            <NoLocationWarning
+              onFix={() => router.push("/manager/restaurant/edit")}
+            />
+          )}
           <Card title="Services" icon="grid">
             <View className="flex-row gap-2">
               <ServiceBadge
