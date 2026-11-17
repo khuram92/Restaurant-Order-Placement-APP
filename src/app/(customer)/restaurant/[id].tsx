@@ -45,6 +45,9 @@ import type {
 import ItemSheet from "@/components/customer/ItemSheet";
 import { CartSelection } from "@/types/cart";
 import RatingBadge from "../../../components/customer/RatingBadge";
+import FavoriteButton from "../../../components/customer/FavoriteButton";
+
+
 type IconName = ComponentProps<typeof Ionicons>["name"];
 
 const DAY_LABELS: Record<Day, string> = {
@@ -864,7 +867,18 @@ export default function CustomerRestaurantScreen() {
       </ScrollView>
 
       {backButton}
+      <View className="absolute right-2 top-4">
+        <FavoriteButton
+          restaurantId={r._id}
+          isFavorite={!!r.isFavorite}
+          size="md"
+          onChange={(favorite) =>
+            setRestaurant((prev) => (prev ? { ...prev, isFavorite: favorite } : prev))
+          }
+        />
+      </View>
       <CartBar restaurantId={r._id} />
+      
       <InfoSheet
         restaurant={r}
         visible={infoOpen}

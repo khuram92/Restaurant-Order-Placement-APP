@@ -10,16 +10,10 @@ const HEART_RED = colors.danger;
 interface Props {
   restaurantId: string;
   isFavorite: boolean;
-  /** Called after the server agrees (use it to update lists) */
   onChange?: (favorite: boolean) => void;
-  /** sm = on restaurant cards, md = on the restaurant page */
   size?: "sm" | "md";
 }
 
-/**
- * ❤️ toggle. Changes straight away, then saves.
- * If saving fails it flips back and shows the error.
- */
 export default function FavoriteButton({
   restaurantId,
   isFavorite,

@@ -189,30 +189,24 @@ export default function ProfileScreen() {
             </View>
 
             <View className="mt-5 items-center px-4">
-              
-                <View
-                  className="h-28 w-28 items-center justify-center overflow-hidden rounded-full border-4 border-white"
-                  style={{ backgroundColor: colors.brandSoft }}>
-                  {user?.avatar ? (
-                    <Image
-                      source={{ uri: user.avatar }}
-                      style={{ width: "100%", height: "100%" }}
-                      contentFit="cover"
-                    />
-                  ) : initials ? (
-                    <Text className="text-3xl font-extrabold text-brand">
-                      {initials}
-                    </Text>
-                  ) : (
-                    <Ionicons
-                      name="person"
-                      size={44}
-                      color={colors.brandLight}
-                    />
-                  )}
-                </View>
-                
-              
+              <View
+                className="h-28 w-28 items-center justify-center overflow-hidden rounded-full border-4 border-white"
+                style={{ backgroundColor: colors.brandSoft }}>
+                {user?.avatar ? (
+                  <Image
+                    source={{ uri: user.avatar }}
+                    style={{ width: "100%", height: "100%" }}
+                    contentFit="cover"
+                  />
+                ) : initials ? (
+                  <Text className="text-3xl font-extrabold text-brand">
+                    {initials}
+                  </Text>
+                ) : (
+                  <Ionicons name="person" size={44} color={colors.brandLight} />
+                )}
+              </View>
+
               <Text
                 className="mt-3 text-2xl font-extrabold text-white"
                 numberOfLines={1}>
@@ -231,7 +225,9 @@ export default function ProfileScreen() {
             style={cardShadow}>
             <Text className=" text-gray-600 text-base">
               Member since{" "}
-              <Text className="font-bold text-lg text-brand-dark">{joinedYear}</Text>
+              <Text className="font-bold text-lg text-brand-dark">
+                {joinedYear}
+              </Text>
             </Text>
           </View>
 
@@ -261,6 +257,18 @@ export default function ProfileScreen() {
               hint="Questions about an order"
               onPress={showHelp}
               last
+            />
+            <LinkRow
+              icon="heart"
+              label="Favourites"
+              hint="Restaurants you've saved"
+              onPress={() => router.push("/favorites")}
+            />
+            <LinkRow
+              icon="star"
+              label="My reviews"
+              hint="Ratings you've given and replies"
+              onPress={() => router.push("/my-reviews")}
             />
           </Section>
 
