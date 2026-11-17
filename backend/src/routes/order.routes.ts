@@ -4,6 +4,7 @@ import {
   createOrder,
   getMyOrder,
   listMyOrders,
+  reorderPreview,
 } from "../controllers/customerOrder.controller.js";
 import {
   createReview,
@@ -22,6 +23,7 @@ router.get("/", listMyOrders);
 router.get("/reviews/mine", listMyReviews);
 router.get("/:id", getMyOrder);
 router.patch("/:id/cancel", cancelMyOrder);
+router.get("/:id/reorder", reorderPreview);
 router.get("/:id/review", getMyOrderReview);
 router.post("/:id/review", createReview);
 
