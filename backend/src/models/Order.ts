@@ -77,6 +77,8 @@ export interface IOrder {
     city: string;
     phone: string;
     instructions?: string;
+    location?: { lat: number; lng: number }; // customer's GPS at checkout
+    distanceKm?: number;
   };
   dineIn?: {
     partySize: number;
@@ -152,6 +154,11 @@ const orderSchema = new Schema<IOrder>(
           city: { type: String, required: true, trim: true },
           phone: { type: String, required: true, trim: true },
           instructions: { type: String, trim: true, maxlength: 200 },
+         location: {
+            type: new Schema({ lat: Number, lng: Number }, { _id: false }),
+            default: undefined,
+          },
+          distanceKm: { type: Number, min: 0 },
         },
         { _id: false },
       ),

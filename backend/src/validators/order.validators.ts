@@ -26,6 +26,12 @@ export const createOrderSchema = z
         city: z.string().trim().min(2, "Enter the city").max(60),
         phone: z.string().trim().regex(PK_PHONE, "Enter a phone number like 03001234567"),
         instructions: z.string().trim().max(200).optional(),
+        location: z
+          .object({
+            lat: z.number().min(-90).max(90),
+            lng: z.number().min(-180).max(180),
+          })
+          .optional(),
       })
       .optional(),
     dineIn: z

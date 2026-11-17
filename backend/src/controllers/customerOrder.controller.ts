@@ -21,6 +21,7 @@ import {
   notifyNewOrder,
   notifyOrderCancelled,
 } from "../utils/orderNotifications.js";
+import { distanceKm, formatKm } from "../utils/geo.js";
 
 const firstIssue = (error: { issues: { message: string }[] }) =>
   error.issues[0]?.message ?? "Invalid input";
@@ -74,6 +75,23 @@ export const createOrder = async (req: Request, res: Response) => {
     return res.status(409).json({
       message: `${restaurant.name} doesn't offer ${SERVICE_LABEL[input.type]}`,
     });
+    
+  }
+  let deliveryDistance: number | undefined;
+  const coords = restaurant.location?.coordinates; // [lng, lat]
+  if (input.type === "delivery" && coords) {
+    const at = input.delivery?.location;
+    if (!at) {
+      return res.status(400).json({
+        message: "Tap \"Use my current location\" so we can check the delivery distance",
+      });
+    }
+    deliveryDistance = distanceKm(at, { lat: coords[1], lng: coords[0] });
+    if (deliveryDistance > restaurant.deliveryRadiusKm) {
+      return res.status(409).json({
+        message: `You're ${formatKm(deliveryDistance)} away. ${restaurant.name} delivers within ${restaurant.deliveryRadiusKm} km. Try Takeaway?`,
+      });
+    }
   }
 
   try {
@@ -129,11 +147,15 @@ export const createOrder = async (req: Request, res: Response) => {
     if (customer.phone) data.customerPhone = customer.phone;
     if (input.note) data.note = input.note;
     if (input.type === "delivery" && input.delivery) {
-      const { area, instructions, ...rest } = input.delivery;
+            const { area, instructions, location, ...rest } = input.delivery;
       data.delivery = {
         ...rest,
         ...(area && { area }),
         ...(instructions && { instructions }),
+        ...(location && { location }),
+        ...(deliveryDistance !== undefined && {
+          distanceKm: Math.round(deliveryDistance * 10) / 10,
+        }),
       };
     }
     if (input.type === "dineIn" && input.dineIn) {

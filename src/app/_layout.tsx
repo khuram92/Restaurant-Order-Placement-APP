@@ -1,10 +1,13 @@
 import { SplashScreen, Stack, router, useSegments } from "expo-router";
 import { useEffect } from "react";
+import { LogBox } from "react-native";
 import "../../global.css";
 import { AuthProvider, useAuth } from "../context/AuthContext";
 import { CartProvider } from "../context/CartContext";
 import { usePushNotifications } from "../hooks/usePushNotifications";
 
+
+LogBox.ignoreLogs(["ImageBackground is deprecated"]);
 SplashScreen.preventAutoHideAsync();
 
 function SplashScreenController() {
