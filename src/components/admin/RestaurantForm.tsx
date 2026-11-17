@@ -27,6 +27,7 @@ import type {
   Restaurant,
   RestaurantInput,
 } from "../../types/restaurant";
+import { getCurrentAddress } from "../../lib/location";
 
 export interface RestaurantFormValues {
   name: string;
@@ -651,7 +652,33 @@ export default function RestaurantForm({
     field: "open" | "close";
   } | null>(null);
 
-  // Update one top-level field
+    const [locating, setLocating] = useState(false);
+  const [locationError, setLocationError] = useState("");
+
+  /** Fill lat/lng from the phone's GPS (stand inside the restaurant) */
+  const fillLocation = async () => {
+    setLocating(true);
+    setLocationError("");
+    try {
+      const here = await getCurrentAddress();
+      setValues((v) => ({
+        ...v,
+        lat: here.lat.toFixed(6),
+        lng: here.lng.toFixed(6),
+        // Only fill address text that's still empty — never overwrite typed text
+        street: v.street.trim() ? v.street : (here.street ?? v.street),
+        area: v.area.trim() ? v.area : (here.area ?? v.area),
+        city: v.city.trim() ? v.city : (here.city ?? v.city),
+      }));
+      if (error) setError("");
+    } catch (err) {
+      setLocationError(
+        err instanceof Error ? err.message : "Couldn't get your location",
+      );
+    } finally {
+      setLocating(false);
+    }
+  };
   const set = <K extends keyof RestaurantFormValues>(
     key: K,
     value: RestaurantFormValues[K],
@@ -816,9 +843,42 @@ export default function RestaurantForm({
             />
           </View>
           <Text className="mb-2 mt-1 text-xs text-brand-light">
-            Map coordinates (optional) — needed later for delivery distance and
-            "near me"
+            Map coordinates (optional) — used to check the delivery distance.
+            Stand inside the restaurant and tap the button.
           </Text>
+          <Pressable
+            onPress={fillLocation}
+            disabled={locating}
+            className="mb-3 flex-row items-center justify-center rounded-2xl border-2 py-3 active:opacity-80"
+            style={{
+              borderColor: colors.brand,
+              backgroundColor:
+                values.lat && values.lng ? colors.brandSoft : colors.white,
+            }}>
+            {locating ? (
+              <ActivityIndicator size="small" color={colors.brand} />
+            ) : (
+              <Ionicons
+                name={values.lat && values.lng ? "checkmark-circle" : "navigate"}
+                size={18}
+                color={colors.brand}
+              />
+            )}
+            <Text className="ml-2 text-base font-bold text-brand">
+              {locating
+                ? "Finding location…"
+                : values.lat && values.lng
+                  ? "Update to my current location"
+                  : "Use my current location"}
+            </Text>
+          </Pressable>
+          {!!locationError && (
+            <Text
+              className="-mt-1 mb-3 text-sm font-semibold"
+              style={{ color: colors.danger }}>
+              {locationError}
+            </Text>
+          )}
           <View className="flex-row gap-3">
             <Field
               label="Latitude"
