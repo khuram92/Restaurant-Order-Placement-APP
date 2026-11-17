@@ -7,6 +7,7 @@ import { customerListQuerySchema } from "../validators/customerRestaurant.valida
 import mongoose from "mongoose";
 import { MenuCategory } from "../models/MenuCategory.js";
 import { MenuItem } from "../models/MenuItem.js";
+import { distanceKm } from "../utils/geo.js";
 
 const firstIssue = (error: { issues: { message: string }[] }) =>
   error.issues[0]?.message ?? "Invalid input";
@@ -33,7 +34,7 @@ const favoriteIdsOf = async (req: Request) => {
 export const listRestaurants = async (req: Request, res: Response) => {
   const parsed = customerListQuerySchema.safeParse(req.query);
   if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
-  const { search, city, service, page, limit } = parsed.data;
+  const { search, city, service, lat, lng, sort, page, limit } = parsed.data;
 
   const managed = await User.distinct("restaurantId", { role: "manager", isActive: true });
 
@@ -45,6 +46,44 @@ export const listRestaurants = async (req: Request, res: Response) => {
     filter.$or = [{ name: term }, { cuisines: term }, { "address.area": term }, { "address.city": term }];
   }
 
+  // ---------- Distance from the customer (when they shared their location) ----------
+  const here = lat !== undefined && lng !== undefined ? { lat, lng } : null;
+  const distanceOf = (r: RestaurantDoc) => {
+    const c = r.location?.coordinates; // [lng, lat]
+    return here && c ? distanceKm(here, { lat: c[1], lng: c[0] }) : null;
+  };
+  const toCard = (r: RestaurantDoc, favorites: Set<string>) => {
+    const d = distanceOf(r);
+    return {
+      ...toCustomerJSON(r, favorites),
+      ...(d !== null && {
+        distanceKm: Math.round(d * 10) / 10,
+        deliversToYou: r.services.delivery && d <= r.deliveryRadiusKm,
+      }),
+    };
+  };
+
+  // ---------- Nearest first ----------
+  // Sorted in code so restaurants without a map location still show (at the end).
+  if (sort === "nearest" && here) {
+    const [all, favorites] = await Promise.all([
+      Restaurant.find(filter).select(HIDDEN_FIELDS),
+      favoriteIdsOf(req),
+    ]);
+    const sorted = all
+      .map((r) => ({ r, d: distanceOf(r) }))
+      .sort((a, b) => (a.d ?? Infinity) - (b.d ?? Infinity) || a.r.name.localeCompare(b.r.name));
+    const pageItems = sorted.slice((page - 1) * limit, page * limit);
+
+    return res.json({
+      restaurants: pageItems.map(({ r }) => toCard(r, favorites)),
+      total: all.length,
+      page,
+      pages: Math.max(1, Math.ceil(all.length / limit)),
+    });
+  }
+
+  // ---------- A–Z ----------
   const [restaurants, total, favorites] = await Promise.all([
     Restaurant.find(filter)
       .select(HIDDEN_FIELDS)
@@ -55,7 +94,7 @@ export const listRestaurants = async (req: Request, res: Response) => {
     favoriteIdsOf(req),
   ]);
   res.json({
-    restaurants: restaurants.map((r) => toCustomerJSON(r, favorites)),
+    restaurants: restaurants.map((r) => toCard(r, favorites)),
     total,
     page,
     pages: Math.max(1, Math.ceil(total / limit)),

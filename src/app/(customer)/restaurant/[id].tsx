@@ -801,7 +801,7 @@ export default function CustomerRestaurantScreen() {
                 />
                 <View className="ml-2 flex-1">
                   <Text
-                    className="text-sm font-bold"
+                    className=" font-bold"
                     style={{
                       color: outsideArea ? colors.danger : colors.brandDark,
                     }}>
@@ -809,7 +809,7 @@ export default function CustomerRestaurantScreen() {
                       ? `Doesn't deliver to your location${otherWays.length ? ` · ${otherWays.join(" / ")} only` : ""}`
                       : "Delivers to you"}
                   </Text>
-                  <Text className="text-xs text-brand-light">
+                  <Text className="text-sm text-brand">
                     {formatKm(away)} away · delivers within {r.deliveryRadiusKm}{" "}
                     km
                   </Text>
