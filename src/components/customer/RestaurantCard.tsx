@@ -63,7 +63,7 @@ export default function RestaurantCard({
             {item.isOpenNow ? "Open now" : "Closed"}
           </Text>
         </View>
-        <View className="absolute right-3 top-3">
+        <View className="absolute right-3 top-1">
           <View className="absolute right-3 top-3">
             <RatingBadge avg={item.ratingAvg} count={item.ratingCount} />
           </View>
