@@ -10,6 +10,7 @@ import {
 } from "react";
 import {
   ActivityIndicator,
+  Alert,
   FlatList,
   Pressable,
   RefreshControl,
@@ -25,6 +26,7 @@ import { useAuth } from "../../../context/AuthContext";
 import { getErrorMessage } from "../../../lib/api";
 import { browseRestaurants } from "../../../services/restaurantApi";
 import type { CustomerRestaurant, ServiceKey } from "../../../types/restaurant";
+import { getQuickPosition } from "../../../lib/location";
 
 type IconName = ComponentProps<typeof Ionicons>["name"];
 
@@ -57,6 +59,31 @@ export default function CustomerHome() {
   const [searchFocused, setSearchFocused] = useState(false);
 
   const requestId = useRef(0);
+    // ---------- Near me ----------
+  const [here, setHere] = useState<{ lat: number; lng: number } | null>(null);
+  const [sort, setSort] = useState<"name" | "nearest">("name");
+  const [locating, setLocating] = useState(false);
+
+  // Quiet check on open: only works if location was allowed before (no popup)
+  useEffect(() => {
+    getQuickPosition(false).then((pos) => pos && setHere(pos));
+  }, []);
+
+  const chooseSort = async (next: "name" | "nearest") => {
+    if (next === "name" || here) return setSort(next);
+    setLocating(true);
+    const pos = await getQuickPosition(true); // asks for permission if needed
+    setLocating(false);
+    if (!pos) {
+      Alert.alert(
+        "Location needed",
+        "Allow location and turn on GPS to see the nearest restaurants.",
+      );
+      return;
+    }
+    setHere(pos);
+    setSort("nearest");
+  };
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(search.trim()), 400);
@@ -71,6 +98,8 @@ export default function CustomerHome() {
         const res = await browseRestaurants({
           search: debouncedSearch,
           ...(service && { service }),
+          near: here,
+          sort,
           page: pageToLoad,
         });
         if (id !== requestId.current) return;
@@ -89,7 +118,7 @@ export default function CustomerHome() {
         }
       }
     },
-    [debouncedSearch, service],
+    [debouncedSearch, service, here, sort],
   );
 
   useFocusEffect(

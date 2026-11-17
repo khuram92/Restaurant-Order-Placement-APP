@@ -5,6 +5,7 @@ import type { ComponentProps } from "react";
 import { Pressable, Text, View } from "react-native";
 import { cardShadow, colors } from "../../constants/theme";
 import type { CustomerRestaurant, ServiceKey } from "../../types/restaurant";
+import { formatKm } from "../../utils/geo";
 import FavoriteButton from "./FavoriteButton";
 import RatingBadge from "./RatingBadge";
 
@@ -116,6 +117,14 @@ export default function RestaurantCard({
             numberOfLines={1}>
             {[item.address.area, item.address.city].filter(Boolean).join(", ")}
           </Text>
+          {item.distanceKm !== undefined && (
+            <View className="ml-2 flex-row items-center">
+              <Ionicons name="navigate" size={12} color={colors.brand} />
+              <Text className="ml-1 text-sm font-bold text-brand">
+                {formatKm(item.distanceKm)}
+              </Text>
+            </View>
+          )}
         </View>
         <View className="mt-2 flex-row items-center">
           <Ionicons name="call" size={13} color={colors.brandLight} />
@@ -127,6 +136,26 @@ export default function RestaurantCard({
         </View>
 
         <View className="mt-3 flex-row flex-wrap items-center gap-1.5">
+                      {item.deliversToYou === true && (
+            <View
+              className="flex-row items-center rounded-full px-2 py-0.5"
+              style={{ backgroundColor: colors.brand }}>
+              <Ionicons name="checkmark-circle" size={11} color={colors.white} />
+              <Text className="ml-1 text-xs font-bold text-white">
+                Delivers to you
+              </Text>
+            </View>
+          )}
+          {item.deliversToYou === false && item.services.delivery && (
+            <View
+              className="flex-row items-center rounded-full px-2 py-0.5"
+              style={{ backgroundColor: "#fdecea" }}>
+              <Ionicons name="close-circle" size={11} color={colors.danger} />
+              <Text className="ml-1 text-xs font-bold" style={{ color: colors.danger }}>
+                Too far to deliver
+              </Text>
+            </View>
+          )}
           {services.map((s) => (
             <View
               key={s.key}
@@ -139,7 +168,7 @@ export default function RestaurantCard({
             </View>
           ))}
           {item.services.delivery && (
-            <Text className="ml-1 text-xs text-brand-light">
+            <Text className="ml-1 text-xs text-brand">
               {item.deliveryFee > 0
                 ? `Rs ${item.deliveryFee} delivery`
                 : "Free delivery"}
