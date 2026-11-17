@@ -8,7 +8,8 @@
     "scheme": "restaurantorderplacementapp",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "com.hash.restaurantorders"
     },
     "android": {
       "adaptiveIcon": {
@@ -21,7 +22,9 @@
       "package": "com.hash.restaurantorders",
       "googleServicesFile": "./google-services.json",
       "permissions": [
-        "android.permission.RECORD_AUDIO"
+        "android.permission.RECORD_AUDIO",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
       ]
     },
     "web": {
@@ -34,6 +37,12 @@
         {
           "photosPermission": "Allow access to your photos to set a profile picture.",
           "cameraPermission": "Allow camera access to take a profile picture."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Allow location access so we can check if a restaurant delivers to you."
         }
       ],
       "expo-router",
