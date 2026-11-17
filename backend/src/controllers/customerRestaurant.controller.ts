@@ -54,7 +54,7 @@ export const listRestaurants = async (req: Request, res: Response) => {
     Restaurant.countDocuments(filter),
     favoriteIdsOf(req),
   ]);
-  rres.json({
+  res.json({
     restaurants: restaurants.map((r) => toCustomerJSON(r, favorites)),
     total,
     page,

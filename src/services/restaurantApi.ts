@@ -52,3 +52,17 @@ export const getSeatAvailability = async (id: string) => {
   const { data } = await api.get<SeatAvailability>(`/restaurants/${id}/seats`);
   return data;
 };
+
+
+export const getFavoriteRestaurants = async () => {
+  const { data } = await api.get<{ restaurants: CustomerRestaurant[] }>("/restaurants/favorites");
+  return data.restaurants;
+};
+
+/** Customer: add (true) or remove (false) a favourite */
+export const setFavorite = async (id: string, favorite: boolean) => {
+  const { data } = favorite
+    ? await api.post<{ isFavorite: boolean }>(`/restaurants/${id}/favorite`)
+    : await api.delete<{ isFavorite: boolean }>(`/restaurants/${id}/favorite`);
+  return data.isFavorite;
+};

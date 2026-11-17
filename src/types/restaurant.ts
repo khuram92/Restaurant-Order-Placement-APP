@@ -73,6 +73,7 @@ export interface CustomerRestaurant extends Omit<
   "email" | "isActive"
 > {
   isOpenNow: boolean;
+  isFavorite?: boolean;
 }
 
 export interface CustomerRestaurantListResponse {
