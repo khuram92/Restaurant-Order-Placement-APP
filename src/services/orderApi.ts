@@ -1,5 +1,6 @@
 import { api } from "../lib/api";
-import type { Order, OrderListResponse, PlaceOrderInput } from "../types/order";
+import type { Order, OrderListResponse, PlaceOrderInput, ReorderPreview } from "../types/order";
+
 
 /** Customer: place an order */
 export const placeOrder = async (input: PlaceOrderInput) => {
@@ -22,4 +23,10 @@ export const getMyOrder = async (id: string) => {
 export const cancelMyOrder = async (id: string, reason?: string) => {
   const { data } = await api.patch<{ order: Order; message: string }>(`/orders/${id}/cancel`, reason ? { reason } : {});
   return data.order;
+};
+
+/** "Order again": a past order rebuilt from today's menu, ready for the cart */
+export const getReorder = async (id: string) => {
+  const { data } = await api.get<ReorderPreview>(`/orders/${id}/reorder`);
+  return data;
 };

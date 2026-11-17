@@ -1,3 +1,5 @@
+
+import type { CartRestaurant, CartSelection } from "./cart";
 export type OrderType = "dineIn" | "takeaway" | "delivery";
 
 export type OrderStatus =
@@ -76,6 +78,14 @@ export interface OrderListResponse {
   total: number;
   page: number;
   pages: number;
+}
+
+/** "Order again": the old order rebuilt from today's menu */
+export interface ReorderPreview {
+  restaurant: CartRestaurant & { isOpenNow: boolean };
+  lines: CartSelection[];
+  skipped: { name: string; reason: string }[];
+  priceChanged: boolean;
 }
 
 /** What checkout sends (prices are worked out by the backend) */
