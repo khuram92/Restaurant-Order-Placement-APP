@@ -1,45 +1,52 @@
 import { api } from "../lib/api";
+import type { MenuCategoryWithItems } from "../types/menu";
 import type {
   CustomerRestaurant,
   CustomerRestaurantListResponse,
   ServiceKey,
 } from "../types/restaurant";
-import type { MenuCategoryWithItems } from "../types/menu";
 export interface BrowseParams {
   search?: string;
   service?: ServiceKey;
   city?: string;
   page?: number;
   limit?: number;
+  near?: { lat: number; lng: number } | null;
+  sort?: "name" | "nearest";
 }
 
 /** Customer: active restaurants (with isOpenNow) */
 export const browseRestaurants = async (params: BrowseParams = {}) => {
-  const { data } = await api.get<CustomerRestaurantListResponse>("/restaurants", {
-    params: {
-      ...(params.search && { search: params.search }),
-      ...(params.service && { service: params.service }),
-      ...(params.city && { city: params.city }),
-      page: params.page ?? 1,
-      limit: params.limit ?? 20,
+  const { data } = await api.get<CustomerRestaurantListResponse>(
+    "/restaurants",
+    {
+      params: {
+        ...(params.search && { search: params.search }),
+        ...(params.service && { service: params.service }),
+        ...(params.city && { city: params.city }),
+        ...(params.near && { lat: params.near.lat, lng: params.near.lng }),
+        ...(params.near && params.sort === "nearest" && { sort: "nearest" }),
+        page: params.page ?? 1,
+        limit: params.limit ?? 20,
+      },
     },
-  });
+  );
   return data;
 };
 
-
-
 export const getCustomerRestaurant = async (id: string) => {
-  const { data } = await api.get<{ restaurant: CustomerRestaurant }>(`/restaurants/${id}`);
+  const { data } = await api.get<{ restaurant: CustomerRestaurant }>(
+    `/restaurants/${id}`,
+  );
   return data.restaurant;
 };
 
-
 export const getCustomerMenu = async (id: string) => {
-  const { data } = await api.get<{ categories: MenuCategoryWithItems[] }>(`/restaurants/${id}/menu`);
+  const { data } = await api.get<{ categories: MenuCategoryWithItems[] }>(
+    `/restaurants/${id}/menu`,
+  );
   return data.categories;
 };
-
 
 export interface SeatAvailability {
   capacity: number;
@@ -53,9 +60,10 @@ export const getSeatAvailability = async (id: string) => {
   return data;
 };
 
-
 export const getFavoriteRestaurants = async () => {
-  const { data } = await api.get<{ restaurants: CustomerRestaurant[] }>("/restaurants/favorites");
+  const { data } = await api.get<{ restaurants: CustomerRestaurant[] }>(
+    "/restaurants/favorites",
+  );
   return data.restaurants;
 };
 

@@ -74,6 +74,8 @@ export interface CustomerRestaurant extends Omit<
 > {
   isOpenNow: boolean;
   isFavorite?: boolean;
+  distanceKm?: number; // from the customer, when their location was sent
+  deliversToYou?: boolean;
 }
 
 export interface CustomerRestaurantListResponse {
