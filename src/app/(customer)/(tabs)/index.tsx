@@ -24,9 +24,9 @@ import RestaurantCard from "../../../components/customer/RestaurantCard";
 import { cardShadow, colors } from "../../../constants/theme";
 import { useAuth } from "../../../context/AuthContext";
 import { getErrorMessage } from "../../../lib/api";
+import { getQuickPosition } from "../../../lib/location";
 import { browseRestaurants } from "../../../services/restaurantApi";
 import type { CustomerRestaurant, ServiceKey } from "../../../types/restaurant";
-import { getQuickPosition } from "../../../lib/location";
 
 type IconName = ComponentProps<typeof Ionicons>["name"];
 
@@ -59,7 +59,7 @@ export default function CustomerHome() {
   const [searchFocused, setSearchFocused] = useState(false);
 
   const requestId = useRef(0);
-    // ---------- Near me ----------
+  // ---------- Near me ----------
   const [here, setHere] = useState<{ lat: number; lng: number } | null>(null);
   const [sort, setSort] = useState<"name" | "nearest">("name");
   const [locating, setLocating] = useState(false);
@@ -260,6 +260,45 @@ export default function CustomerHome() {
               </Pressable>
             );
           })}
+        </View>
+               
+        <View className="mt-4 flex-row items-center justify-between ">
+          <Text className="text-sm font-semibold text-brand-dark">
+            
+          </Text>
+          <View className="flex-row rounded-full bg-white p-1">
+            {(
+              [
+                { key: "name", label: "all", icon: "list" },
+                { key: "nearest", label: "Nearest", icon: "navigate" },
+              ] as const
+            ).map((o) => {
+              const selected = sort === o.key;
+              return (
+                <Pressable
+                  key={o.key}
+                  onPress={() => chooseSort(o.key)}
+                  disabled={locating}
+                  className="flex-row items-center rounded-full px-3 py-1.5"
+                  style={{ backgroundColor: selected ? colors.brand : "transparent" }}>
+                  {locating && o.key === "nearest" ? (
+                    <ActivityIndicator size="small" color={colors.brand} />
+                  ) : (
+                    <Ionicons
+                      name={o.icon}
+                      size={13}
+                      color={selected ? colors.white : colors.brand}
+                    />
+                  )}
+                  <Text
+                    className="ml-1 text-sm font-semibold"
+                    style={{ color: selected ? colors.white : colors.brand }}>
+                    {o.label}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
         </View>
       </View>
 
