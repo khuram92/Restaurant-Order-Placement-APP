@@ -263,7 +263,7 @@ export default function CustomerHome() {
         </View>
 
         <View className="mt-4 flex-row items-center justify-between ">
-          <Text className="text-sm font-semibold text-brand-dark"></Text>
+          {/* <Text className="text-sm font-semibold text-brand-dark"></Text> */}
           <Pressable
             onPress={() => chooseSort(sort === "nearest" ? "name" : "nearest")}
             disabled={locating}

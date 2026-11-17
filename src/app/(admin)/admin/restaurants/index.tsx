@@ -103,6 +103,16 @@ function RestaurantCard({ item }: { item: Restaurant }) {
         )}
 
         <View className="mt-2 flex-row flex-wrap gap-1">
+          {item.services.delivery && !item.location && (
+            <View
+              className="flex-row items-center rounded-full px-2 py-0.5"
+              style={{ backgroundColor: colors.danger }}>
+              <Ionicons name="location" size={11} color={colors.white} />
+              <Text className="ml-1 text-xs font-bold text-white">
+                No location set
+              </Text>
+            </View>
+          )}
           {services.map((s) => (
             <View
               key={s.label}
@@ -287,7 +297,7 @@ export default function AdminRestaurantsScreen() {
             style={{ backgroundColor: colors.brand }}>
             <Text className="font-bold text-white">Try again</Text>
           </Pressable>
-        </View> 
+        </View>
       ) : (
         <FlatList
           data={restaurants}
