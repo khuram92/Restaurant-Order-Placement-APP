@@ -21,6 +21,7 @@ export interface IUser {
   role: Role;
   restaurantId?: Types.ObjectId;
   pushTokens: string[];
+  favoriteRestaurants: Types.ObjectId[];
   isActive: boolean;
   mustChangePassword: boolean;
   profileCompleted: boolean;
@@ -48,7 +49,12 @@ const userSchema = new Schema<
       trim: true,
       match: [/^03\d{9}$/, "Phone must be 03XXXXXXXXX"],
     },
-     pushTokens: { type: [String], default: [], select: false },
+    pushTokens: { type: [String], default: [], select: false },
+    favoriteRestaurants: {
+      type: [{ type: Schema.Types.ObjectId, ref: "Restaurant" }],
+      default: [],
+      select: false,
+    },
     password: { type: String, select: false, minlength: 8 },
     role: { type: String, enum: ROLES, default: "customer" },
     restaurantId: { type: Schema.Types.ObjectId, ref: "Restaurant" },
@@ -103,7 +109,6 @@ userSchema.methods.comparePassword = function (candidate: string) {
     ? bcrypt.compare(candidate, this.password)
     : Promise.resolve(false);
 };
-
 
 userSchema.set("toJSON", {
   transform: (_doc, ret) => {

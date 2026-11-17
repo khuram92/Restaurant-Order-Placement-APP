@@ -1,6 +1,14 @@
 import { Router } from "express";
-import { getRestaurant, getRestaurantMenu, getSeatAvailability, listRestaurants } from "../controllers/customerRestaurant.controller.js";
-import { protect } from "../middleware/auth.middleware.js";
+import {
+  addFavorite,
+  getRestaurant,
+  getRestaurantMenu,
+  getSeatAvailability,
+  listFavorites,
+  listRestaurants,
+  removeFavorite,
+} from "../controllers/customerRestaurant.controller.js";
+import { authorize, protect } from "../middleware/auth.middleware.js";
 import { listRestaurantReviews } from "../controllers/review.controller.js";
 
 const router = Router();
@@ -9,6 +17,9 @@ const router = Router();
 router.use(protect);
 
 router.get("/", listRestaurants);
+router.get("/favorites", authorize("customer"), listFavorites);
+router.post("/:id/favorite", authorize("customer"), addFavorite);
+router.delete("/:id/favorite", authorize("customer"), removeFavorite);
 router.get("/:id", getRestaurant);
 router.get("/:id/menu", getRestaurantMenu);
 router.get("/:id/seats", getSeatAvailability);
