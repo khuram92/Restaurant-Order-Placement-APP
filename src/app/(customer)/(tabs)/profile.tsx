@@ -252,13 +252,6 @@ export default function ProfileScreen() {
               onPress={goEdit}
             />
             <LinkRow
-              icon="help-circle"
-              label="Help & support"
-              hint="Questions about an order"
-              onPress={showHelp}
-              last
-            />
-            <LinkRow
               icon="heart"
               label="Favourites"
               hint="Restaurants you've saved"
@@ -269,6 +262,13 @@ export default function ProfileScreen() {
               label="My reviews"
               hint="Ratings you've given and replies"
               onPress={() => router.push("/my-reviews")}
+            />
+            <LinkRow
+              icon="help-circle"
+              label="Help & support"
+              hint="Questions about an order"
+              onPress={showHelp}
+              last
             />
           </Section>
 
