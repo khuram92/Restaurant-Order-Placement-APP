@@ -22,6 +22,8 @@ import {
   notifyOrderCancelled,
 } from "../utils/orderNotifications.js";
 import { distanceKm, formatKm } from "../utils/geo.js";
+import { rebuildOrderLines } from "../utils/reorder.js";
+
 
 const firstIssue = (error: { issues: { message: string }[] }) =>
   error.issues[0]?.message ?? "Invalid input";
@@ -257,4 +259,38 @@ export const cancelMyOrder = async (req: Request, res: Response) => {
 
   void notifyOrderCancelled(updated); // let the manager know
   res.json({ message: "Order cancelled", order: updated });
+};
+
+
+/** GET /api/orders/:id/reorder — the old order rebuilt as a cart, from today's menu */
+export const reorderPreview = async (req: Request, res: Response) => {
+  const order = await findMyOrderOr404(req, res);
+  if (!order) return;
+
+  const [restaurant, hasManager] = await Promise.all([
+    Restaurant.findOne({ _id: order.restaurantId, isActive: true }),
+    User.exists({ role: "manager", isActive: true, restaurantId: order.restaurantId }),
+  ]);
+  if (!restaurant || !hasManager) {
+    return res.status(404).json({ message: `${order.restaurantName} isn't taking orders anymore` });
+  }
+
+  const { lines, skipped, priceChanged } = await rebuildOrderLines(restaurant.id, order.items);
+
+  res.json({
+    // Same shape as the app's cart restaurant
+    restaurant: {
+      _id: restaurant.id,
+      name: restaurant.name,
+      ...(restaurant.logo && { logo: restaurant.logo }),
+      taxRate: restaurant.taxRate,
+      deliveryFee: restaurant.deliveryFee,
+      minOrder: restaurant.minOrder,
+      services: restaurant.services,
+      isOpenNow: !restaurant.isTemporarilyClosed && isOpenNow(restaurant.openingHours),
+    },
+    lines,
+    skipped,
+    priceChanged,
+  });
 };
