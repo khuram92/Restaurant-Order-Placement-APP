@@ -21,12 +21,15 @@ import { cardShadow, colors } from "../../constants/theme";
 import { useAuth } from "../../context/AuthContext";
 import { useCart } from "../../context/CartContext";
 import { getErrorMessage } from "../../lib/api";
+import { getCurrentAddress } from "../../lib/location";
 import { placeOrder } from "../../services/orderApi";
 import {
+  getCustomerRestaurant,
   getSeatAvailability,
   type SeatAvailability,
 } from "../../services/restaurantApi";
 import type { OrderType, PlaceOrderInput } from "../../types/order";
+import { distanceKm, formatKm } from "../../utils/geo";
 import { money } from "../../utils/menuFormat";
 import { ORDER_TYPE_INFO } from "../../utils/orderFormat";
 
@@ -151,6 +154,28 @@ export default function CheckoutScreen() {
   // Order note
   const [note, setNote] = useState("");
 
+  const [pin, setPin] = useState<{ lat: number; lng: number } | null>(null);
+  const [locating, setLocating] = useState(false);
+  const [locationError, setLocationError] = useState("");
+
+  const [zone, setZone] = useState<{
+    center: { lat: number; lng: number } | null;
+    radiusKm: number;
+  } | null>(null);
+
+  useEffect(() => {
+    if (type !== "delivery" || !restaurantId || zone) return;
+    getCustomerRestaurant(restaurantId)
+      .then((r) => {
+        const c = r.location?.coordinates; // [lng, lat]
+        setZone({
+          center: c ? { lat: c[1], lng: c[0] } : null,
+          radiusKm: r.deliveryRadiusKm,
+        });
+      })
+      .catch(() => {}); // the backend still checks when the order is placed
+  }, [type, restaurantId, zone]);
+
   const [placing, setPlacing] = useState(false);
   const [error, setError] = useState("");
 
@@ -179,6 +204,33 @@ export default function CheckoutScreen() {
 
   const clearError = () => error && setError("");
 
+  // How far is the customer? (only when both sides have coordinates)
+  const distance = pin && zone?.center ? distanceKm(pin, zone.center) : null;
+  const outOfRange =
+    type === "delivery" &&
+    distance !== null &&
+    distance > (zone?.radiusKm ?? 0);
+  const needsPin = type === "delivery" && !!zone?.center && !pin;
+
+  const fillMyLocation = async () => {
+    setLocating(true);
+    setLocationError("");
+    clearError();
+    try {
+      const here = await getCurrentAddress();
+      setPin({ lat: here.lat, lng: here.lng });
+      if (here.street) setStreet(here.street);
+      if (here.area) setArea(here.area);
+      if (here.city) setCity(here.city);
+    } catch (err) {
+      setLocationError(
+        err instanceof Error ? err.message : "Couldn't get your location",
+      );
+    } finally {
+      setLocating(false);
+    }
+  };
+
   const submit = async () => {
     setError("");
 
@@ -188,6 +240,14 @@ export default function CheckoutScreen() {
       if (city.trim().length < 2) return setError("Enter your city");
       if (!PK_PHONE.test(phone.trim()))
         return setError("Enter a phone number like 03001234567");
+      if (needsPin)
+        return setError(
+          'Tap "Use my current location" so we can check the distance',
+        );
+      if (outOfRange && distance !== null)
+        return setError(
+          `You're ${formatKm(distance)} away. ${restaurant.name} delivers within ${zone?.radiusKm} km.`,
+        );
     }
     if (type === "dineIn" && seats && partySize > seats.free) {
       return setError(
@@ -215,6 +275,8 @@ export default function CheckoutScreen() {
         phone: phone.trim(),
         ...(area.trim() && { area: area.trim() }),
         ...(instructions.trim() && { instructions: instructions.trim() }),
+        ...(instructions.trim() && { instructions: instructions.trim() }),
+        ...(pin && { location: pin }),
       };
     }
     if (type === "dineIn") input.dineIn = { partySize };
@@ -326,6 +388,69 @@ export default function CheckoutScreen() {
 
           {type === "delivery" && (
             <Card title="Delivery address" icon="location">
+              <Pressable
+                onPress={fillMyLocation}
+                disabled={locating}
+                className="mb-3 flex-row items-center justify-center rounded-2xl border-2 py-3 active:opacity-80"
+                style={{
+                  borderColor: colors.brand,
+                  backgroundColor: pin ? colors.brandSoft : colors.white,
+                }}>
+                {locating ? (
+                  <ActivityIndicator size="small" color={colors.brand} />
+                ) : (
+                  <Ionicons
+                    name={pin ? "checkmark-circle" : "navigate"}
+                    size={18}
+                    color={colors.brand}
+                  />
+                )}
+                <Text className="ml-2 text-base font-bold text-brand">
+                  {locating
+                    ? "Finding you…"
+                    : pin
+                      ? "Location added · tap to update"
+                      : "Use my current location"}
+                </Text>
+              </Pressable>
+
+              {!!locationError && (
+                <Text
+                  className="-mt-1 mb-3 text-sm font-semibold"
+                  style={{ color: colors.danger }}>
+                  {locationError}
+                </Text>
+              )}
+
+              {distance !== null && zone && (
+                <View
+                  className="mb-3 flex-row items-center rounded-2xl px-3 py-2.5"
+                  style={{
+                    backgroundColor: outOfRange ? "#fdecea" : colors.mistLight,
+                  }}>
+                  <Ionicons
+                    name={outOfRange ? "close-circle" : "checkmark-circle"}
+                    size={18}
+                    color={outOfRange ? colors.danger : colors.brand}
+                  />
+                  <Text
+                    className="ml-2 flex-1 text-sm font-semibold"
+                    style={{
+                      color: outOfRange ? colors.danger : colors.brandDark,
+                    }}>
+                    {outOfRange
+                      ? `${formatKm(distance)} away. Outside the ${zone.radiusKm} km delivery area. Try Takeaway?`
+                      : `${formatKm(distance)} away · inside the ${zone.radiusKm} km delivery area`}
+                  </Text>
+                </View>
+              )}
+
+              {needsPin && !locationError && (
+                <Text className="-mt-1 mb-3 text-sm text-brand-light">
+                  {restaurant.name} delivers within {zone?.radiusKm} km. Add
+                  your location to check.
+                </Text>
+              )}
               <Field
                 label="Street / house"
                 value={street}
@@ -626,12 +751,13 @@ export default function CheckoutScreen() {
           )}
           <Pressable
             onPress={submit}
-            disabled={placing || available.length === 0}
+            disabled={placing || available.length === 0 || outOfRange}
             className="flex-row items-center justify-between rounded-2xl px-5 py-4"
             style={[
               cardShadow,
               {
-                backgroundColor: placing ? colors.brandLight : colors.brandDark,
+                backgroundColor:
+                  placing || outOfRange ? colors.brandLight : colors.brandDark,
               },
             ]}>
             {placing ? (
