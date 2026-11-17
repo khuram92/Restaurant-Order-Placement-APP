@@ -12,6 +12,8 @@ import {
 } from "../utils/otp.js";
 import { sendOtp } from "../utils/sendOtp.js";
 import { uploadAvatarImage } from "../utils/cloudinary.js";
+import { checkOtpLimits, clientIp, recordOtpRequest } from "../utils/otpLimits.js";
+
 
 const OTP_EXPIRES_MINUTES = Number(process.env.OTP_EXPIRES_MINUTES) || 5;
 const OTP_RESEND_SECONDS = Number(process.env.OTP_RESEND_SECONDS) || 60;
@@ -129,7 +131,14 @@ export const requestOtp = async (req: Request, res: Response) => {
         .json({ message: `Please wait ${wait}s before requesting a new code` });
     }
   }
-
+  // Hourly / daily limits (per email-phone and per device)
+  const ip = clientIp(req);
+  const limit = await checkOtpLimits(identifier, ip);
+  if (!limit.ok) {
+    res.set("Retry-After", String(limit.retryAfterSeconds));
+    return res.status(429).json({ message: limit.message, retryAfterSeconds: limit.retryAfterSeconds });
+  }
+  await recordOtpRequest(identifier, ip, "login");
   const code = generateOtp();
     await Otp.deleteMany({ identifier, purpose: { $ne: "contact" } }); // only one active code at a time
   await Otp.create({
