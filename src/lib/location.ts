@@ -24,9 +24,22 @@ export async function getCurrentAddress(): Promise<CurrentAddress> {
     throw new Error("Turn on Location (GPS) on your phone and try again");
   }
 
-  const pos = await Location.getCurrentPositionAsync({
-    accuracy: Location.Accuracy.Balanced,
-  });
+  let pos: Location.LocationObject | null = null;
+  try {
+    pos = await Location.getCurrentPositionAsync({
+      accuracy: Location.Accuracy.High,
+    });
+  } catch {
+    pos = await Location.getLastKnownPositionAsync({
+      maxAge: 10 * 60 * 1000, // up to 10 minutes old
+      requiredAccuracy: 500, // within 500 m
+    });
+  }
+  if (!pos) {
+    throw new Error(
+      "Couldn't find your location yet. Step outside or open Maps for a moment, then try again.",
+    );
+  }
   const result: CurrentAddress = {
     lat: pos.coords.latitude,
     lng: pos.coords.longitude,
