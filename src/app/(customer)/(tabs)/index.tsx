@@ -19,13 +19,12 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import NotificationBell from "../../../components/customer/NotificationBell";
-import RatingBadge from "../../../components/customer/RatingBadge";
+import RestaurantCard from "../../../components/customer/RestaurantCard";
 import { cardShadow, colors } from "../../../constants/theme";
 import { useAuth } from "../../../context/AuthContext";
 import { getErrorMessage } from "../../../lib/api";
 import { browseRestaurants } from "../../../services/restaurantApi";
 import type { CustomerRestaurant, ServiceKey } from "../../../types/restaurant";
-import RestaurantCard from "../../../components/customer/RestaurantCard";
 
 type IconName = ComponentProps<typeof Ionicons>["name"];
 
@@ -41,8 +40,6 @@ const greeting = () => {
   if (hour < 17) return "Good afternoon";
   return "Good evening";
 };
-
-
 
 export default function CustomerHome() {
   const { user, signOut } = useAuth();
@@ -112,7 +109,7 @@ export default function CustomerHome() {
     setLoadingMore(true);
     load(page + 1, "append");
   };
-  
+
   const setFavoriteInList = (id: string, favorite: boolean) =>
     setRestaurants((prev) =>
       prev.map((r) => (r._id === id ? { ...r, isFavorite: favorite } : r)),
@@ -147,7 +144,7 @@ export default function CustomerHome() {
                 </Text>
               </View>
               <View className="flex-row items-center gap-2">
-                                <Pressable
+                <Pressable
                   onPress={() => router.push("/my-reviews")}
                   hitSlop={8}
                   className="h-12 w-12 items-center justify-center rounded-full"
@@ -262,7 +259,9 @@ export default function CustomerHome() {
           renderItem={({ item }) => (
             <RestaurantCard
               item={item}
-              onFavoriteChange={(favorite) => setFavoriteInList(item._id, favorite)}
+              onFavoriteChange={(favorite) =>
+                setFavoriteInList(item._id, favorite)
+              }
             />
           )}
           contentContainerStyle={{ padding: 16, flexGrow: 1 }}
