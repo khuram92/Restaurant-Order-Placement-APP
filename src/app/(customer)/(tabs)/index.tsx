@@ -261,44 +261,33 @@ export default function CustomerHome() {
             );
           })}
         </View>
-               
+
         <View className="mt-4 flex-row items-center justify-between ">
-          <Text className="text-sm font-semibold text-brand-dark">
-            
-          </Text>
-          <View className="flex-row rounded-full bg-white p-1">
-            {(
-              [
-                { key: "name", label: "all", icon: "list" },
-                { key: "nearest", label: "Nearest", icon: "navigate" },
-              ] as const
-            ).map((o) => {
-              const selected = sort === o.key;
-              return (
-                <Pressable
-                  key={o.key}
-                  onPress={() => chooseSort(o.key)}
-                  disabled={locating}
-                  className="flex-row items-center rounded-full px-3 py-1.5"
-                  style={{ backgroundColor: selected ? colors.brand : "transparent" }}>
-                  {locating && o.key === "nearest" ? (
-                    <ActivityIndicator size="small" color={colors.brand} />
-                  ) : (
-                    <Ionicons
-                      name={o.icon}
-                      size={13}
-                      color={selected ? colors.white : colors.brand}
-                    />
-                  )}
-                  <Text
-                    className="ml-1 text-sm font-semibold"
-                    style={{ color: selected ? colors.white : colors.brand }}>
-                    {o.label}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
+          <Text className="text-sm font-semibold text-brand-dark"></Text>
+          <Pressable
+            onPress={() => chooseSort(sort === "nearest" ? "name" : "nearest")}
+            disabled={locating}
+            className="flex-row items-center rounded-full px-3.5 py-2 active:opacity-80"
+            style={{
+              backgroundColor: sort === "nearest" ? colors.brand : colors.white,
+            }}>
+            {locating ? (
+              <ActivityIndicator size="small" color={colors.brand} />
+            ) : (
+              <Ionicons
+                name="navigate"
+                size={14}
+                color={sort === "nearest" ? colors.white : colors.brand}
+              />
+            )}
+            <Text
+              className="ml-1.5 text-sm font-semibold"
+              style={{
+                color: sort === "nearest" ? colors.white : colors.brand,
+              }}>
+              Nearest
+            </Text>
+          </Pressable>
         </View>
       </View>
 
