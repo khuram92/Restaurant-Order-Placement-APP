@@ -1,0 +1,56 @@
+import * as Location from "expo-location";
+
+export interface CurrentAddress {
+  lat: number;
+  lng: number;
+  street?: string;
+  area?: string;
+  city?: string;
+}
+
+
+export async function getCurrentAddress(): Promise<CurrentAddress> {
+  const { status, canAskAgain } =
+    await Location.requestForegroundPermissionsAsync();
+  if (status !== "granted") {
+    throw new Error(
+      canAskAgain
+        ? "Allow location access so we can check if the restaurant delivers to you"
+        : "Location is blocked for this app. Turn it on in your phone's Settings → Apps.",
+    );
+  }
+
+  if (!(await Location.hasServicesEnabledAsync())) {
+    throw new Error("Turn on Location (GPS) on your phone and try again");
+  }
+
+  const pos = await Location.getCurrentPositionAsync({
+    accuracy: Location.Accuracy.Balanced,
+  });
+  const result: CurrentAddress = {
+    lat: pos.coords.latitude,
+    lng: pos.coords.longitude,
+  };
+
+  
+  try {
+    const [place] = await Location.reverseGeocodeAsync({
+      latitude: result.lat,
+      longitude: result.lng,
+    });
+    if (place) {
+      const street = [place.name, place.street]
+        .filter((p, i, all): p is string => !!p && all.indexOf(p) === i)
+        .join(", ");
+      const area = place.district ?? place.subregion;
+      const city = place.city ?? place.region;
+      if (street) result.street = street;
+      if (area) result.area = area;
+      if (city) result.city = city;
+    }
+  } catch {
+    
+  }
+
+  return result;
+}

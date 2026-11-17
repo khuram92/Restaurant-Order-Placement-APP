@@ -55,6 +55,8 @@ export interface Order {
     city: string;
     phone: string;
     instructions?: string;
+    location?: { lat: number; lng: number };
+    distanceKm?: number;
   };
   dineIn?: { partySize: number; seatsReserved: boolean };
   note?: string;
@@ -94,6 +96,7 @@ export interface PlaceOrderInput {
     city: string;
     phone: string;
     instructions?: string;
+    location?: { lat: number; lng: number };
   };
   dineIn?: { partySize: number };
 }
