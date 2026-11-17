@@ -23,6 +23,7 @@ import {
 } from "react-native-safe-area-context";
 import OrderReviewCard from "../../../components/customer/OrderReviewCard";
 import { cardShadow, colors } from "../../../constants/theme";
+import { useReorder } from "../../../hooks/useReorder";
 import { getErrorMessage } from "../../../lib/api";
 import { cancelMyOrder, getMyOrder } from "../../../services/orderApi";
 import type { Order, OrderStatus } from "../../../types/order";
@@ -311,6 +312,7 @@ export default function OrderScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
   const [cancelling, setCancelling] = useState(false);
+  const { reorder, busyId } = useReorder();
   const [showTimeline, setShowTimeline] = useState(false);
 
   const load = useCallback(async () => {
@@ -541,6 +543,24 @@ export default function OrderScreen() {
               </Text>
             </View>
           </View>
+                    {FINISHED.includes(o.status) && (
+            <Pressable
+              onPress={() => reorder(o._id)}
+              disabled={!!busyId}
+              className="mb-4 flex-row items-center justify-center rounded-2xl py-4 active:opacity-80"
+              style={[cardShadow, { backgroundColor: colors.brandDark }]}>
+              {busyId ? (
+                <ActivityIndicator color={colors.white} />
+              ) : (
+                <>
+                  <Ionicons name="repeat" size={20} color={colors.white} />
+                  <Text className="ml-2 text-base font-bold text-white">
+                    Order again
+                  </Text>
+                </>
+              )}
+            </Pressable>
+          )}
 
           {o.status === "completed" && (
             <OrderReviewCard
