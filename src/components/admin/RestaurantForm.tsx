@@ -619,8 +619,6 @@ function TimeButton({ time, onPress }: { time: string; onPress: () => void }) {
   );
 }
 
-
-
 type Props = {
   initialValues?: RestaurantFormValues;
   /** Current image URLs (Edit screen) */
@@ -934,42 +932,68 @@ export default function RestaurantForm({
           {values.openingHours.map((hour, index) => {
             const label =
               DAYS.find((d) => d.key === hour.day)?.label ?? hour.day;
+            const sameTime = !hour.closed && hour.open === hour.close;
             return (
               <View
                 key={hour.day}
-                className="flex-row items-center border-b py-2.5"
+                className="border-b py-2.5"
                 style={{
                   borderColor: index === 6 ? "transparent" : colors.mist,
+                  backgroundColor: sameTime ? "#fde8e6" : "transparent",
+                  marginHorizontal: sameTime ? -8 : 0,
+                  paddingHorizontal: sameTime ? 8 : 0,
+                  borderRadius: sameTime ? 12 : 0,
                 }}>
-                <Text className="w-24 text-sm font-semibold text-brand-dark">
-                  {label}
-                </Text>
-                {hour.closed ? (
-                  <Text className="flex-1 text-sm italic text-brand-light">
-                    Closed
+                <View className="flex-row items-center">
+                  <Text
+                    className="w-24 text-sm font-semibold"
+                    style={{
+                      color: sameTime ? colors.danger : colors.brandDark,
+                    }}>
+                    {label}
                   </Text>
-                ) : (
-                  <View className="flex-1 flex-row items-center gap-1.5">
-                    <TimeButton
-                      time={hour.open}
-                      onPress={() => setPicker({ index, field: "open" })}
+                  {hour.closed ? (
+                    <Text className="flex-1 text-sm italic text-brand-light">
+                      Closed
+                    </Text>
+                  ) : (
+                    <View className="flex-1 flex-row items-center gap-1.5">
+                      <TimeButton
+                        time={hour.open}
+                        onPress={() => setPicker({ index, field: "open" })}
+                      />
+                      <Text className="text-brand-light">–</Text>
+                      <TimeButton
+                        time={hour.close}
+                        onPress={() => setPicker({ index, field: "close" })}
+                      />
+                    </View>
+                  )}
+                  <Switch
+                    value={!hour.closed}
+                    onValueChange={(open) => setHour(index, { closed: !open })}
+                    trackColor={{
+                      false: colors.mistDark,
+                      true: colors.brandLight,
+                    }}
+                    thumbColor={!hour.closed ? colors.brand : colors.white}
+                  />
+                </View>
+                {sameTime && (
+                  <View className="mt-1 flex-row items-center">
+                    <Ionicons
+                      name="alert-circle"
+                      size={13}
+                      color={colors.danger}
                     />
-                    <Text className="text-brand-light">–</Text>
-                    <TimeButton
-                      time={hour.close}
-                      onPress={() => setPicker({ index, field: "close" })}
-                    />
+                    <Text
+                      className="ml-1 text-xs font-semibold"
+                      style={{ color: colors.danger }}>
+                      Opening and closing time can't be the same. Change one, or
+                      switch the day off.
+                    </Text>
                   </View>
                 )}
-                <Switch
-                  value={!hour.closed}
-                  onValueChange={(open) => setHour(index, { closed: !open })}
-                  trackColor={{
-                    false: colors.mistDark,
-                    true: colors.brandLight,
-                  }}
-                  thumbColor={!hour.closed ? colors.brand : colors.white}
-                />
               </View>
             );
           })}

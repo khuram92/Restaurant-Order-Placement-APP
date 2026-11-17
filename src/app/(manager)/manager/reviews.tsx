@@ -288,13 +288,13 @@ export default function ManagerReviewsScreen() {
         d ? { ...more, reviews: [...d.reviews, ...more.reviews] } : more,
       );
     } catch {
-      // keep what we have
+      
     } finally {
       setLoadingMore(false);
     }
   };
 
-  /** A reply was posted → update that card + the unanswered count */
+ 
   const onReplied = (updated: ManagerReview) =>
     setData((d) => {
       if (!d) return d;

@@ -156,7 +156,7 @@ function BookingCard({ order }: { order: Order }) {
         </Text>
       )}
 
-      {/* Footer: type + total + action */}
+  
       <View
         className="mt-3 flex-row items-center border-t pt-3"
         style={{ borderColor: colors.mist }}>
