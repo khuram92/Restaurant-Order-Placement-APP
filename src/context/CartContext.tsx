@@ -1,4 +1,12 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import type { CartLine, CartRestaurant, CartSelection } from "../types/cart";
 import { useAuth } from "./AuthContext";
 
@@ -13,6 +21,7 @@ type CartContextValue = {
   add: (restaurant: CartRestaurant, selection: CartSelection) => AddResult;
   /** Empties the cart and starts a new one with this item */
   replaceWith: (restaurant: CartRestaurant, selection: CartSelection) => void;
+  fill: (restaurant: CartRestaurant, selections: CartSelection[]) => void;
   setQuantity: (key: string, quantity: number) => void;
   remove: (key: string) => void;
   clear: () => void;
@@ -24,7 +33,15 @@ const MAX_QTY = 20;
 
 /** Same item + size + add-ons + note → same line (quantities are merged) */
 const lineKey = (s: CartSelection) =>
-  [s.itemId, s.sizeId ?? "", s.addOns.map((a) => a.optionId).sort().join(","), s.note ?? ""].join("|");
+  [
+    s.itemId,
+    s.sizeId ?? "",
+    s.addOns
+      .map((a) => a.optionId)
+      .sort()
+      .join(","),
+    s.note ?? "",
+  ].join("|");
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
@@ -46,14 +63,22 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const key = lineKey(selection);
     const existing = prev.find((l) => l.key === key);
     if (existing) {
-      return prev.map((l) => (l.key === key ? { ...l, quantity: Math.min(MAX_QTY, l.quantity + selection.quantity) } : l));
+      return prev.map((l) =>
+        l.key === key
+          ? {
+              ...l,
+              quantity: Math.min(MAX_QTY, l.quantity + selection.quantity),
+            }
+          : l,
+      );
     }
     return [...prev, { ...selection, key }];
   };
 
   const add = useCallback(
     (r: CartRestaurant, selection: CartSelection): AddResult => {
-      if (restaurant && restaurant._id !== r._id && lines.length > 0) return "other-restaurant";
+      if (restaurant && restaurant._id !== r._id && lines.length > 0)
+        return "other-restaurant";
       setRestaurant(r);
       setLines((prev) => pushLine(prev, selection));
       return "added";
@@ -61,20 +86,37 @@ export function CartProvider({ children }: { children: ReactNode }) {
     [restaurant, lines.length],
   );
 
-  const replaceWith = useCallback((r: CartRestaurant, selection: CartSelection) => {
-    setRestaurant(r);
-    setLines(pushLine([], selection));
-  }, []);
+  const replaceWith = useCallback(
+    (r: CartRestaurant, selection: CartSelection) => {
+      setRestaurant(r);
+      setLines(pushLine([], selection));
+    },
+    [],
+  );
 
   const setQuantity = useCallback((key: string, quantity: number) => {
     setLines((prev) => {
-      const next = quantity <= 0 ? prev.filter((l) => l.key !== key) : prev.map((l) => (l.key === key ? { ...l, quantity: Math.min(MAX_QTY, quantity) } : l));
+      const next =
+        quantity <= 0
+          ? prev.filter((l) => l.key !== key)
+          : prev.map((l) =>
+              l.key === key
+                ? { ...l, quantity: Math.min(MAX_QTY, quantity) }
+                : l,
+            );
       if (next.length === 0) setRestaurant(null);
       return next;
     });
   }, []);
+  const fill = useCallback((r: CartRestaurant, selections: CartSelection[]) => {
+    setRestaurant(r);
+    setLines(selections.reduce<CartLine[]>((acc, s) => pushLine(acc, s), []));
+  }, []);
 
-  const remove = useCallback((key: string) => setQuantity(key, 0), [setQuantity]);
+  const remove = useCallback(
+    (key: string) => setQuantity(key, 0),
+    [setQuantity],
+  );
 
   const value = useMemo<CartContextValue>(
     () => ({
@@ -84,11 +126,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
       subtotal: lines.reduce((sum, l) => sum + l.unitPrice * l.quantity, 0),
       add,
       replaceWith,
+      fill,
       setQuantity,
       remove,
       clear,
     }),
-    [restaurant, lines, add, replaceWith, setQuantity, remove, clear],
+    [restaurant, lines, add, replaceWith, fill, setQuantity, remove, clear],
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
