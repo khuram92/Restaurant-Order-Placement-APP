@@ -1,9 +1,9 @@
-// ===== Fill these in before publishing =====
-const APP_NAME = "Restaurant Orders"; // the name shown on the Play Store
-const OWNER = "Muhammad Hashir"; // person or company that runs the app
-const CONTACT_EMAIL = "support@example.com"; // a real inbox you check
+
+const APP_NAME = "Restaurant Orders"; 
+const OWNER = "Muhammad Hashir"; 
+const CONTACT_EMAIL = "support@example.com"; 
 const EFFECTIVE_DATE = "18 November 2026";
-// ============================================
+
 
 const css = `
   :root { --brand:#4e5c4a; --dark:#2c3329; --light:#6f7d6a; --mist:#e0e1df; }
