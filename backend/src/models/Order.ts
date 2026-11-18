@@ -93,6 +93,7 @@ export interface IOrder {
   statusHistory: IStatusChange[];
   rejectReason?: string;
   cancelReason?: string;
+  cancelledBy?: "customer" | "system";
 }
 
 export type OrderDoc = HydratedDocument<IOrder>;
@@ -195,6 +196,7 @@ const orderSchema = new Schema<IOrder>(
     },
     rejectReason: { type: String, trim: true, maxlength: 200 },
     cancelReason: { type: String, trim: true, maxlength: 200 },
+      cancelledBy: { type: String, enum: ["customer", "system"] },
   },
   { timestamps: true },
 );
@@ -207,6 +209,7 @@ orderSchema.pre("validate", function () {
 orderSchema.index({ orderNumber: 1 }, { unique: true });
 orderSchema.index({ customerId: 1, createdAt: -1 }); // "My orders"
 orderSchema.index({ restaurantId: 1, status: 1, createdAt: -1 }); // manager's order board
+orderSchema.index({ status: 1, createdAt: 1 });
 
 orderSchema.set("toJSON", {
   transform: (_doc, ret) => {

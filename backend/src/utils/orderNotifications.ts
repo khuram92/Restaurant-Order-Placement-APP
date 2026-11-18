@@ -188,3 +188,41 @@ export const notifyReviewReply = async (review: {
     console.error("❌ Review reply notification failed:", (error as Error).message);
   }
 };
+
+/** Not accepted in time → tell the customer (inbox + push) and the manager */
+export const notifyAutoCancelled = async (order: OrderDoc, minutes: number) => {
+  const customerText = {
+    title: "⌛ Order cancelled",
+    body: `${order.restaurantName} didn't confirm order #${order.orderNumber} within ${minutes} minutes, so we cancelled it. You haven't been charged.`,
+  };
+  const managerText = {
+    title: `⌛ Order #${order.orderNumber} auto-cancelled`,
+    body: `It wasn't accepted within ${minutes} minutes. ${order.customerName} has been told.`,
+  };
+
+  try {
+    const restaurant = await Restaurant.findById(order.restaurantId).select("logo");
+    await Notification.create({
+      userId: order.customerId,
+      type: "order",
+      ...customerText,
+      orderId: order._id,
+      orderStatus: "cancelled",
+      restaurantName: order.restaurantName,
+      ...(restaurant?.logo && { restaurantImage: restaurant.logo }),
+    });
+  } catch (error) {
+    console.error("❌ Saving notification failed:", (error as Error).message);
+  }
+  await sendPushToUsers([order.customerId], {
+    ...customerText,
+    data: { type: "customer-order", orderId: String(order._id) },
+  });
+
+  const managerIds = await managerIdsOf(order);
+  await saveToInbox(managerIds, order, managerText, "cancelled");
+  await sendPushToUsers(managerIds, {
+    ...managerText,
+    data: { type: "manager-order", orderId: String(order._id) },
+  });
+};

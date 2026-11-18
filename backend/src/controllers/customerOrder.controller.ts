@@ -244,7 +244,7 @@ export const cancelMyOrder = async (req: Request, res: Response) => {
   const order = await findMyOrderOr404(req, res);
   if (!order) return;
 
-  const set: Record<string, unknown> = { status: "cancelled" };
+  const set: Record<string, unknown> = { status: "cancelled", cancelledBy: "customer" };
   if (parsed.data.reason) set.cancelReason = parsed.data.reason;
 
   // Cancel ONLY if it's still pending right now (the manager may have just accepted it)
