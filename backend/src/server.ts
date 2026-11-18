@@ -2,6 +2,7 @@ import "dotenv/config";
 import app from "./app.js";
 import connectDB from "./config/db.js";
 import { initRealtime } from "./utils/realtime.js";
+import { startAutoCancel } from "./utils/autoCancel.js";
 
 const PORT = Number(process.env.PORT) || 5000;
 
@@ -12,7 +13,8 @@ const startServer = async () => {
     console.log(`🚀 Server running on http://localhost:${PORT}`);
   });
 
-  initRealtime(server); // 3. live updates share the same port
+  initRealtime(server); 
+  startAutoCancel();
 };
 
 startServer();

@@ -4,7 +4,7 @@ import { emitOrderEvent } from "./realtime.js";
 
 /** Pending orders older than this are cancelled automatically (override in .env) */
 export const AUTO_CANCEL_MINUTES = Number(process.env.ORDER_AUTO_CANCEL_MINUTES) || 20;
-const CHECK_EVERY_MS = 60 * 1000; // look once a minute
+const CHECK_EVERY_MS = 60 * 1000; 
 
 /** Cancel every pending order the restaurant didn't accept in time */
 const cancelIgnoredOrders = async () => {
@@ -12,7 +12,7 @@ const cancelIgnoredOrders = async () => {
   const stale = await Order.find({ status: "pending", createdAt: { $lt: cutoff } }).select("_id").limit(100);
 
   for (const { _id } of stale) {
-    // Atomic: only if it's STILL pending (the manager may accept it this very second)
+    
     const order = await Order.findOneAndUpdate(
       { _id, status: "pending" },
       {
@@ -25,7 +25,7 @@ const cancelIgnoredOrders = async () => {
       },
       { new: true },
     );
-    if (!order) continue; // someone else got there first
+    if (!order) continue;
 
     emitOrderEvent("order:updated", order); // screens update live
     void notifyAutoCancelled(order, AUTO_CANCEL_MINUTES); // inbox + push
@@ -33,7 +33,7 @@ const cancelIgnoredOrders = async () => {
   }
 };
 
-/** Start the once-a-minute check (call after the database is connected) */
+
 export const startAutoCancel = () => {
   const run = () =>
     cancelIgnoredOrders().catch((error) =>
