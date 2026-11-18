@@ -10,6 +10,20 @@ import {
 export const ROLES = ["superadmin", "manager", "customer"] as const;
 export type Role = (typeof ROLES)[number];
 
+export interface ISavedAddress {
+  _id?: Types.ObjectId;
+  label: "home" | "work" | "other";
+  name?: string;
+  street: string;
+  area?: string;
+  city: string;
+  phone: string;
+  instructions?: string;
+  location?: { lat: number; lng: number };
+}
+
+export const MAX_SAVED_ADDRESSES = 5;
+
 export interface IUser {
   firstName?: string;
   lastName?: string;
@@ -22,6 +36,7 @@ export interface IUser {
   restaurantId?: Types.ObjectId;
   pushTokens: string[];
   favoriteRestaurants: Types.ObjectId[];
+  addresses: ISavedAddress[];
   isActive: boolean;
   mustChangePassword: boolean;
   profileCompleted: boolean;
@@ -56,6 +71,25 @@ const userSchema = new Schema<
       select: false,
     },
     password: { type: String, select: false, minlength: 8 },
+    addresses: {
+      type: [
+        new Schema<ISavedAddress>({
+          label: { type: String, enum: ["home", "work", "other"], required: true },
+          name: { type: String, trim: true, maxlength: 30 },
+          street: { type: String, trim: true, required: true, maxlength: 150 },
+          area: { type: String, trim: true, maxlength: 80 },
+          city: { type: String, trim: true, required: true, maxlength: 60 },
+          phone: { type: String, trim: true, required: true, match: /^03\d{9}$/ },
+          instructions: { type: String, trim: true, maxlength: 200 },
+          location: {
+            type: new Schema({ lat: Number, lng: Number }, { _id: false }),
+            default: undefined,
+          },
+        }),
+      ],
+      default: [],
+      select: false,
+    },
     role: { type: String, enum: ROLES, default: "customer" },
     restaurantId: { type: Schema.Types.ObjectId, ref: "Restaurant" },
     isActive: { type: Boolean, default: true },
