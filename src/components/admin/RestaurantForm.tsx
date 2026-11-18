@@ -657,12 +657,8 @@ export default function RestaurantForm({
 
   const baseFee = Number(values.deliveryFee) || 0;
   const perKm = Number(values.deliveryFeePerKm) || 0;
-  const exampleKm = Math.max(
-    1,
-    Math.min(3, Math.ceil(Number(values.deliveryRadiusKm) || 3)),
-  );
   const feeExample = perKm
-    ? `Customer ${exampleKm} km away pays Rs ${baseFee + perKm * exampleKm} (Rs ${baseFee} + Rs ${perKm} × ${exampleKm} km). Distance is rounded up to whole km.`
+    ? `Customer 1 km away pays Rs ${baseFee + perKm * 1} (Rs ${baseFee} + Rs ${perKm} × 1 km). Distance is rounded up to whole km.`
     : `Flat fee: every delivery costs Rs ${baseFee}. Add a per-km charge to charge more for longer trips.`;
   const [locating, setLocating] = useState(false);
   const [locationError, setLocationError] = useState("");
@@ -996,7 +992,7 @@ export default function RestaurantForm({
               style={{ backgroundColor: colors.mistLight }}>
               <Ionicons
                 name="calculator"
-                size={15}
+                size={16}
                 color={colors.brand}
                 style={{ marginTop: 1 }}
               />
