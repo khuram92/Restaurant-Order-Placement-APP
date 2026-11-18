@@ -14,6 +14,7 @@ import { cardShadow, colors } from "../../../constants/theme";
 import { useAuth } from "../../../context/AuthContext";
 import { openInApp, PRIVACY_URL } from "../../../lib/links";
 import { listMyOrders } from "../../../services/orderApi";
+import DeleteAccountSheet from "@/components/customer/DeleteAccountSheet";
 
 type IconName = ComponentProps<typeof Ionicons>["name"];
 
@@ -166,13 +167,16 @@ export default function ProfileScreen() {
       { text: "Cancel", style: "cancel" },
       { text: "Sign out", style: "destructive", onPress: signOut },
     ]);
-      const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   // Account is gone on the server: sign out here too (back to the login screen)
   const onAccountDeleted = async () => {
     setDeleteOpen(false);
     await signOut();
-    Alert.alert("Account deleted", "Your account and personal information have been deleted.");
+    Alert.alert(
+      "Account deleted",
+      "Your account and personal information have been deleted.",
+    );
   };
 
   return (
@@ -308,9 +312,9 @@ export default function ProfileScreen() {
           <Pressable
             onPress={() => setDeleteOpen(true)}
             hitSlop={6}
-            className="mt-4 flex-row items-center justify-center py-2">
-            <Ionicons name="trash" size={14} color={colors.danger} />
-            <Text className="ml-1.5 text-sm font-semibold" style={{ color: colors.danger }}>
+            className="flex-row items-center justify-center rounded-2xl mt-4 border-2 bg-red-500 py-4">
+            <Ionicons name="trash" size={16} color={colors.white} />
+            <Text className="ml-2 font-bold" style={{ color: colors.white }}>
               Delete account
             </Text>
           </Pressable>
@@ -320,6 +324,11 @@ export default function ProfileScreen() {
           </Text>
         </View>
       </ScrollView>
+      <DeleteAccountSheet
+        open={deleteOpen}
+        onClose={() => setDeleteOpen(false)}
+        onDeleted={onAccountDeleted}
+      />
     </View>
   );
 }
