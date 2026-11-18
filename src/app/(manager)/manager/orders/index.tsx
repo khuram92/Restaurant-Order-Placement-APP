@@ -1,19 +1,20 @@
 import { Ionicons } from "@expo/vector-icons";
-  import { router, Stack, useFocusEffect } from "expo-router";
-  import { useCallback, useEffect, useRef, useState } from "react";
+import { router, Stack, useFocusEffect } from "expo-router";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
   FlatList,
-  
   Pressable,
   RefreshControl,
   Text,
   TextInput,
   View,
 } from "react-native";
+import RejectSheet from "../../../../components/manager/RejectSheet";
 import { cardShadow, colors } from "../../../../constants/theme";
 import { getErrorMessage } from "../../../../lib/api";
+import { useOrderEvents } from "../../../../lib/realtime";
 import {
   listRestaurantOrders,
   updateOrderStatus,
@@ -29,18 +30,15 @@ import {
   nextOrderStatus,
   ORDER_STATUS_INFO,
   ORDER_TYPE_INFO,
+  stoppedLabel,
   timeAgo,
 } from "../../../../utils/orderFormat";
-import RejectSheet from "../../../../components/manager/RejectSheet";
-import { useOrderEvents } from "../../../../lib/realtime";
 
 const TABS: { key: ManagerOrderTab; label: string }[] = [
   { key: "new", label: "New" },
   { key: "active", label: "In progress" },
   { key: "past", label: "Past" },
 ];
-
-
 
 function OrderCard({
   order,
@@ -65,7 +63,7 @@ function OrderCard({
 
   return (
     <Pressable
-     onPress={onOpen}
+      onPress={onOpen}
       className="mb-3 rounded-3xl bg-white p-4"
       style={[
         cardShadow,
@@ -213,7 +211,7 @@ function OrderCard({
         <Text
           className="mt-2 text-sm italic font-medium"
           style={{ color: "red" }}>
-          {order.status === "rejected" ? "Rejected: " : "Customer cancelled: "}
+          {stoppedLabel(order, "manager")}
           {order.rejectReason || order.cancelReason}
         </Text>
       )}
@@ -304,8 +302,8 @@ export default function ManagerOrdersScreen() {
     setData(null);
     load(tab);
   }, [tab, search, load]);
-useOrderEvents(() => load(tabRef.current));
-  
+  useOrderEvents(() => load(tabRef.current));
+
   useFocusEffect(
     useCallback(() => {
       load(tabRef.current);
@@ -501,12 +499,17 @@ useOrderEvents(() => load(tabRef.current));
             flexGrow: 1,
           }}
           renderItem={({ item }) => (
-             <OrderCard
+            <OrderCard
               order={item}
               busy={busyId === item._id}
               onNext={() => confirmNext(item)}
               onReject={() => setRejecting(item)}
-              onOpen={() => router.push({ pathname: "/manager/orders/[id]", params: { id: item._id } })}
+              onOpen={() =>
+                router.push({
+                  pathname: "/manager/orders/[id]",
+                  params: { id: item._id },
+                })
+              }
             />
           )}
           onEndReached={loadMore}

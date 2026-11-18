@@ -29,6 +29,7 @@ import { cancelMyOrder, getMyOrder } from "../../../services/orderApi";
 import type { Order, OrderStatus } from "../../../types/order";
 import { money } from "../../../utils/menuFormat";
 import {
+  autoCancelIn,
   formatOrderDate,
   ORDER_STATUS_INFO,
   ORDER_TYPE_INFO,
@@ -44,7 +45,7 @@ const FINISHED: OrderStatus[] = ["completed", "rejected", "cancelled"];
 const statusMessage = (o: Order): string => {
   switch (o.status) {
     case "pending":
-      return `Waiting for ${o.restaurantName} to confirm your order`;
+      return `Waiting for ${o.restaurantName} to confirm. If they don't within ${autoCancelIn(o)} min, we'll cancel it for you.`
     case "accepted":
       return o.type === "dineIn"
         ? "Your table is held. The kitchen will start soon."
@@ -61,8 +62,10 @@ const statusMessage = (o: Order): string => {
       return "Thanks for ordering. See you again!";
     case "rejected":
       return o.rejectReason || "The restaurant couldn't take this order";
-    case "cancelled":
-      return o.cancelReason || "You cancelled this order";
+        case "cancelled":
+      return o.cancelledBy === "system"
+        ? `${o.restaurantName} didn't confirm in time, so we cancelled it. You haven't been charged.`
+        : o.cancelReason || "You cancelled this order";
   }
 };
 

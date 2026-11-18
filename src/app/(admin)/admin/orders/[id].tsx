@@ -27,6 +27,7 @@ import {
   formatOrderDate,
   ORDER_STATUS_INFO,
   ORDER_TYPE_INFO,
+  stoppedLabel,
   timeAgo,
 } from "../../../../utils/orderFormat";
 
@@ -220,9 +221,7 @@ export default function AdminOrderDetailScreen() {
             <Text
               className="ml-2 flex-1 text-sm"
               style={{ color: colors.danger }}>
-              {o.status === "rejected"
-                ? "Rejected by the restaurant: "
-                : "Cancelled by the customer: "}
+              {stoppedLabel(o, "admin")}
               {o.rejectReason || o.cancelReason}
             </Text>
           </View>

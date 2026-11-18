@@ -2,11 +2,11 @@ import { Order } from "../models/Order.js";
 import { notifyAutoCancelled } from "./orderNotifications.js";
 import { emitOrderEvent } from "./realtime.js";
 
-/** Pending orders older than this are cancelled automatically (override in .env) */
-export const AUTO_CANCEL_MINUTES = Number(process.env.ORDER_AUTO_CANCEL_MINUTES) || 20;
+
+export const AUTO_CANCEL_MINUTES =  20;
 const CHECK_EVERY_MS = 60 * 1000; 
 
-/** Cancel every pending order the restaurant didn't accept in time */
+
 const cancelIgnoredOrders = async () => {
   const cutoff = new Date(Date.now() - AUTO_CANCEL_MINUTES * 60 * 1000);
   const stale = await Order.find({ status: "pending", createdAt: { $lt: cutoff } }).select("_id").limit(100);
@@ -27,9 +27,9 @@ const cancelIgnoredOrders = async () => {
     );
     if (!order) continue;
 
-    emitOrderEvent("order:updated", order); // screens update live
-    void notifyAutoCancelled(order, AUTO_CANCEL_MINUTES); // inbox + push
-    console.log(`⌛ Auto-cancelled order #${order.orderNumber}`);
+    emitOrderEvent("order:updated", order);
+    void notifyAutoCancelled(order, AUTO_CANCEL_MINUTES); 
+    
   }
 };
 

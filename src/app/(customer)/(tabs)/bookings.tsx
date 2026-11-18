@@ -13,6 +13,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { cardShadow, colors } from "../../../constants/theme";
 import { useReorder } from "../../../hooks/useReorder";
 import { getErrorMessage } from "../../../lib/api";
+import { useOrderEvents } from "../../../lib/realtime";
 import { listMyOrders } from "../../../services/orderApi";
 import type {
   Order,
@@ -21,12 +22,13 @@ import type {
 } from "../../../types/order";
 import { money } from "../../../utils/menuFormat";
 import {
+  autoCancelIn,
   ORDER_STATUS_INFO,
   ORDER_TYPE_INFO,
+  stoppedLabel,
   timeAgo,
   trackerSteps,
 } from "../../../utils/orderFormat";
-import { useOrderEvents } from "../../../lib/realtime";
 
 type Tab = "active" | "past";
 
@@ -39,11 +41,10 @@ const itemsSummary = (o: Order) => {
   return shown.join(", ") + (more > 0 ? ` +${more} more` : "");
 };
 
-/** Friendly status line for running orders */
 const runningHint = (o: Order) => {
   switch (o.status) {
     case "pending":
-      return "Waiting for the restaurant to confirm";
+      return `Waiting for the restaurant · auto-cancels in ${autoCancelIn(o)} min`;
     case "accepted":
       return o.type === "dineIn"
         ? "Confirmed · your table is held"
@@ -154,7 +155,7 @@ function BookingCard({ order }: { order: Order }) {
           className="mt-2 text-xs italic"
           style={{ color: colors.danger }}
           numberOfLines={2}>
-          {order.status === "rejected" ? "Restaurant: " : "You cancelled: "}
+          {stoppedLabel(order, "customer")}
           {order.rejectReason || order.cancelReason}
         </Text>
       )}
@@ -174,7 +175,7 @@ function BookingCard({ order }: { order: Order }) {
         <Text className="ml-2 flex-1 text-base font-extrabold text-brand-dark">
           {money(order.total)}
         </Text>
-                {!running && (
+        {!running && (
           <Pressable
             onPress={() => reorder(order._id)}
             disabled={!!busyId}
@@ -186,7 +187,9 @@ function BookingCard({ order }: { order: Order }) {
             ) : (
               <Ionicons name="repeat" size={13} color={colors.white} />
             )}
-            <Text className="ml-1 text-xs font-bold text-white">Order again</Text>
+            <Text className="ml-1 text-xs font-bold text-white">
+              Order again
+            </Text>
           </Pressable>
         )}
         <View className="flex-row items-center">
@@ -247,7 +250,7 @@ export default function BookingsScreen() {
     setData(null);
     load(tab);
   }, [tab, load]);
-useOrderEvents(() => load(tabRef.current));
+  useOrderEvents(() => load(tabRef.current));
   // While this screen is open: refresh every 20 s (statuses move on their own)
   useFocusEffect(
     useCallback(() => {

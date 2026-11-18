@@ -23,6 +23,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import RejectSheet from "../../../../components/manager/RejectSheet";
 import { cardShadow, colors } from "../../../../constants/theme";
 import { getErrorMessage } from "../../../../lib/api";
+import { useOrderEvents } from "../../../../lib/realtime";
 import {
   getRestaurantOrder,
   updateOrderStatus,
@@ -36,9 +37,9 @@ import {
   nextOrderStatus,
   ORDER_STATUS_INFO,
   ORDER_TYPE_INFO,
+  stoppedLabel,
   timeAgo,
 } from "../../../../utils/orderFormat";
-import { useOrderEvents } from "../../../../lib/realtime";
 
 type IconName = ComponentProps<typeof Ionicons>["name"];
 
@@ -151,7 +152,7 @@ export default function ManagerOrderDetailScreen() {
   useEffect(() => {
     load();
   }, [load]);
-useOrderEvents((e) => {
+  useOrderEvents((e) => {
     if (!e || e.orderId === String(id)) load();
   });
   // Refresh every 15 s while the order is still running (e.g. the customer cancels)
@@ -325,9 +326,7 @@ useOrderEvents((e) => {
             <Text
               className="ml-2 flex-1 text-sm"
               style={{ color: colors.danger }}>
-              {o.status === "rejected"
-                ? "You rejected it: "
-                : "The customer cancelled: "}
+              {stoppedLabel(o, "manager")}
               {o.rejectReason || o.cancelReason}
             </Text>
           </View>
