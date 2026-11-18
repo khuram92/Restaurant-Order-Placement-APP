@@ -32,6 +32,7 @@ import {
   timeAgo,
 } from "../../../../utils/orderFormat";
 import RejectSheet from "../../../../components/manager/RejectSheet";
+import { useOrderEvents } from "../../../../lib/realtime";
 
 const TABS: { key: ManagerOrderTab; label: string }[] = [
   { key: "new", label: "New" },
@@ -303,8 +304,8 @@ export default function ManagerOrdersScreen() {
     setData(null);
     load(tab);
   }, [tab, search, load]);
-
-  // While this screen is open: refresh every 15 s (new orders show up on their own)
+useOrderEvents(() => load(tabRef.current));
+  
   useFocusEffect(
     useCallback(() => {
       load(tabRef.current);

@@ -5,7 +5,7 @@ import "../../global.css";
 import { AuthProvider, useAuth } from "../context/AuthContext";
 import { CartProvider } from "../context/CartContext";
 import { usePushNotifications } from "../hooks/usePushNotifications";
-
+import { useRealtime } from "../hooks/useRealtime";
 
 LogBox.ignoreLogs(["ImageBackground is deprecated"]);
 SplashScreen.preventAutoHideAsync();
@@ -32,7 +32,8 @@ function RootNavigator() {
   const canOpenOrders =
     (isManager && !mustChangePassword) || (isCustomer && !needsProfile);
   usePushNotifications(user, !isLoading && canOpenOrders);
-  
+  useRealtime(user, !isLoading && (canOpenOrders || isSuperAdmin));
+
   useEffect(() => {
     if (isLoading) return;
     const group = segments[0];

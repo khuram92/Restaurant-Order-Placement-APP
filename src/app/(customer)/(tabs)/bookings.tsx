@@ -26,6 +26,7 @@ import {
   timeAgo,
   trackerSteps,
 } from "../../../utils/orderFormat";
+import { useOrderEvents } from "../../../lib/realtime";
 
 type Tab = "active" | "past";
 
@@ -246,7 +247,7 @@ export default function BookingsScreen() {
     setData(null);
     load(tab);
   }, [tab, load]);
-
+useOrderEvents(() => load(tabRef.current));
   // While this screen is open: refresh every 20 s (statuses move on their own)
   useFocusEffect(
     useCallback(() => {

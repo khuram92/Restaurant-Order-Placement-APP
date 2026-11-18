@@ -46,6 +46,7 @@ import {
   ORDER_TYPE_INFO,
   timeAgo,
 } from "../../../../utils/orderFormat";
+import { useOrderEvents } from "../../../../lib/realtime";
 
 const TABS: { key: AdminOrderTab; label: string }[] = [
   { key: "all", label: "All" },
@@ -396,6 +397,7 @@ export default function AdminOrdersScreen() {
       load(filtersRef.current);
     }, [load]),
   );
+  useOrderEvents(() => load(filtersRef.current));
 
   const loadMore = async () => {
     if (!data || loadingMore || loading || data.page >= data.pages) return;

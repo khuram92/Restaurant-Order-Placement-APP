@@ -34,6 +34,7 @@ import {
   ORDER_TYPE_INFO,
   trackerSteps,
 } from "../../../utils/orderFormat";
+import { useOrderEvents } from "../../../lib/realtime";
 
 type IconName = ComponentProps<typeof Ionicons>["name"];
 
@@ -330,7 +331,9 @@ export default function OrderScreen() {
   useEffect(() => {
     load();
   }, [load]);
-
+useOrderEvents((e) => {
+    if (!e || e.orderId === String(id)) load();
+  });
   // Check for updates every 20 s while the order is still running
   const running = !!order && !FINISHED.includes(order.status);
   useEffect(() => {

@@ -38,6 +38,7 @@ import {
   ORDER_TYPE_INFO,
   timeAgo,
 } from "../../../../utils/orderFormat";
+import { useOrderEvents } from "../../../../lib/realtime";
 
 type IconName = ComponentProps<typeof Ionicons>["name"];
 
@@ -150,7 +151,9 @@ export default function ManagerOrderDetailScreen() {
   useEffect(() => {
     load();
   }, [load]);
-
+useOrderEvents((e) => {
+    if (!e || e.orderId === String(id)) load();
+  });
   // Refresh every 15 s while the order is still running (e.g. the customer cancels)
   const running = !!order && !FINISHED.includes(order.status);
   useEffect(() => {
