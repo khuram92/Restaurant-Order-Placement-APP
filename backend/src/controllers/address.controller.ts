@@ -79,16 +79,16 @@ export const updateAddress = async (req: Request, res: Response) => {
   res.json({ message: "Address updated", addresses: sorted(me.addresses) });
 };
 
-// /** DELETE /api/auth/addresses/:addressId */
-// export const deleteAddress = async (req: Request, res: Response) => {
-//   const id = String(req.params.addressId);
-//   if (!mongoose.isValidObjectId(id)) return res.status(400).json({ message: "Invalid address" });
+/** DELETE /api/auth/addresses/:addressId */
+export const deleteAddress = async (req: Request, res: Response) => {
+  const id = String(req.params.addressId);
+  if (!mongoose.isValidObjectId(id)) return res.status(400).json({ message: "Invalid address" });
 
-//   const updated = await User.findByIdAndUpdate(
-//     req.user!._id,
-//     { $pull: { addresses: { _id: id } } },
-//     { new: true },
-//   ).select("+addresses");
+  const updated = await User.findByIdAndUpdate(
+    req.user!._id,
+    { $pull: { addresses: { _id: id } } },
+    { new: true },
+  ).select("+addresses");
 
-//   res.json({ message: "Address deleted", addresses: sorted(updated?.addresses ?? []) });
-// };
+  res.json({ message: "Address deleted", addresses: sorted(updated?.addresses ?? []) });
+};
