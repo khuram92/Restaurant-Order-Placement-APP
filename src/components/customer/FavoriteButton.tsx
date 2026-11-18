@@ -5,7 +5,7 @@ import { colors } from "../../constants/theme";
 import { getErrorMessage } from "../../lib/api";
 import { setFavorite } from "../../services/restaurantApi";
 
-const HEART_RED = colors.danger;
+const HEART_RED = colors.brandDark;
 
 interface Props {
   restaurantId: string;
@@ -51,7 +51,9 @@ export default function FavoriteButton({
       accessibilityRole="button"
       accessibilityLabel={on ? "Remove from favourites" : "Add to favourites"}
       className={`${box} items-center justify-center rounded-full active:opacity-80`}
-      style={{ backgroundColor: on ? colors.white : "rgba(44,51,41,0.45)" }}>
+      style={{
+        backgroundColor: on ? colors.brandSoft : "rgba(44,51,41,0.45)",
+      }}>
       <Ionicons
         name="heart"
         size={size === "md" ? 22 : 19}
