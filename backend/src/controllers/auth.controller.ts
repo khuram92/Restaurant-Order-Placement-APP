@@ -13,7 +13,7 @@ import {
 import { sendOtp } from "../utils/sendOtp.js";
 import { uploadAvatarImage } from "../utils/cloudinary.js";
 import { checkOtpLimits, clientIp, recordOtpRequest } from "../utils/otpLimits.js";
-
+import { clearFailures, lockMessage, recordFailure } from "../utils/loginLock.js";
 
 const OTP_EXPIRES_MINUTES = Number(process.env.OTP_EXPIRES_MINUTES) || 5;
 const OTP_RESEND_SECONDS = Number(process.env.OTP_RESEND_SECONDS) || 60;
@@ -75,7 +75,15 @@ export const staffLogin = async (req: Request, res: Response) => {
     return res.status(400).json({ message: parsed.error.issues[0]?.message });
   }
 
-  const { email, password } = parsed.data;
+    const { email, password } = parsed.data;
+
+  // Locked after too many wrong passwords? (checked before the password, so guessing stops)
+  const locked = await lockMessage(email);
+  if (locked) {
+    res.set("Retry-After", String(locked.retryAfterSeconds));
+    return res.status(423).json(locked);
+  }
+
   const user = await User.findOne({ email }).select("+password");
 
   if (
@@ -83,8 +91,18 @@ export const staffLogin = async (req: Request, res: Response) => {
     user.role === "customer" ||
     !(await user.comparePassword(password))
   ) {
-    return res.status(401).json({ message: "Invalid email or password" });
+    // Counted for unknown emails too, so the reply never reveals which emails exist
+    const left = await recordFailure(email);
+    return res.status(left === 0 ? 423 : 401).json({
+      message:
+        left === 0
+          ? "Too many wrong passwords. This account is locked for 15 minutes."
+          : left <= 2
+            ? `Invalid email or password. ${left} attempt${left === 1 ? "" : "s"} left.`
+            : "Invalid email or password",
+    });
   }
+  await clearFailures(email);
   if (!user.isActive) {
     return res.status(403).json({ message: "Account is deactivated" });
   }
@@ -288,7 +306,6 @@ export const uploadAvatar = async (req: Request, res: Response) => {
 };
 /**
  * PATCH /api/auth/change-password   { currentPassword, newPassword }
- * Super Admin & Managers. Clears mustChangePassword.
  */
 export const changePassword = async (req: Request, res: Response) => {
   const parsed = changePasswordSchema.safeParse(req.body);
@@ -297,10 +314,25 @@ export const changePassword = async (req: Request, res: Response) => {
   }
   const { currentPassword, newPassword } = parsed.data;
 
+    // Same lock for guessing the current password on a stolen, logged-in phone
+  const key = `pw:${req.user!._id}`;
+  const locked = await lockMessage(key);
+  if (locked) {
+    res.set("Retry-After", String(locked.retryAfterSeconds));
+    return res.status(423).json(locked);
+  }
+
   const user = await User.findById(req.user!._id).select("+password");
   if (!user || !(await user.comparePassword(currentPassword))) {
-    return res.status(400).json({ message: "Current password is incorrect" });
+    const left = await recordFailure(key);
+    return res.status(left === 0 ? 423 : 400).json({
+      message:
+        left === 0
+          ? "Too many wrong passwords. Try again in 15 minutes."
+          : `Current password is incorrect. ${left} attempt${left === 1 ? "" : "s"} left.`,
+    });
   }
+  await clearFailures(key);
   if (currentPassword === newPassword) {
     return res.status(400).json({ message: "Choose a password different from the current one" });
   }

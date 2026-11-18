@@ -65,5 +65,5 @@ export const recordFailure = async (key: string) => {
   return MAX_FAILS - doc.fails;
 };
 
-/** Correct password → forget the wrong ones */
+
 export const clearFailures = (key: string) => LoginLock.deleteOne({ key });
