@@ -23,13 +23,16 @@ import { useCart } from "../../context/CartContext";
 import { getErrorMessage } from "../../lib/api";
 import { getCurrentAddress } from "../../lib/location";
 import { setMyLocation, useMyLocation } from "../../lib/myLocation";
+import { getAddresses, saveAddress } from "../../services/addressApi";
 import { placeOrder } from "../../services/orderApi";
 import {
   getCustomerRestaurant,
   getSeatAvailability,
   type SeatAvailability,
 } from "../../services/restaurantApi";
+import type { AddressLabel, SavedAddress } from "../../types/address";
 import type { OrderType, PlaceOrderInput } from "../../types/order";
+import { ADDRESS_LABEL_INFO, addressTitle } from "../../utils/addressFormat";
 import { deliveryFeeFor } from "../../utils/deliveryFee";
 import { distanceKm, formatKm } from "../../utils/geo";
 import { money } from "../../utils/menuFormat";
@@ -171,7 +174,48 @@ export default function CheckoutScreen() {
   }, [myLoc]);
   const [locating, setLocating] = useState(false);
   const [locationError, setLocationError] = useState("");
+  const [saved, setSaved] = useState<SavedAddress[] | null>(null);
+  const [pickedId, setPickedId] = useState<string | null>(null);
+  const [saveAs, setSaveAs] = useState<AddressLabel | "none">("none");
+  const [saveName, setSaveName] = useState("");
 
+  const pickAddress = (a: SavedAddress) => {
+    setPickedId(a._id);
+    setStreet(a.street);
+    setArea(a.area ?? "");
+    setCity(a.city);
+    setPhone(a.phone);
+    setInstructions(a.instructions ?? "");
+    setPin(a.location ?? null);
+    setSaveAs("none");
+    setLocationError("");
+  };
+
+  const newAddress = () => {
+    setPickedId(null);
+    setStreet("");
+    setArea("");
+    setCity("");
+    setInstructions("");
+    setPin(null);
+  };
+
+  const edited =
+    <T,>(setter: (v: T) => void) =>
+    (v: T) => {
+      setter(v);
+      setPickedId(null);
+    };
+  useEffect(() => {
+    if (type !== "delivery" || saved) return;
+    getAddresses()
+      .then((list) => {
+        setSaved(list);
+        if (list[0] && !street.trim() && !pin) pickAddress(list[0]);
+      })
+      .catch(() => setSaved([])); // checkout still works without them
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [type]);
   const [zone, setZone] = useState<{
     center: { lat: number; lng: number } | null;
     radiusKm: number;
@@ -241,6 +285,7 @@ export default function CheckoutScreen() {
     try {
       const here = await getCurrentAddress();
       setMyLocation(here, true);
+      setPickedId(null);
       setPin({ lat: here.lat, lng: here.lng });
       if (here.street) setStreet(here.street);
       if (here.area) setArea(here.area);
@@ -271,6 +316,8 @@ export default function CheckoutScreen() {
         return setError(
           `You're ${formatKm(distance)} away. ${restaurant.name} delivers within ${zone?.radiusKm} km.`,
         );
+      if (saveAs === "other" && !saveName.trim())
+        return setError("Give the address a name to save.");
     }
     if (type === "dineIn" && seats && partySize > seats.free) {
       return setError(
@@ -298,7 +345,7 @@ export default function CheckoutScreen() {
         phone: phone.trim(),
         ...(area.trim() && { area: area.trim() }),
         ...(instructions.trim() && { instructions: instructions.trim() }),
-        ...(instructions.trim() && { instructions: instructions.trim() }),
+
         ...(pin && { location: pin }),
       };
     }
@@ -308,6 +355,15 @@ export default function CheckoutScreen() {
     try {
       const order = await placeOrder(input);
       clear();
+      if (type === "delivery" && saveAs !== "none" && input.delivery) {
+        const { location, ...rest } = input.delivery;
+        saveAddress({
+          ...rest,
+          label: saveAs,
+          ...(saveAs === "other" && { name: saveName.trim() }),
+          ...(location && { location }),
+        }).catch(() => {});
+      }
       router.replace({
         pathname: "/order/[id]",
         params: { id: order._id, placed: "1" },
@@ -411,6 +467,52 @@ export default function CheckoutScreen() {
 
           {type === "delivery" && (
             <Card title="Delivery address" icon="location">
+              {!!saved?.length && (
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  className="-mx-1 mb-3"
+                  contentContainerStyle={{ paddingHorizontal: 4, gap: 8 }}>
+                  {saved.map((a) => {
+                    const on = pickedId === a._id;
+                    return (
+                      <Pressable
+                        key={a._id}
+                        onPress={() => pickAddress(a)}
+                        className="flex-row items-center rounded-full border-2 px-3.5 py-2"
+                        style={{
+                          borderColor: on ? colors.brand : colors.mistDark,
+                          backgroundColor: on ? colors.brand : colors.white,
+                        }}>
+                        <Ionicons
+                          name={ADDRESS_LABEL_INFO[a.label].icon}
+                          size={15}
+                          color={on ? colors.white : colors.brand}
+                        />
+                        <Text
+                          className="ml-1.5 text-sm font-bold"
+                          style={{ color: on ? colors.white : colors.brand }}>
+                          {addressTitle(a)}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                  <Pressable
+                    onPress={newAddress}
+                    className="flex-row items-center rounded-full border-2 border-dashed px-3.5 py-2"
+                    style={{
+                      borderColor: colors.brandLight,
+                      backgroundColor: pickedId
+                        ? colors.white
+                        : colors.mistLight,
+                    }}>
+                    <Ionicons name="add" size={16} color={colors.brand} />
+                    <Text className="ml-1 text-sm font-bold text-brand">
+                      New
+                    </Text>
+                  </Pressable>
+                </ScrollView>
+              )}
               <Pressable
                 onPress={fillMyLocation}
                 disabled={locating}
@@ -477,7 +579,7 @@ export default function CheckoutScreen() {
               <Field
                 label="Street / house"
                 value={street}
-                onChangeText={(t) => (setStreet(t), clearError())}
+                onChangeText={(t) => (edited(setStreet)(t), clearError())}
                 placeholder="House 12, Street 5"
                 maxLength={150}
               />
@@ -486,7 +588,7 @@ export default function CheckoutScreen() {
                   <Field
                     label="Area"
                     value={area}
-                    onChangeText={setArea}
+                    onChangeText={edited(setArea)}
                     placeholder="Gulberg"
                     optional
                     maxLength={80}
@@ -496,7 +598,7 @@ export default function CheckoutScreen() {
                   <Field
                     label="City"
                     value={city}
-                    onChangeText={(t) => (setCity(t), clearError())}
+                    onChangeText={(t) => (edited(setCity)(t), clearError())}
                     placeholder="Lahore"
                     maxLength={60}
                   />
@@ -506,7 +608,7 @@ export default function CheckoutScreen() {
                 label="Phone for the rider"
                 value={phone}
                 onChangeText={(t) => (
-                  setPhone(t.replace(/[^\d]/g, "")),
+                  edited(setPhone)(t.replace(/[^\d]/g, "")),
                   clearError()
                 )}
                 placeholder="03001234567"
@@ -516,11 +618,67 @@ export default function CheckoutScreen() {
               <Field
                 label="Directions"
                 value={instructions}
-                onChangeText={setInstructions}
+                onChangeText={edited(setInstructions)}
                 placeholder="Near the blue gate"
                 optional
                 maxLength={200}
               />
+              {!pickedId && (
+                <View
+                  className="mt-1 rounded-2xl p-3"
+                  style={{ backgroundColor: colors.mistLight }}>
+                  <Text className="mb-2 text-sm font-semibold text-brand-dark">
+                    Save this address?
+                  </Text>
+                  <View className="flex-row flex-wrap gap-2">
+                    {(["none", "home", "work", "other"] as const).map((l) => {
+                      const on = saveAs === l;
+                      return (
+                        <Pressable
+                          key={l}
+                          onPress={() => setSaveAs(l)}
+                          className="flex-row items-center rounded-full px-3 py-1.5"
+                          style={{
+                            backgroundColor: on ? colors.brand : colors.white,
+                          }}>
+                          {l !== "none" && (
+                            <Ionicons
+                              name={ADDRESS_LABEL_INFO[l].icon}
+                              size={13}
+                              color={on ? colors.white : colors.brand}
+                            />
+                          )}
+                          <Text
+                            className={`text-sm font-semibold ${l !== "none" ? "ml-1" : ""}`}
+                            style={{ color: on ? colors.white : colors.brand }}>
+                            {l === "none"
+                              ? "Don't save"
+                              : ADDRESS_LABEL_INFO[l].label}
+                          </Text>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                  {saveAs === "other" && (
+                    <View className="mt-3">
+                      <Field
+                        label="Name"
+                        value={saveName}
+                        onChangeText={setSaveName}
+                        placeholder="Mom's place"
+                        maxLength={30}
+                      />
+                    </View>
+                  )}
+                  {(saveAs === "home" || saveAs === "work") &&
+                    saved?.some((a) => a.label === saveAs) && (
+                      <Text className="mt-2 text-xs text-brand-light">
+                        This replaces your saved{" "}
+                        {ADDRESS_LABEL_INFO[saveAs].label} address.
+                      </Text>
+                    )}
+                </View>
+              )}
             </Card>
           )}
 
