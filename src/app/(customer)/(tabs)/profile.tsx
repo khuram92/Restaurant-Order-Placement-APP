@@ -264,6 +264,12 @@ export default function ProfileScreen() {
               onPress={() => router.push("/my-reviews")}
             />
             <LinkRow
+              icon="location"
+              label="Saved addresses"
+              hint="Home, Work and more for quick checkout"
+              onPress={() => router.push("/addresses")}
+            />
+            <LinkRow
               icon="help-circle"
               label="Help & support"
               hint="Questions about an order"
