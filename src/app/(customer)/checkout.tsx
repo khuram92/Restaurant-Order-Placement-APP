@@ -22,6 +22,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useCart } from "../../context/CartContext";
 import { getErrorMessage } from "../../lib/api";
 import { getCurrentAddress } from "../../lib/location";
+import { setMyLocation, useMyLocation } from "../../lib/myLocation";
 import { placeOrder } from "../../services/orderApi";
 import {
   getCustomerRestaurant,
@@ -32,7 +33,6 @@ import type { OrderType, PlaceOrderInput } from "../../types/order";
 import { distanceKm, formatKm } from "../../utils/geo";
 import { money } from "../../utils/menuFormat";
 import { ORDER_TYPE_INFO } from "../../utils/orderFormat";
-import { setMyLocation, useMyLocation } from "../../lib/myLocation";
 
 const PK_PHONE = /^03\d{9}$/;
 const TYPE_HINT: Record<OrderType, string> = {
@@ -156,7 +156,7 @@ export default function CheckoutScreen() {
   const [note, setNote] = useState("");
 
   const [pin, setPin] = useState<{ lat: number; lng: number } | null>(null);
-    const myLoc = useMyLocation();
+  const myLoc = useMyLocation();
 
   // Already located on Home (Nearest) → use it as the delivery pin straight away
   useEffect(() => {
@@ -174,6 +174,7 @@ export default function CheckoutScreen() {
   const [zone, setZone] = useState<{
     center: { lat: number; lng: number } | null;
     radiusKm: number;
+    perKm: number;
   } | null>(null);
 
   useEffect(() => {
@@ -184,6 +185,7 @@ export default function CheckoutScreen() {
         setZone({
           center: c ? { lat: c[1], lng: c[0] } : null,
           radiusKm: r.deliveryRadiusKm,
+          perKm: r.deliveryFeePerKm ?? 0,
         });
       })
       .catch(() => {}); // the backend still checks when the order is placed
@@ -212,8 +214,6 @@ export default function CheckoutScreen() {
   }
 
   const tax = Math.round((subtotal * restaurant.taxRate) / 100);
-  const deliveryFee = type === "delivery" ? restaurant.deliveryFee : 0;
-  const total = subtotal + tax + deliveryFee;
 
   const clearError = () => error && setError("");
 
@@ -224,14 +224,22 @@ export default function CheckoutScreen() {
     distance !== null &&
     distance > (zone?.radiusKm ?? 0);
   const needsPin = type === "delivery" && !!zone?.center && !pin;
-
+  // Base fee + per-km charge (same formula as the server)
+  const perKm = zone?.perKm ?? 0;
+  const deliveryFee =
+    type === "delivery"
+      ? deliveryFeeFor(restaurant.deliveryFee, perKm, distance ?? undefined)
+      : 0;
+  const chargedKm = distance !== null ? Math.max(1, Math.ceil(distance)) : null;
+  const feeWaitsForPin = type === "delivery" && perKm > 0 && distance === null;
+  const total = subtotal + tax + deliveryFee;
   const fillMyLocation = async () => {
     setLocating(true);
     setLocationError("");
     clearError();
     try {
       const here = await getCurrentAddress();
-      setMyLocation(here, true); 
+      setMyLocation(here, true);
       setPin({ lat: here.lat, lng: here.lng });
       if (here.street) setStreet(here.street);
       if (here.area) setArea(here.area);
@@ -725,13 +733,29 @@ export default function CheckoutScreen() {
                 </View>
               )}
               {type === "delivery" && (
-                <View className="flex-row justify-between py-0.5">
-                  <Text className="text-sm text-brand font-normal">
-                    Delivery fee
-                  </Text>
-                  <Text className="text-sm text-brand-dark font-normal">
-                    {deliveryFee > 0 ? money(deliveryFee) : "Free"}
-                  </Text>
+                <View className="py-0.5">
+                  <View className="flex-row justify-between">
+                    <Text className="text-sm text-brand font-normal">
+                      Delivery fee
+                      {distance !== null && perKm > 0
+                        ? ` · ${formatKm(distance)}`
+                        : ""}
+                    </Text>
+                    <Text className="text-sm text-brand-dark font-normal">
+                      {feeWaitsForPin
+                        ? `from ${money(deliveryFee)}`
+                        : deliveryFee > 0
+                          ? money(deliveryFee)
+                          : "Free"}
+                    </Text>
+                  </View>
+                  {perKm > 0 && (
+                    <Text className="text-xs text-brand-light">
+                      {chargedKm !== null
+                        ? `${money(restaurant.deliveryFee)} + ${money(perKm)} × ${chargedKm} km`
+                        : `${money(restaurant.deliveryFee)} + ${money(perKm)}/km · add your location to see the exact fee`}
+                    </Text>
+                  )}
                 </View>
               )}
               <View className="mt-1 flex-row justify-between">

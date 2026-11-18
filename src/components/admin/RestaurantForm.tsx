@@ -20,6 +20,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { cardShadow, colors } from "../../constants/theme";
+import { getCurrentAddress } from "../../lib/location";
 import type {
   Day,
   OpeningHour,
@@ -27,7 +28,6 @@ import type {
   Restaurant,
   RestaurantInput,
 } from "../../types/restaurant";
-import { getCurrentAddress } from "../../lib/location";
 
 export interface RestaurantFormValues {
   name: string;
@@ -42,6 +42,7 @@ export interface RestaurantFormValues {
   lng: string;
   services: { dineIn: boolean; takeaway: boolean; delivery: boolean };
   deliveryFee: string;
+  deliveryFeePerKm: string;
   minOrder: string;
   deliveryRadiusKm: string;
   taxRate: string;
@@ -93,6 +94,7 @@ export const emptyRestaurantValues = (): RestaurantFormValues => ({
   deliveryFee: "0",
   minOrder: "0",
   deliveryRadiusKm: "5",
+  deliveryFeePerKm: "0",
   taxRate: "0",
 
   seatingCapacity: "0",
@@ -119,6 +121,7 @@ export const restaurantToValues = (r: Restaurant): RestaurantFormValues => ({
   deliveryFee: String(r.deliveryFee),
   minOrder: String(r.minOrder),
   deliveryRadiusKm: String(r.deliveryRadiusKm),
+  deliveryFeePerKm: String(r.deliveryFeePerKm ?? 0),
   taxRate: String(r.taxRate),
   seatingCapacity: String(r.seatingCapacity ?? 0),
   openingHours: r.openingHours.map((h) => ({ ...h })),
@@ -150,7 +153,7 @@ export const valuesToInput = (
     minOrder: num(v.minOrder),
     deliveryRadiusKm: num(v.deliveryRadiusKm),
     taxRate: num(v.taxRate),
-
+    deliveryFeePerKm: num(v.deliveryFeePerKm),
     seatingCapacity: num(v.seatingCapacity),
   };
   if (Object.values(fields).some((n) => Number.isNaN(n) || n < 0)) {
@@ -652,7 +655,16 @@ export default function RestaurantForm({
     field: "open" | "close";
   } | null>(null);
 
-    const [locating, setLocating] = useState(false);
+  const baseFee = Number(values.deliveryFee) || 0;
+  const perKm = Number(values.deliveryFeePerKm) || 0;
+  const exampleKm = Math.max(
+    1,
+    Math.min(3, Math.ceil(Number(values.deliveryRadiusKm) || 3)),
+  );
+  const feeExample = perKm
+    ? `Customer ${exampleKm} km away pays Rs ${baseFee + perKm * exampleKm} (Rs ${baseFee} + Rs ${perKm} × ${exampleKm} km). Distance is rounded up to whole km.`
+    : `Flat fee: every delivery costs Rs ${baseFee}. Add a per-km charge to charge more for longer trips.`;
+  const [locating, setLocating] = useState(false);
   const [locationError, setLocationError] = useState("");
 
   /** Fill lat/lng from the phone's GPS (stand inside the restaurant) */
@@ -859,7 +871,9 @@ export default function RestaurantForm({
               <ActivityIndicator size="small" color={colors.brand} />
             ) : (
               <Ionicons
-                name={values.lat && values.lng ? "checkmark-circle" : "navigate"}
+                name={
+                  values.lat && values.lng ? "checkmark-circle" : "navigate"
+                }
                 size={18}
                 color={colors.brand}
               />
@@ -950,22 +964,47 @@ export default function RestaurantForm({
               disabled={deliveryOff}
             />
             <Field
-              label="Delivery fee"
+              label="Delivery radius"
+              value={values.deliveryRadiusKm}
+              onChangeText={(t) => set("deliveryRadiusKm", t)}
+              keyboardType="decimal-pad"
+              suffix="km"
+              disabled={deliveryOff}
+            />
+          </View>
+          <View className="flex-row gap-3">
+            <Field
+              label="Base fee"
               value={values.deliveryFee}
               onChangeText={(t) => set("deliveryFee", t)}
               keyboardType="decimal-pad"
               suffix="Rs"
               disabled={deliveryOff}
             />
+            <Field
+              label="Per km"
+              value={values.deliveryFeePerKm}
+              onChangeText={(t) => set("deliveryFeePerKm", t)}
+              keyboardType="decimal-pad"
+              suffix="Rs"
+              disabled={deliveryOff}
+            />
           </View>
-          <Field
-            label="Delivery radius"
-            value={values.deliveryRadiusKm}
-            onChangeText={(t) => set("deliveryRadiusKm", t)}
-            keyboardType="decimal-pad"
-            suffix="km"
-            disabled={deliveryOff}
-          />
+          {!deliveryOff && (
+            <View
+              className="-mt-1 mb-4 flex-row items-start rounded-2xl px-3 py-2.5"
+              style={{ backgroundColor: colors.mistLight }}>
+              <Ionicons
+                name="calculator"
+                size={15}
+                color={colors.brand}
+                style={{ marginTop: 1 }}
+              />
+              <Text className="ml-2 flex-1 text-xs text-brand-dark">
+                {feeExample}
+              </Text>
+            </View>
+          )}
 
           {/* Dine-in settings */}
           <Text className="mb-2 mt-1 text-xs font-bold uppercase tracking-wide text-brand-light">
