@@ -55,5 +55,5 @@ export const checkOtpLimits = async (identifier: string, ip: string): Promise<Li
 };
 
 /** Count this request (call right before sending the code) */
-export const recordOtpRequest = (identifier: string, ip: string, purpose: "login" | "contact") =>
+export const recordOtpRequest = (identifier: string, ip: string, purpose: "login" | "contact" | "delete") =>
   OtpRequest.create({ identifier, ip, purpose });
