@@ -1,5 +1,9 @@
 import { Router } from "express";
 import {
+  confirmAccountDeletion,
+  requestAccountDeletion,
+} from "../controllers/accountDeletion.controller.js";
+import {
   deleteAddress,
   listAddresses,
   saveAddress,
@@ -25,7 +29,7 @@ import {
 import { authorize, protect } from "../middleware/auth.middleware.js";
 import { avatarUpload } from "../middleware/upload.middleware.js";
 const router = Router();
-// Customers (OTP)
+
 router.post("/otp/request", requestOtp);
 router.post("/otp/verify", verifyOtp);
 router.patch(
@@ -66,6 +70,19 @@ router.delete(
   protect,
   authorize("customer"),
   deleteAddress,
+);
+// Delete my account (customers)
+router.post(
+  "/delete-account/request",
+  protect,
+  authorize("customer"),
+  requestAccountDeletion,
+);
+router.post(
+  "/delete-account/confirm",
+  protect,
+  authorize("customer"),
+  confirmAccountDeletion,
 );
 router.post("/login", staffLogin);
 router.patch(
