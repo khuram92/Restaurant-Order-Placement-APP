@@ -32,6 +32,8 @@ import {
   setRestaurantStatus,
 } from "../../../../services/adminRestaurantApi";
 import type { Day, Restaurant } from "../../../../types/restaurant";
+import { deliveryFeeLabel } from "../../../../utils/deliveryFee";
+
 
 type IconName = ComponentProps<typeof Ionicons>["name"];
 
@@ -494,7 +496,7 @@ export default function RestaurantDetailScreen() {
                   />
                   <SettingTile
                     label="Delivery fee"
-                    value={money(r.deliveryFee)}
+                    value={deliveryFeeLabel(r.deliveryFee, r.deliveryFeePerKm)}
                   />
                   <SettingTile
                     label="Delivery radius"

@@ -8,6 +8,8 @@ import type { CustomerRestaurant, ServiceKey } from "../../types/restaurant";
 import { formatKm } from "../../utils/geo";
 import FavoriteButton from "./FavoriteButton";
 import RatingBadge from "./RatingBadge";
+import { deliveryFeeLabel } from "../../utils/deliveryFee";
+
 
 type IconName = ComponentProps<typeof Ionicons>["name"];
 
@@ -175,8 +177,8 @@ export default function RestaurantCard({
           ))}
           {item.services.delivery && (
             <Text className="ml-1 text-xs text-brand">
-              {item.deliveryFee > 0
-                ? `Rs ${item.deliveryFee} delivery`
+              {item.deliveryFee > 0 || item.deliveryFeePerKm
+                ? `${deliveryFeeLabel(item.deliveryFee, item.deliveryFeePerKm)} delivery`
                 : "Free delivery"}
             </Text>
           )}
