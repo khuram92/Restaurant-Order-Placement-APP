@@ -15,7 +15,8 @@ const escapeRegex = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"
 
 /** Fields customers never need */
 const HIDDEN_FIELDS = "-createdBy -email -isActive";
-
+/** "Nearest" only shows restaurants within this distance (km) */
+const NEAREST_MAX_KM = Number(process.env.NEAREST_MAX_KM) || 100;
 /** Restaurant JSON + isOpenNow + isFavorite (for this customer) */
 const toCustomerJSON = (restaurant: RestaurantDoc, favorites?: Set<string>) => ({
   ...restaurant.toJSON(),
@@ -70,16 +71,17 @@ export const listRestaurants = async (req: Request, res: Response) => {
       Restaurant.find(filter).select(HIDDEN_FIELDS),
       favoriteIdsOf(req),
     ]);
-    const sorted = all
+    const nearby = all
       .map((r) => ({ r, d: distanceOf(r) }))
-      .sort((a, b) => (a.d ?? Infinity) - (b.d ?? Infinity) || a.r.name.localeCompare(b.r.name));
-    const pageItems = sorted.slice((page - 1) * limit, page * limit);
+      .filter((x): x is { r: RestaurantDoc; d: number } => x.d !== null && x.d <= NEAREST_MAX_KM)
+      .sort((a, b) => a.d - b.d || a.r.name.localeCompare(b.r.name));
+    const pageItems = nearby.slice((page - 1) * limit, page * limit);
 
     return res.json({
       restaurants: pageItems.map(({ r }) => toCard(r, favorites)),
-      total: all.length,
+      total: nearby.length,
       page,
-      pages: Math.max(1, Math.ceil(all.length / limit)),
+      pages: Math.max(1, Math.ceil(nearby.length / limit)),
     });
   }
 

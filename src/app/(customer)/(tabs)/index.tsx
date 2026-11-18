@@ -25,10 +25,10 @@ import RestaurantCard from "../../../components/customer/RestaurantCard";
 import { cardShadow, colors } from "../../../constants/theme";
 import { useAuth } from "../../../context/AuthContext";
 import { getErrorMessage } from "../../../lib/api";
-import { browseRestaurants } from "../../../services/restaurantApi";
-import type { CustomerRestaurant, ServiceKey } from "../../../types/restaurant";
 import { getCurrentAddress, getQuickPosition } from "../../../lib/location";
 import { setMyLocation, useMyLocation } from "../../../lib/myLocation";
+import { browseRestaurants } from "../../../services/restaurantApi";
+import type { CustomerRestaurant, ServiceKey } from "../../../types/restaurant";
 type IconName = ComponentProps<typeof Ionicons>["name"];
 
 const SERVICES: { key: ServiceKey; label: string; icon: IconName }[] = [
@@ -43,6 +43,8 @@ const greeting = () => {
   if (hour < 17) return "Good afternoon";
   return "Good evening";
 };
+
+const NEAREST_KM = 100;
 
 export default function CustomerHome() {
   const { user, signOut } = useAuth();
@@ -60,7 +62,7 @@ export default function CustomerHome() {
   const [searchFocused, setSearchFocused] = useState(false);
 
   const requestId = useRef(0);
-   // Shared with the restaurant page and checkout
+  // Shared with the restaurant page and checkout
   const myLoc = useMyLocation();
   const here = useMemo(
     () => (myLoc ? { lat: myLoc.lat, lng: myLoc.lng } : null),
@@ -71,7 +73,8 @@ export default function CustomerHome() {
 
   // Quiet check on open: only works if location was allowed before (no popup)
   useEffect(() => {
-    if (!myLoc) getQuickPosition(false).then((pos) => pos && setMyLocation(pos, false));
+    if (!myLoc)
+      getQuickPosition(false).then((pos) => pos && setMyLocation(pos, false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -350,16 +353,30 @@ export default function CustomerHome() {
             <View className="flex-1 items-center justify-center py-16">
               <View className="h-16 w-16 items-center justify-center rounded-2xl bg-brand-soft">
                 <Ionicons
-                  name={filtered ? "search" : "restaurant"}
+                  name={
+                    sort === "nearest"
+                      ? "navigate"
+                      : filtered
+                        ? "search"
+                        : "restaurant"
+                  }
                   size={30}
                   color={colors.brand}
                 />
               </View>
               <Text className="mt-3 text-base font-semibold text-brand-dark">
-                {filtered ? "No matching restaurants" : "No restaurants yet"}
+                {sort === "nearest"
+                  ? "No restaurants near you"
+                  : filtered
+                    ? "No matching restaurants"
+                    : "No restaurants yet"}
               </Text>
-              <Text className="mt-1 text-center text-sm text-brand-light">
-                {filtered ? "Try another search or filter" : "Check back soon"}
+              <Text className="mt-1 px-8 text-center text-sm text-brand">
+                {sort === "nearest"
+                  ? `Nothing within ${NEAREST_KM} km${filtered ? " matches your search" : ""}. Turn off Nearest to see all restaurants.`
+                  : filtered
+                    ? "Try another search or filter"
+                    : "Check back soon"}
               </Text>
             </View>
           }
