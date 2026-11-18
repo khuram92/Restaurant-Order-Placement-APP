@@ -1,4 +1,3 @@
-/** Straight-line distance between two points in km (same maths as the backend) */
 export const distanceKm = (
   a: { lat: number; lng: number },
   b: { lat: number; lng: number },
@@ -13,6 +12,6 @@ export const distanceKm = (
   return 2 * R * Math.asin(Math.sqrt(h));
 };
 
-/** 2.345 → "2.3 km", 0.42 → "420 m" */
+
 export const formatKm = (km: number) =>
   km < 1 ? `${Math.round(km * 1000)} m` : `${km.toFixed(1)} km`;

@@ -69,11 +69,6 @@ export async function getCurrentAddress(): Promise<CurrentAddress> {
 }
 
 
-/**
- * Quick position for "does this restaurant deliver to me?" checks.
- * ask = false → never shows a permission popup (silent, returns null instead).
- * Uses a recent known position first, so it's fast.
- */
 export async function getQuickPosition(
   ask = false,
 ): Promise<{ lat: number; lng: number } | null> {
