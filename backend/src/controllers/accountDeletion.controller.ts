@@ -86,63 +86,61 @@ export const requestAccountDeletion = async (req: Request, res: Response) => {
   });
 };
 
-// /**
-//  * POST /api/auth/delete-account/confirm { code }
-//  * Deletes the account and personal data. Past orders stay for the restaurants' records,
-//  * with the customer's name, phone and address removed.
-//  */
-// export const confirmAccountDeletion = async (req: Request, res: Response) => {
-//   const parsed = confirmSchema.safeParse(req.body);
-//   if (!parsed.success) return res.status(400).json({ message: parsed.error.issues[0]?.message });
-//   const user = req.user!;
+/**
+ * POST /api/auth/delete-account/confirm { code }
+ */
+export const confirmAccountDeletion = async (req: Request, res: Response) => {
+  const parsed = confirmSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ message: parsed.error.issues[0]?.message });
+  const user = req.user!;
 
-//   const otp = await Otp.findOne({ purpose: "delete", userId: user._id });
-//   if (!otp || otp.expiresAt < new Date()) {
-//     return res.status(400).json({ message: "Code expired, please request a new one" });
-//   }
-//   if (otp.attempts >= OTP_MAX_ATTEMPTS) {
-//     await otp.deleteOne();
-//     return res.status(429).json({ message: "Too many wrong attempts, request a new code" });
-//   }
-//   if (!otpMatches(parsed.data.code, otp.codeHash)) {
-//     otp.attempts += 1;
-//     await otp.save();
-//     return res.status(400).json({ message: `Incorrect code. ${OTP_MAX_ATTEMPTS - otp.attempts} attempt(s) left` });
-//   }
+  const otp = await Otp.findOne({ purpose: "delete", userId: user._id });
+  if (!otp || otp.expiresAt < new Date()) {
+    return res.status(400).json({ message: "Code expired, please request a new one" });
+  }
+  if (otp.attempts >= OTP_MAX_ATTEMPTS) {
+    await otp.deleteOne();
+    return res.status(429).json({ message: "Too many wrong attempts, request a new code" });
+  }
+  if (!otpMatches(parsed.data.code, otp.codeHash)) {
+    otp.attempts += 1;
+    await otp.save();
+    return res.status(400).json({ message: `Incorrect code. ${OTP_MAX_ATTEMPTS - otp.attempts} attempt(s) left` });
+  }
 
-//   // An order may have started since the code was sent
-//   if (await hasActiveOrder(user._id)) {
-//     return res.status(409).json({
-//       message: "You have an order in progress. You can delete your account once it's finished.",
-//     });
-//   }
+  
+  if (await hasActiveOrder(user._id)) {
+    return res.status(409).json({
+      message: "You have an order in progress. You can delete your account once it's finished.",
+    });
+  }
 
-//   const identifiers = [user.phone, user.email].filter((v): v is string => !!v);
+  const identifiers = [user.phone, user.email].filter((v): v is string => !!v);
 
-//   // 1) Orders stay (restaurant sales & tax records) but without personal details
-//   await Order.updateMany(
-//     { customerId: user._id },
-//     { $set: { customerName: "Deleted customer" }, $unset: { customerPhone: 1, note: 1 } },
-//   );
-//   await Order.updateMany(
-//     { customerId: user._id, delivery: { $exists: true } },
-//     {
-//       $set: { "delivery.street": "Removed", "delivery.phone": "Removed" },
-//       $unset: { "delivery.area": 1, "delivery.instructions": 1, "delivery.location": 1 },
-//     },
-//   );
+  
+  await Order.updateMany(
+    { customerId: user._id },
+    { $set: { customerName: "Deleted customer" }, $unset: { customerPhone: 1, note: 1 } },
+  );
+  await Order.updateMany(
+    { customerId: user._id, delivery: { $exists: true } },
+    {
+      $set: { "delivery.street": "Removed", "delivery.phone": "Removed" },
+      $unset: { "delivery.area": 1, "delivery.instructions": 1, "delivery.location": 1 },
+    },
+  );
 
-//   // 2) Reviews stay (they count in the restaurant's rating) under a neutral name
-//   await Review.updateMany({ customerId: user._id }, { $set: { customerName: "Customer" } });
+  
+  await Review.updateMany({ customerId: user._id }, { $set: { customerName: "Customer" } });
 
-//   // 3) Everything else about the person goes
-//   await Promise.all([
-//     Notification.deleteMany({ userId: user._id }),
-//     Otp.deleteMany({ $or: [{ userId: user._id }, { identifier: { $in: identifiers } }] }),
-//     OtpRequest.deleteMany({ identifier: { $in: identifiers } }),
-//     deleteAvatarImage(String(user._id)).catch(() => {}), // no photo is fine
-//   ]);
-//   await User.deleteOne({ _id: user._id }); // also removes addresses, favourites, push tokens
+  
+  await Promise.all([
+    Notification.deleteMany({ userId: user._id }),
+    Otp.deleteMany({ $or: [{ userId: user._id }, { identifier: { $in: identifiers } }] }),
+    OtpRequest.deleteMany({ identifier: { $in: identifiers } }),
+    deleteAvatarImage(String(user._id)).catch(() => {}), // no photo is fine
+  ]);
+  await User.deleteOne({ _id: user._id }); // also removes addresses, favourites, push tokens
 
-//   res.json({ message: "Your account has been deleted" });
-// };
+  res.json({ message: "Your account has been deleted" });
+};
