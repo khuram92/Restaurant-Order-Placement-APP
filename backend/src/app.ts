@@ -7,7 +7,7 @@ import restaurantRoutes from "./routes/restaurant.routes.js";
 import managerRoutes from "./routes/manager.routes.js";
 import orderRoutes from "./routes/order.routes.js";
 import notificationRoutes from "./routes/notification.routes.js";
-
+import { privacyPolicyHtml } from "./pages/privacyPolicy.js";
 
 
 const app = express();
@@ -23,7 +23,9 @@ app.use("/api", (_req, res, next) => {
   res.set("Cache-Control", "no-store");
   next();
 });
-
+app.get("/privacy", (_req: Request, res: Response) => {
+  res.type("html").send(privacyPolicyHtml);
+});
 // Routes
 app.get("/api/health", (_req: Request, res: Response) => {
   res.json({ status: "ok" });

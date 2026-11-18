@@ -12,6 +12,7 @@ import { Alert, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { cardShadow, colors } from "../../../constants/theme";
 import { useAuth } from "../../../context/AuthContext";
+import { openInApp, PRIVACY_URL } from "../../../lib/links";
 import { listMyOrders } from "../../../services/orderApi";
 
 type IconName = ComponentProps<typeof Ionicons>["name"];
@@ -274,6 +275,13 @@ export default function ProfileScreen() {
               label="Help & support"
               hint="Questions about an order"
               onPress={showHelp}
+              last
+            />
+            <LinkRow
+              icon="shield-checkmark"
+              label="Privacy policy"
+              hint="What we collect and why"
+              onPress={() => openInApp(PRIVACY_URL)}
               last
             />
           </Section>
