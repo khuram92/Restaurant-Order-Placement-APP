@@ -1,9 +1,7 @@
-
-const APP_NAME = "Restaurant Orders"; 
-const OWNER = "Muhammad Hashir"; 
-const CONTACT_EMAIL = "support@example.com"; 
+const APP_NAME = "Restaurant Orders";
+const OWNER = "Muhammad Hashir";
+const CONTACT_EMAIL = "support@example.com";
 const EFFECTIVE_DATE = "18 November 2026";
-
 
 const css = `
   :root { --brand:#4e5c4a; --dark:#2c3329; --light:#6f7d6a; --mist:#e0e1df; }
@@ -98,9 +96,12 @@ export const privacyPolicyHtml = `<!DOCTYPE html>
       need a location to check their delivery area.</li>
     <li><b>Notifications:</b> you can turn them off in your phone's settings.</li>
     <li><b>Edit your details:</b> change your name, photo, phone, email and saved addresses in the app.</li>
-    <li><b>Delete your account:</b> email <a href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a>
-      from your registered email, or with your registered phone number, and we will delete your
-      account and personal information within 30 days.</li>
+     <li><b>Delete your account:</b> in the app, go to <b>Profile → Delete account</b> and confirm
+      with the code we send you. Your account and personal information are deleted straight away.
+      Past orders stay for the restaurant's records without your name, phone or address, and your
+      reviews stay under the name “Customer”. If you can't use the app, email
+      <a href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a> from your registered email or phone
+      number and we will delete your account within 30 days.</li>
   </ul>
 </section>
 

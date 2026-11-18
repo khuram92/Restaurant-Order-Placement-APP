@@ -33,8 +33,12 @@ const hasActiveOrder = (customerId: Types.ObjectId) =>
 /** POST /api/auth/delete-account/request — sends a code to the customer's phone (or email) */
 export const requestAccountDeletion = async (req: Request, res: Response) => {
   const user = req.user!;
-  const channel = user.phone ? "phone" : "email";
-  const identifier = (user.phone ?? user.email)!;
+  
+  const targets = [
+    ...(user.phone ? [{ identifier: user.phone, channel: "phone" as const }] : []),
+    ...(user.email ? [{ identifier: user.email, channel: "email" as const }] : []),
+  ];
+  const { identifier, channel } = targets[0]!;
 
   if (await hasActiveOrder(user._id)) {
     return res.status(409).json({
@@ -69,18 +73,25 @@ export const requestAccountDeletion = async (req: Request, res: Response) => {
     expiresAt: new Date(Date.now() + OTP_EXPIRES_MINUTES * 60 * 1000),
   });
 
-  try {
-    await sendOtp(identifier, channel, code);
-  } catch (error) {
+    // Send to all of them; it's enough if at least one arrives
+  const results = await Promise.allSettled(targets.map((t) => sendOtp(t.identifier, t.channel, code)));
+  const sent = targets.filter((_, i) => results[i]!.status === "fulfilled");
+  results.forEach((r, i) => {
+    if (r.status === "rejected") {
+      console.error(`❌ Delete-account OTP to ${targets[i]!.channel} failed:`, (r.reason as Error).message);
+    }
+  });
+
+  if (sent.length === 0) {
     await Otp.deleteMany({ purpose: "delete", userId: user._id });
-    console.error("❌ Delete-account OTP send failed:", (error as Error).message);
-    return res.status(502).json({ message: `Couldn't send the code to your ${channel}. Please try again.` });
+    return res.status(502).json({ message: "Couldn't send the code. Please try again." });
   }
 
+  const sentTo = sent.map((t) => mask(t.identifier)).join(" and ");
   res.json({
-    message: `Code sent to ${mask(identifier)}`,
-    channel,
-    sentTo: mask(identifier),
+    message: `Code sent to ${sentTo}`,
+    channels: sent.map((t) => t.channel),
+    sentTo,
     expiresInMinutes: OTP_EXPIRES_MINUTES,
     ...(isDev && { devOtp: code }),
   });
