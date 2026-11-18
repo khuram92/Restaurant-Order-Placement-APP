@@ -68,6 +68,7 @@ export interface Order {
   statusHistory: { status: OrderStatus; at: string; by?: string }[];
   rejectReason?: string;
   cancelReason?: string;
+  cancelledBy?: "customer" | "system";
   reviewed?: boolean;
   createdAt: string;
   updatedAt: string;
@@ -80,7 +81,7 @@ export interface OrderListResponse {
   pages: number;
 }
 
-/** "Order again": the old order rebuilt from today's menu */
+
 export interface ReorderPreview {
   restaurant: CartRestaurant & { isOpenNow: boolean };
   lines: CartSelection[];
@@ -88,7 +89,7 @@ export interface ReorderPreview {
   priceChanged: boolean;
 }
 
-/** What checkout sends (prices are worked out by the backend) */
+
 export interface PlaceOrderInput {
   restaurantId: string;
   type: OrderType;
