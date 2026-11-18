@@ -665,7 +665,7 @@ export default function CheckoutScreen() {
                         label="Name"
                         value={saveName}
                         onChangeText={setSaveName}
-                        placeholder="Mom's place"
+                        placeholder="Place name"
                         maxLength={30}
                       />
                     </View>
