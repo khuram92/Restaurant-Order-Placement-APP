@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import mongoose from "mongoose";
 import { ACTIVE_STATUSES, Order, type IOrder } from "../models/Order.js";
 import { Restaurant } from "../models/Restaurant.js";
+import { Review } from "../models/Review.js";
 import { User } from "../models/User.js";
 import { isOpenNow } from "../utils/openingHours.js";
 import { generateOrderNumber } from "../utils/orderNumber.js";
@@ -15,15 +16,14 @@ import {
   createOrderSchema,
   listMyOrdersSchema,
 } from "../validators/order.validators.js";
-import { Review } from "../models/Review.js";
 
+import { deliveryFeeFor } from "../utils/deliveryFee.js";
+import { distanceKm, formatKm } from "../utils/geo.js";
 import {
   notifyNewOrder,
   notifyOrderCancelled,
 } from "../utils/orderNotifications.js";
-import { distanceKm, formatKm } from "../utils/geo.js";
 import { rebuildOrderLines } from "../utils/reorder.js";
-
 
 const firstIssue = (error: { issues: { message: string }[] }) =>
   error.issues[0]?.message ?? "Invalid input";
@@ -77,7 +77,6 @@ export const createOrder = async (req: Request, res: Response) => {
     return res.status(409).json({
       message: `${restaurant.name} doesn't offer ${SERVICE_LABEL[input.type]}`,
     });
-    
   }
   let deliveryDistance: number | undefined;
   const coords = restaurant.location?.coordinates; // [lng, lat]
@@ -85,7 +84,8 @@ export const createOrder = async (req: Request, res: Response) => {
     const at = input.delivery?.location;
     if (!at) {
       return res.status(400).json({
-        message: "Tap \"Use my current location\" so we can check the delivery distance",
+        message:
+          'Tap "Use my current location" so we can check the delivery distance',
       });
     }
     deliveryDistance = distanceKm(at, { lat: coords[1], lng: coords[0] });
@@ -124,7 +124,14 @@ export const createOrder = async (req: Request, res: Response) => {
     }
 
     const tax = Math.round((subtotal * restaurant.taxRate) / 100);
-    const deliveryFee = input.type === "delivery" ? restaurant.deliveryFee : 0;
+    const deliveryFee =
+      input.type === "delivery"
+        ? deliveryFeeFor(
+            restaurant.deliveryFee,
+            restaurant.deliveryFeePerKm ?? 0,
+            deliveryDistance,
+          )
+        : 0;
 
     const data: IOrder = {
       orderNumber: generateOrderNumber(restaurant.name),
@@ -149,7 +156,7 @@ export const createOrder = async (req: Request, res: Response) => {
     if (customer.phone) data.customerPhone = customer.phone;
     if (input.note) data.note = input.note;
     if (input.type === "delivery" && input.delivery) {
-            const { area, instructions, location, ...rest } = input.delivery;
+      const { area, instructions, location, ...rest } = input.delivery;
       data.delivery = {
         ...rest,
         ...(area && { area }),
@@ -203,11 +210,18 @@ export const listMyOrders = async (req: Request, res: Response) => {
   ]);
 
   const reviewed = new Set(
-    (await Review.find({ orderId: { $in: orders.map((o) => o._id) } }).distinct("orderId")).map(String),
+    (
+      await Review.find({
+        orderId: { $in: orders.map((o) => o._id) },
+      }).distinct("orderId")
+    ).map(String),
   );
 
   res.json({
-    orders: orders.map((o) => ({ ...o.toJSON(), reviewed: reviewed.has(String(o._id)) })),
+    orders: orders.map((o) => ({
+      ...o.toJSON(),
+      reviewed: reviewed.has(String(o._id)),
+    })),
     total,
     page,
     pages: Math.max(1, Math.ceil(total / limit)),
@@ -261,7 +275,6 @@ export const cancelMyOrder = async (req: Request, res: Response) => {
   res.json({ message: "Order cancelled", order: updated });
 };
 
-
 /** GET /api/orders/:id/reorder — the old order rebuilt as a cart, from today's menu */
 export const reorderPreview = async (req: Request, res: Response) => {
   const order = await findMyOrderOr404(req, res);
@@ -269,13 +282,22 @@ export const reorderPreview = async (req: Request, res: Response) => {
 
   const [restaurant, hasManager] = await Promise.all([
     Restaurant.findOne({ _id: order.restaurantId, isActive: true }),
-    User.exists({ role: "manager", isActive: true, restaurantId: order.restaurantId }),
+    User.exists({
+      role: "manager",
+      isActive: true,
+      restaurantId: order.restaurantId,
+    }),
   ]);
   if (!restaurant || !hasManager) {
-    return res.status(404).json({ message: `${order.restaurantName} isn't taking orders anymore` });
+    return res
+      .status(404)
+      .json({ message: `${order.restaurantName} isn't taking orders anymore` });
   }
 
-  const { lines, skipped, priceChanged } = await rebuildOrderLines(restaurant.id, order.items);
+  const { lines, skipped, priceChanged } = await rebuildOrderLines(
+    restaurant.id,
+    order.items,
+  );
 
   res.json({
     // Same shape as the app's cart restaurant
@@ -285,9 +307,11 @@ export const reorderPreview = async (req: Request, res: Response) => {
       ...(restaurant.logo && { logo: restaurant.logo }),
       taxRate: restaurant.taxRate,
       deliveryFee: restaurant.deliveryFee,
+      deliveryFeePerKm: restaurant.deliveryFeePerKm ?? 0,
       minOrder: restaurant.minOrder,
       services: restaurant.services,
-      isOpenNow: !restaurant.isTemporarilyClosed && isOpenNow(restaurant.openingHours),
+      isOpenNow:
+        !restaurant.isTemporarilyClosed && isOpenNow(restaurant.openingHours),
     },
     lines,
     skipped,

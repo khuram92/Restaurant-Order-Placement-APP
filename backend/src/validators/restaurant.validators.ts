@@ -77,7 +77,7 @@ const base = {
       .trim()
       .min(2, "City is required"),
   }),
-    location: location.nullable().optional(), // null = no coordinates
+  location: location.nullable().optional(), // null = no coordinates
   openingHours: openingHours.optional(),
   services: z
     .object({
@@ -87,6 +87,7 @@ const base = {
     })
     .optional(),
   deliveryFee: money("Delivery fee").optional(),
+  deliveryFeePerKm: money("Per-km charge").optional(),
   minOrder: money("Minimum order").optional(),
   deliveryRadiusKm: z.number().min(0).max(50, "Radius is too large").optional(),
   taxRate: z.number().min(0).max(100, "Tax can't be over 100%").optional(),
@@ -122,7 +123,6 @@ export const updateRestaurantSchema = z
       })
       .partial()
       .optional(),
-    
   })
   .refine((data) => Object.keys(data).length > 0, {
     message: "Nothing to update",

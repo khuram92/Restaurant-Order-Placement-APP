@@ -40,7 +40,8 @@ export interface IRestaurant {
     takeaway: boolean;
     delivery: boolean;
   };
-  deliveryFee: number; // PKR
+  deliveryFee: number;
+  deliveryFeePerKm: number;
   minOrder: number; // PKR
   deliveryRadiusKm: number;
   taxRate: number; // percent, e.g. 16
@@ -127,6 +128,11 @@ const restaurantSchema = new Schema<IRestaurant>(
       type: Number,
       default: 0,
       min: [0, "Delivery fee can't be negative"],
+    },
+    deliveryFeePerKm: {
+      type: Number,
+      default: 0,
+      min: [0, "Per-km charge can't be negative"],
     },
     minOrder: {
       type: Number,
