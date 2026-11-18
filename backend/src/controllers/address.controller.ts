@@ -58,26 +58,26 @@ export const saveAddress = async (req: Request, res: Response) => {
   });
 };
 
-// /** PATCH /api/auth/addresses/:addressId — edit one address */
-// export const updateAddress = async (req: Request, res: Response) => {
-//   const id = String(req.params.addressId);
-//   if (!mongoose.isValidObjectId(id)) return res.status(400).json({ message: "Invalid address" });
-//   const parsed = addressSchema.safeParse(req.body);
-//   if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
-//   const data = clean(parsed.data);
+/** PATCH /api/auth/addresses/:addressId — edit one address */
+export const updateAddress = async (req: Request, res: Response) => {
+  const id = String(req.params.addressId);
+  if (!mongoose.isValidObjectId(id)) return res.status(400).json({ message: "Invalid address" });
+  const parsed = addressSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
+  const data = clean(parsed.data);
 
-//   const me = await loadMe(req);
-//   const address = me?.addresses.find((a) => String(a._id) === id);
-//   if (!me || !address) return res.status(404).json({ message: "Address not found" });
+  const me = await loadMe(req);
+  const address = me?.addresses.find((a) => String(a._id) === id);
+  if (!me || !address) return res.status(404).json({ message: "Address not found" });
 
-//   me.addresses = me.addresses
-//     // Changing this one to Home / Work: the old Home / Work goes away
-//     .filter((a) => String(a._id) === id || data.label === "other" || a.label !== data.label)
-//     .map((a) => (String(a._id) === id ? { ...data, ...(address._id && { _id: address._id }) } : a));
-//   await me.save();
+  me.addresses = me.addresses
+    
+    .filter((a) => String(a._id) === id || data.label === "other" || a.label !== data.label)
+    .map((a) => (String(a._id) === id ? { ...data, ...(address._id && { _id: address._id }) } : a));
+  await me.save();
 
-//   res.json({ message: "Address updated", addresses: sorted(me.addresses) });
-// };
+  res.json({ message: "Address updated", addresses: sorted(me.addresses) });
+};
 
 // /** DELETE /api/auth/addresses/:addressId */
 // export const deleteAddress = async (req: Request, res: Response) => {
