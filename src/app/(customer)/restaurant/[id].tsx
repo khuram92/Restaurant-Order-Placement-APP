@@ -630,7 +630,7 @@ export default function CustomerRestaurantScreen() {
   const r = restaurant;
   const todayHours = r.openingHours.find((h) => h.day === todayKey());
   const services = SERVICES.filter((s) => r.services[s.key]);
-  const center = r.location?.coordinates; // [lng, lat]
+  const center = r.location?.coordinates;
   const away =
     here && center && r.services.delivery
       ? distanceKm(here, { lat: center[1], lng: center[0] })
@@ -656,7 +656,6 @@ export default function CustomerRestaurantScreen() {
         showsVerticalScrollIndicator={false}
         onScroll={onScroll}
         scrollEventThrottle={32}
-        // Index 1 = the category bar: it sticks to the top while the menu scrolls
         stickyHeaderIndices={[1]}
         contentContainerStyle={{
           paddingBottom: insets.bottom + 96,
@@ -944,21 +943,21 @@ export default function CustomerRestaurantScreen() {
             ))
           )}
         </View>
+        {backButton}
+        <View className="absolute right-2 top-4">
+          <FavoriteButton
+            restaurantId={r._id}
+            isFavorite={!!r.isFavorite}
+            size="md"
+            onChange={(favorite) =>
+              setRestaurant((prev) =>
+                prev ? { ...prev, isFavorite: favorite } : prev,
+              )
+            }
+          />
+        </View>
       </ScrollView>
 
-      {backButton}
-      <View className="absolute right-2 top-4">
-        <FavoriteButton
-          restaurantId={r._id}
-          isFavorite={!!r.isFavorite}
-          size="md"
-          onChange={(favorite) =>
-            setRestaurant((prev) =>
-              prev ? { ...prev, isFavorite: favorite } : prev,
-            )
-          }
-        />
-      </View>
       <CartBar restaurantId={r._id} />
 
       <InfoSheet
