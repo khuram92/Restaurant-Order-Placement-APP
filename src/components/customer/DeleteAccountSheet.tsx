@@ -27,7 +27,7 @@ const KEPT = [
   "Your reviews, shown as “Customer”",
 ];
 
-/** Explain → send code → enter code → account deleted */
+
 export default function DeleteAccountSheet({
   open,
   onClose,
@@ -97,7 +97,7 @@ export default function DeleteAccountSheet({
     <Modal visible transparent animationType="slide" onRequestClose={busy ? undefined : onClose}>
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} className="flex-1">
         <Pressable className="flex-1" style={{ backgroundColor: "rgba(0,0,0,0.35)" }} onPress={busy ? undefined : onClose} />
-        <View className="rounded-t-[28px] bg-white px-5 pt-3" style={{ paddingBottom: insets.bottom + 16 }}>
+        <View className=" bg-mist px-5 pt-3" style={{ paddingBottom: insets.bottom + 16 }}>
           <View className="mb-4 h-1.5 w-12 self-center rounded-full" style={{ backgroundColor: colors.mistDark }} />
 
           <View className="mb-3 flex-row items-center">
@@ -109,12 +109,12 @@ export default function DeleteAccountSheet({
 
           {step === "info" ? (
             <>
-              <Text className="mb-3 text-sm text-brand-dark">
+              <Text className="mb-3 text-brand-dark">
                 This can't be undone. If you sign in again later, you'll start with a new, empty account.
               </Text>
 
               <View className="mb-2 rounded-2xl p-3" style={{ backgroundColor: "#fdf3f2" }}>
-                <Text className="mb-1 text-xs font-bold uppercase tracking-wide" style={{ color: colors.danger }}>
+                <Text className="mb-1 text-sm font-bold uppercase tracking-wide" style={{ color: colors.danger }}>
                   Deleted
                 </Text>
                 {DELETED.map((t) => (
@@ -125,7 +125,7 @@ export default function DeleteAccountSheet({
                 ))}
               </View>
               <View className="mb-4 rounded-2xl p-3" style={{ backgroundColor: colors.mistLight }}>
-                <Text className="mb-1 text-xs font-bold uppercase tracking-wide text-brand-light">Kept</Text>
+                <Text className="mb-1 text-sm font-bold uppercase tracking-wide text-brand">Kept</Text>
                 {KEPT.map((t) => (
                   <View key={t} className="mt-1 flex-row items-start">
                     <Ionicons name="information-circle" size={14} color={colors.brand} style={{ marginTop: 2 }} />
@@ -174,9 +174,9 @@ export default function DeleteAccountSheet({
             <Pressable
               onPress={onClose}
               disabled={busy}
-              className="flex-1 items-center rounded-2xl border-2 py-4"
-              style={{ borderColor: colors.mistDark }}>
-              <Text className="font-bold text-brand-dark">Keep account</Text>
+              className="flex-1 items-center rounded-2xl border-2 bg-white py-4"
+              >
+              <Text className="font-bold  text-brand-dark">Keep account</Text>
             </Pressable>
             <Pressable
               onPress={step === "info" ? sendCode : confirm}

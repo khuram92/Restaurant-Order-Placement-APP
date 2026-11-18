@@ -312,7 +312,7 @@ export default function ProfileScreen() {
           <Pressable
             onPress={() => setDeleteOpen(true)}
             hitSlop={6}
-            className="flex-row items-center justify-center rounded-2xl mt-4 border-2 bg-red-500 py-4">
+            className="flex-row items-center justify-center rounded-2xl mt-4  bg-red-500 py-4">
             <Ionicons name="trash" size={16} color={colors.white} />
             <Text className="ml-2 font-bold" style={{ color: colors.white }}>
               Delete account
