@@ -5,11 +5,11 @@ import { addressSchema, type AddressInput } from "../validators/address.validato
 
 const firstIssue = (e: { issues: { message: string }[] }) => e.issues[0]?.message ?? "Invalid address";
 
-/** Home first, then Work, then the rest */
+
 const ORDER = { home: 0, work: 1, other: 2 } as const;
 const sorted = (list: ISavedAddress[]) => [...list].sort((a, b) => ORDER[a.label] - ORDER[b.label]);
 
-/** Drop empty optional fields (exactOptionalPropertyTypes) */
+
 const clean = (a: AddressInput): ISavedAddress => ({
   label: a.label,
   street: a.street,
@@ -23,11 +23,11 @@ const clean = (a: AddressInput): ISavedAddress => ({
 
 const loadMe = (req: Request) => User.findById(req.user!._id).select("+addresses");
 
-// /** GET /api/auth/addresses */
-// export const listAddresses = async (req: Request, res: Response) => {
-//   const me = await loadMe(req);
-//   res.json({ addresses: sorted(me?.addresses ?? []) });
-// };
+/** GET /api/auth/addresses */
+export const listAddresses = async (req: Request, res: Response) => {
+  const me = await loadMe(req);
+  res.json({ addresses: sorted(me?.addresses ?? []) });
+};
 
 // /**
 //  * POST /api/auth/addresses
