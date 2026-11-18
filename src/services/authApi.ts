@@ -95,3 +95,17 @@ export const verifyContactChange = async (identifier: string, code: string) => {
   const { data } = await api.post<{ message: string; user: User }>("/auth/contact/verify", { identifier, code });
   return data.user;
 };
+
+/** Customer: send a code to confirm deleting the account */
+export const requestAccountDeletion = async () => {
+  const { data } = await api.post<{ message: string; sentTo: string; devOtp?: string }>(
+    "/auth/delete-account/request",
+  );
+  return data;
+};
+
+/** Customer: confirm with the code → the account is deleted */
+export const confirmAccountDeletion = async (code: string) => {
+  const { data } = await api.post<{ message: string }>("/auth/delete-account/confirm", { code });
+  return data;
+};
