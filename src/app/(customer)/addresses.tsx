@@ -10,7 +10,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-// import AddressSheet from "../../components/customer/AddressSheet";
+import AddressSheet from "../../components/customer/AddressSheet";
 import { cardShadow, colors } from "../../constants/theme";
 import { useAuth } from "../../context/AuthContext";
 import { getErrorMessage } from "../../lib/api";
@@ -185,12 +185,12 @@ export default function AddressesScreen() {
         </ScrollView>
       )}
 
-      {/* <AddressSheet
+      <AddressSheet
         editing={editing}
         {...(user?.phone && { defaultPhone: user.phone })}
         onClose={() => setEditing(null)}
         onSaved={setList}
-      /> */}
+      />
     </View>
   );
 }
