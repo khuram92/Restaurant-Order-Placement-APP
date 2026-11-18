@@ -2,18 +2,26 @@ import type { Request, Response } from "express";
 import { z } from "zod";
 import { Otp } from "../models/Otp.js";
 import { User } from "../models/User.js";
-import { signToken } from "../utils/jwt.js";
-import { PASSWORD_REGEX, PASSWORD_RULE_MESSAGE } from "../utils/password.js";
-import {
-    generateOtp,
-    hashOtp,
-    otpMatches,
-    parseIdentifier,
-} from "../utils/otp.js";
-import { sendOtp } from "../utils/sendOtp.js";
 import { uploadAvatarImage } from "../utils/cloudinary.js";
-import { checkOtpLimits, clientIp, recordOtpRequest } from "../utils/otpLimits.js";
-import { clearFailures, lockMessage, recordFailure } from "../utils/loginLock.js";
+import { signToken } from "../utils/jwt.js";
+import {
+  clearFailures,
+  lockMessage,
+  recordFailure,
+} from "../utils/loginLock.js";
+import {
+  generateOtp,
+  hashOtp,
+  otpMatches,
+  parseIdentifier,
+} from "../utils/otp.js";
+import {
+  checkOtpLimits,
+  clientIp,
+  recordOtpRequest,
+} from "../utils/otpLimits.js";
+import { PASSWORD_REGEX, PASSWORD_RULE_MESSAGE } from "../utils/password.js";
+import { sendOtp } from "../utils/sendOtp.js";
 
 const OTP_EXPIRES_MINUTES = Number(process.env.OTP_EXPIRES_MINUTES) || 5;
 const OTP_RESEND_SECONDS = Number(process.env.OTP_RESEND_SECONDS) || 60;
@@ -63,8 +71,12 @@ const completeProfileSchema = z.object({
   phone: z.string().trim().optional(),
 });
 const changePasswordSchema = z.object({
-  currentPassword: z.string({ error: "Enter your current password" }).min(1, "Enter your current password"),
-  newPassword: z.string({ error: "Enter a new password" }).regex(PASSWORD_REGEX, PASSWORD_RULE_MESSAGE),
+  currentPassword: z
+    .string({ error: "Enter your current password" })
+    .min(1, "Enter your current password"),
+  newPassword: z
+    .string({ error: "Enter a new password" })
+    .regex(PASSWORD_REGEX, PASSWORD_RULE_MESSAGE),
 });
 // ---------- Staff ----------
 
@@ -75,7 +87,7 @@ export const staffLogin = async (req: Request, res: Response) => {
     return res.status(400).json({ message: parsed.error.issues[0]?.message });
   }
 
-    const { email, password } = parsed.data;
+  const { email, password } = parsed.data;
 
   // Locked after too many wrong passwords? (checked before the password, so guessing stops)
   const locked = await lockMessage(email);
@@ -139,7 +151,10 @@ export const requestOtp = async (req: Request, res: Response) => {
   }
 
   // Resend cooldown
-    const last = await Otp.findOne({ identifier, purpose: { $ne: "contact" } }).sort({ createdAt: -1 });
+  const last = await Otp.findOne({
+    identifier,
+    purpose: { $ne: "contact" },
+  }).sort({ createdAt: -1 });
   if (last) {
     const secondsSince = (Date.now() - last.createdAt.getTime()) / 1000;
     if (secondsSince < OTP_RESEND_SECONDS) {
@@ -154,11 +169,14 @@ export const requestOtp = async (req: Request, res: Response) => {
   const limit = await checkOtpLimits(identifier, ip);
   if (!limit.ok) {
     res.set("Retry-After", String(limit.retryAfterSeconds));
-    return res.status(429).json({ message: limit.message, retryAfterSeconds: limit.retryAfterSeconds });
+    return res.status(429).json({
+      message: limit.message,
+      retryAfterSeconds: limit.retryAfterSeconds,
+    });
   }
   await recordOtpRequest(identifier, ip, "login");
   const code = generateOtp();
-    await Otp.deleteMany({ identifier, purpose: { $ne: "contact" } }); // only one active code at a time
+  await Otp.deleteMany({ identifier, purpose: { $ne: "contact" } }); // only one active code at a time
   await Otp.create({
     identifier,
     channel,
@@ -170,11 +188,9 @@ export const requestOtp = async (req: Request, res: Response) => {
   } catch (error) {
     await Otp.deleteMany({ identifier }); // so the user can retry right away
     console.error("❌ OTP send failed:", (error as Error).message);
-    return res
-      .status(502)
-      .json({
-        message: `Couldn't send the code to your ${channel}. Please try again.`,
-      });
+    return res.status(502).json({
+      message: `Couldn't send the code to your ${channel}. Please try again.`,
+    });
   }
 
   res.json({
@@ -195,24 +211,32 @@ export const verifyOtp = async (req: Request, res: Response) => {
 
   const result = parseIdentifier(parsed.data.identifier);
   if (!result) {
-    return res.status(400).json({ message: "Enter a valid email or phone (03XXXXXXXXX)" });
+    return res
+      .status(400)
+      .json({ message: "Enter a valid email or phone (03XXXXXXXXX)" });
   }
   const { identifier, channel } = result;
   const { code } = parsed.data;
 
-    const otp = await Otp.findOne({ identifier, purpose: { $ne: "contact" } });
+  const otp = await Otp.findOne({ identifier, purpose: { $ne: "contact" } });
   if (!otp || otp.expiresAt < new Date()) {
-    return res.status(400).json({ message: "Code expired, please request a new one" });
+    return res
+      .status(400)
+      .json({ message: "Code expired, please request a new one" });
   }
   if (otp.attempts >= OTP_MAX_ATTEMPTS) {
     await otp.deleteOne();
-    return res.status(429).json({ message: "Too many wrong attempts, request a new code" });
+    return res
+      .status(429)
+      .json({ message: "Too many wrong attempts, request a new code" });
   }
   if (!otpMatches(code, otp.codeHash)) {
     otp.attempts += 1;
     await otp.save();
     const left = OTP_MAX_ATTEMPTS - otp.attempts;
-    return res.status(400).json({ message: `Incorrect code. ${left} attempt(s) left` });
+    return res
+      .status(400)
+      .json({ message: `Incorrect code. ${left} attempt(s) left` });
   }
 
   let user = await User.findOne({ [channel]: identifier });
@@ -221,10 +245,16 @@ export const verifyOtp = async (req: Request, res: Response) => {
   if (!user) {
     // New customer: create with only the verified email/phone.
     // Name, DOB etc. are filled on the "Complete profile" screen.
-    user = await User.create({ [channel]: identifier, role: "customer", profileCompleted: false });
+    user = await User.create({
+      [channel]: identifier,
+      role: "customer",
+      profileCompleted: false,
+    });
     isNewUser = true;
   } else if (user.role !== "customer") {
-    return res.status(403).json({ message: "Staff must log in with email and password" });
+    return res
+      .status(403)
+      .json({ message: "Staff must log in with email and password" });
   } else if (!user.isActive) {
     return res.status(403).json({ message: "Account is deactivated" });
   }
@@ -247,13 +277,19 @@ export const completeProfile = async (req: Request, res: Response) => {
 
   // ----- Date of birth: real date, in the past, max 100 years ago -----
   const dobDate = new Date(`${dob}T00:00:00.000Z`);
-  const isRealDate = !isNaN(dobDate.getTime()) && dobDate.toISOString().slice(0, 10) === dob; // rejects 2000-02-31
+  const isRealDate =
+    !isNaN(dobDate.getTime()) && dobDate.toISOString().slice(0, 10) === dob; // rejects 2000-02-31
   const oldest = new Date();
   oldest.setFullYear(oldest.getFullYear() - 100);
 
-  if (!isRealDate) return res.status(400).json({ message: "Enter a valid date of birth" });
-  if (dobDate >= new Date()) return res.status(400).json({ message: "Date of birth must be in the past" });
-  if (dobDate < oldest) return res.status(400).json({ message: "Enter a realistic date of birth" });
+  if (!isRealDate)
+    return res.status(400).json({ message: "Enter a valid date of birth" });
+  if (dobDate >= new Date())
+    return res
+      .status(400)
+      .json({ message: "Date of birth must be in the past" });
+  if (dobDate < oldest)
+    return res.status(400).json({ message: "Enter a realistic date of birth" });
 
   // ----- Second contact (optional). The login contact is locked. -----
   if (email && !user.email) {
@@ -261,18 +297,32 @@ export const completeProfile = async (req: Request, res: Response) => {
     if (!result || result.channel !== "email") {
       return res.status(400).json({ message: "Enter a valid email" });
     }
-    const taken = await User.exists({ email: result.identifier, _id: { $ne: user._id } });
-    if (taken) return res.status(409).json({ message: "This email is already used by another account" });
+    const taken = await User.exists({
+      email: result.identifier,
+      _id: { $ne: user._id },
+    });
+    if (taken)
+      return res
+        .status(409)
+        .json({ message: "This email is already used by another account" });
     user.email = result.identifier;
   }
 
   if (phone && !user.phone) {
     const result = parseIdentifier(phone);
     if (!result || result.channel !== "phone") {
-      return res.status(400).json({ message: "Enter a valid phone number (03XXXXXXXXX)" });
+      return res
+        .status(400)
+        .json({ message: "Enter a valid phone number (03XXXXXXXXX)" });
     }
-    const taken = await User.exists({ phone: result.identifier, _id: { $ne: user._id } });
-    if (taken) return res.status(409).json({ message: "This phone number is already used by another account" });
+    const taken = await User.exists({
+      phone: result.identifier,
+      _id: { $ne: user._id },
+    });
+    if (taken)
+      return res.status(409).json({
+        message: "This phone number is already used by another account",
+      });
     user.phone = result.identifier;
   }
 
@@ -284,7 +334,6 @@ export const completeProfile = async (req: Request, res: Response) => {
   await user.save();
   res.json({ user });
 };
-
 
 export const uploadAvatar = async (req: Request, res: Response) => {
   if (!req.file) {
@@ -301,7 +350,9 @@ export const uploadAvatar = async (req: Request, res: Response) => {
     res.json({ user });
   } catch (error) {
     console.error("❌ Avatar upload failed:", (error as Error).message);
-    res.status(502).json({ message: "Couldn't upload the image. Please try again." });
+    res
+      .status(502)
+      .json({ message: "Couldn't upload the image. Please try again." });
   }
 };
 /**
@@ -314,7 +365,7 @@ export const changePassword = async (req: Request, res: Response) => {
   }
   const { currentPassword, newPassword } = parsed.data;
 
-    // Same lock for guessing the current password on a stolen, logged-in phone
+  // Same lock for guessing the current password on a stolen, logged-in phone
   const key = `pw:${req.user!._id}`;
   const locked = await lockMessage(key);
   if (locked) {
@@ -334,7 +385,9 @@ export const changePassword = async (req: Request, res: Response) => {
   }
   await clearFailures(key);
   if (currentPassword === newPassword) {
-    return res.status(400).json({ message: "Choose a password different from the current one" });
+    return res
+      .status(400)
+      .json({ message: "Choose a password different from the current one" });
   }
 
   user.password = newPassword; // hashed by the model
