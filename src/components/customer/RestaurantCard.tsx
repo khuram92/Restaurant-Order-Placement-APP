@@ -118,9 +118,9 @@ export default function RestaurantCard({
             {[item.address.area, item.address.city].filter(Boolean).join(", ")}
           </Text>
           {item.distanceKm !== undefined && (
-            <View className="ml-2 flex-row items-center">
+            <View className="ml-2 flex-row items-center rounded-full bg-mist-light p-1">
               <Ionicons name="navigate" size={12} color={colors.brand} />
-              <Text className="ml-1 text-sm font-bold text-brand">
+              <Text className="ml-1 text-sm font-bold text-brand-dark">
                 {formatKm(item.distanceKm)}
               </Text>
             </View>
@@ -136,11 +136,15 @@ export default function RestaurantCard({
         </View>
 
         <View className="mt-3 flex-row flex-wrap items-center gap-1.5">
-                      {item.deliversToYou === true && (
+          {item.deliversToYou === true && (
             <View
               className="flex-row items-center rounded-full px-2 py-0.5"
               style={{ backgroundColor: colors.brand }}>
-              <Ionicons name="checkmark-circle" size={11} color={colors.white} />
+              <Ionicons
+                name="checkmark-circle"
+                size={11}
+                color={colors.white}
+              />
               <Text className="ml-1 text-xs font-bold text-white">
                 Delivers to you
               </Text>
@@ -149,9 +153,11 @@ export default function RestaurantCard({
           {item.deliversToYou === false && item.services.delivery && (
             <View
               className="flex-row items-center rounded-full px-2 py-0.5"
-              style={{ backgroundColor: "#fdecea" }}>
+              style={{ backgroundColor: "#fdece" }}>
               <Ionicons name="close-circle" size={11} color={colors.danger} />
-              <Text className="ml-1 text-xs font-bold" style={{ color: colors.danger }}>
+              <Text
+                className="ml-1 text-xs font-bold"
+                style={{ color: colors.danger }}>
                 Too far to deliver
               </Text>
             </View>
