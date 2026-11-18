@@ -5,7 +5,7 @@ import type { MenuItem } from "../types/menu";
 
 export type ItemTagKey = "isBestseller" | "isChefSpecial" | "isNew" | "isSpicy";
 
-/** Item tags, in the order they're shown (form chips, menu rows, customer cards) */
+
 export const ITEM_TAGS: {
   key: ItemTagKey;
   label: string;

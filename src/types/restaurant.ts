@@ -21,6 +21,7 @@ export interface Restaurant {
   coverImage?: string;
   services: { dineIn: boolean; takeaway: boolean; delivery: boolean };
   deliveryFee: number;
+  deliveryFeePerKm?: number
   minOrder: number;
   deliveryRadiusKm: number;
   taxRate: number;
@@ -54,6 +55,7 @@ export interface RestaurantInput {
   openingHours?: OpeningHour[];
   services?: { dineIn: boolean; takeaway: boolean; delivery: boolean };
   deliveryFee?: number;
+  deliveryFeePerKm?: number
   minOrder?: number;
   deliveryRadiusKm?: number;
   taxRate?: number;
