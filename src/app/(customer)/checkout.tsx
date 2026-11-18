@@ -32,6 +32,7 @@ import type { OrderType, PlaceOrderInput } from "../../types/order";
 import { distanceKm, formatKm } from "../../utils/geo";
 import { money } from "../../utils/menuFormat";
 import { ORDER_TYPE_INFO } from "../../utils/orderFormat";
+import { setMyLocation, useMyLocation } from "../../lib/myLocation";
 
 const PK_PHONE = /^03\d{9}$/;
 const TYPE_HINT: Record<OrderType, string> = {
@@ -155,6 +156,18 @@ export default function CheckoutScreen() {
   const [note, setNote] = useState("");
 
   const [pin, setPin] = useState<{ lat: number; lng: number } | null>(null);
+    const myLoc = useMyLocation();
+
+  // Already located on Home (Nearest) → use it as the delivery pin straight away
+  useEffect(() => {
+    if (pin || !myLoc?.precise) return;
+    setPin({ lat: myLoc.lat, lng: myLoc.lng });
+    // Fill only empty fields — never overwrite what the customer typed
+    if (myLoc.street) setStreet((v) => v.trim() || myLoc.street!);
+    if (myLoc.area) setArea((v) => v.trim() || myLoc.area!);
+    if (myLoc.city) setCity((v) => v.trim() || myLoc.city!);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [myLoc]);
   const [locating, setLocating] = useState(false);
   const [locationError, setLocationError] = useState("");
 
@@ -218,6 +231,7 @@ export default function CheckoutScreen() {
     clearError();
     try {
       const here = await getCurrentAddress();
+      setMyLocation(here, true); 
       setPin({ lat: here.lat, lng: here.lng });
       if (here.street) setStreet(here.street);
       if (here.area) setArea(here.area);

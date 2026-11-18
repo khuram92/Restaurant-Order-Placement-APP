@@ -4,6 +4,7 @@ import { router, useFocusEffect } from "expo-router";
 import {
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
   type ComponentProps,
@@ -24,10 +25,10 @@ import RestaurantCard from "../../../components/customer/RestaurantCard";
 import { cardShadow, colors } from "../../../constants/theme";
 import { useAuth } from "../../../context/AuthContext";
 import { getErrorMessage } from "../../../lib/api";
-import { getQuickPosition } from "../../../lib/location";
 import { browseRestaurants } from "../../../services/restaurantApi";
 import type { CustomerRestaurant, ServiceKey } from "../../../types/restaurant";
-
+import { getCurrentAddress, getQuickPosition } from "../../../lib/location";
+import { setMyLocation, useMyLocation } from "../../../lib/myLocation";
 type IconName = ComponentProps<typeof Ionicons>["name"];
 
 const SERVICES: { key: ServiceKey; label: string; icon: IconName }[] = [
@@ -59,30 +60,37 @@ export default function CustomerHome() {
   const [searchFocused, setSearchFocused] = useState(false);
 
   const requestId = useRef(0);
-  // ---------- Near me ----------
-  const [here, setHere] = useState<{ lat: number; lng: number } | null>(null);
+   // Shared with the restaurant page and checkout
+  const myLoc = useMyLocation();
+  const here = useMemo(
+    () => (myLoc ? { lat: myLoc.lat, lng: myLoc.lng } : null),
+    [myLoc],
+  );
   const [sort, setSort] = useState<"name" | "nearest">("name");
   const [locating, setLocating] = useState(false);
 
   // Quiet check on open: only works if location was allowed before (no popup)
   useEffect(() => {
-    getQuickPosition(false).then((pos) => pos && setHere(pos));
+    if (!myLoc) getQuickPosition(false).then((pos) => pos && setMyLocation(pos, false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  /** Nearest ON = always a fresh GPS fix, shared with every screen */
   const chooseSort = async (next: "name" | "nearest") => {
-    if (next === "name" || here) return setSort(next);
+    if (next === "name") return setSort("name");
     setLocating(true);
-    const pos = await getQuickPosition(true); // asks for permission if needed
-    setLocating(false);
-    if (!pos) {
+    try {
+      const loc = await getCurrentAddress(); // asks for permission if needed
+      setMyLocation(loc, true);
+      setSort("nearest");
+    } catch (err) {
       Alert.alert(
         "Location needed",
-        "Allow location and turn on GPS to see the nearest restaurants.",
+        err instanceof Error ? err.message : "Couldn't get your location",
       );
-      return;
+    } finally {
+      setLocating(false);
     }
-    setHere(pos);
-    setSort("nearest");
   };
 
   useEffect(() => {

@@ -12,6 +12,7 @@ import { getMe } from "../services/authApi";
 import type { User } from "../types/auth";
 import { getCurrentPushToken } from "../lib/notifications";
 import { removePushToken } from "../services/pushApi";
+import { clearMyLocation } from "../lib/myLocation";
 
 interface AuthContextValue {
   user: User | null;
@@ -56,10 +57,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
     const signOut = useCallback(async () => {
-    // Stop this phone getting the old user's notifications (needs the login token, so do it first)
+    
     const pushToken = getCurrentPushToken();
     if (pushToken) await removePushToken(pushToken).catch(() => {});
     await removeToken();
+    clearMyLocation();
     setUser(null);
   }, []);
 

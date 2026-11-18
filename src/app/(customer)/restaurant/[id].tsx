@@ -6,6 +6,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import {
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
   type ComponentProps,
@@ -47,6 +48,7 @@ import type {
   Day,
   ServiceKey,
 } from "../../../types/restaurant";
+import { setMyLocation, useMyLocation } from "../../../lib/myLocation";
 
 import { distanceKm, formatKm } from "../../../utils/geo";
 
@@ -481,22 +483,28 @@ export default function CustomerRestaurantScreen() {
   const tabX = useRef<Record<string, number>>({}); // x of each tab chip
   const jumping = useRef(false); // true while scrolling after a tab tap
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [here, setHere] = useState<{ lat: number; lng: number } | null>(null);
+    // Shared location (set by Nearest on Home, checkout, or the check below)
+  const myLoc = useMyLocation();
+  const here = useMemo(
+    () => (myLoc ? { lat: myLoc.lat, lng: myLoc.lng } : null),
+    [myLoc],
+  );
   const [checkingArea, setCheckingArea] = useState(false);
   const [areaUnknown, setAreaUnknown] = useState(false); // no permission / no fix yet
 
   const checkArea = useCallback(async (ask: boolean) => {
     setCheckingArea(true);
     const pos = await getQuickPosition(ask);
-    setHere(pos);
+    if (pos) setMyLocation(pos, false);
     setAreaUnknown(!pos);
     setCheckingArea(false);
   }, []);
 
-  // Silent check (no popup) once we know the restaurant delivers and has a location
+  // Silent check (no popup) only if no screen has found the location yet
   const canCheckArea = !!restaurant?.services.delivery && !!restaurant.location;
   useEffect(() => {
-    if (canCheckArea) checkArea(false);
+    if (canCheckArea && !myLoc) checkArea(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canCheckArea, checkArea]);
   const load = useCallback(async () => {
     setError("");
