@@ -101,7 +101,7 @@ export default function DeleteAccountSheet({
           <View className="mb-4 h-1.5 w-12 self-center rounded-full" style={{ backgroundColor: colors.mistDark }} />
 
           <View className="mb-3 flex-row items-center">
-            <View className="h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor: "#fdecea" }}>
+            <View className="h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor: colors.white }}>
               <Ionicons name="trash" size={20} color={colors.danger} />
             </View>
             <Text className="ml-3 flex-1 text-xl font-extrabold text-brand-dark">Delete account</Text>
@@ -137,7 +137,7 @@ export default function DeleteAccountSheet({
           ) : (
             <>
               <Text className="mb-3 text-sm text-brand-dark">
-                Enter the code we sent to <Text className="font-bold">{sentTo}</Text> to confirm.
+                Enter the code we sent to <Text className="font-bold text-black">{sentTo}</Text> to confirm.
               </Text>
               <TextInput
                 value={code}
@@ -150,12 +150,10 @@ export default function DeleteAccountSheet({
                 autoFocus
                 placeholder="••••••"
                 placeholderTextColor={colors.placeholder}
-                className="mb-2 rounded-2xl border-2 px-4 py-3 text-center text-2xl font-extrabold"
+                className="mb-2 rounded-2xl border-2 px-4 py-3 text-center text-2xl font-extrabold bg-white"
                 style={{ borderColor: colors.danger, color: colors.text, letterSpacing: 10 }}
               />
-              {!!devCode && (
-                <Text className="mb-1 text-center text-xs text-brand-light">Dev code: {devCode}</Text>
-              )}
+              
               <Pressable onPress={sendCode} disabled={wait > 0 || busy} className="mb-3 self-center py-1">
                 <Text className="text-sm font-semibold" style={{ color: wait > 0 ? colors.brandLight : colors.brand }}>
                   {wait > 0 ? `Resend code in ${wait}s` : "Resend code"}
