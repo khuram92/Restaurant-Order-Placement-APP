@@ -3,11 +3,7 @@ import { ActivityIndicator, View } from "react-native";
 import { colors } from "../constants/theme";
 import { useAuth } from "../context/AuthContext";
 
-/**
- * Any address that doesn't exist for the signed-in user
- * (e.g. the app opens at "/" but you're signed in as admin or manager)
- * → send them to their own home instead of "Unmatched Route".
- */
+
 export default function NotFound() {
   const { user, isLoading } = useAuth();
 
