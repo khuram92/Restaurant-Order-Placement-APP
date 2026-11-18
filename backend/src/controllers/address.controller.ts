@@ -29,35 +29,34 @@ export const listAddresses = async (req: Request, res: Response) => {
   res.json({ addresses: sorted(me?.addresses ?? []) });
 };
 
-// /**
-//  * POST /api/auth/addresses
-//  * Saving a Home or Work address replaces the old Home / Work (there's only one of each).
-//  */
-// export const saveAddress = async (req: Request, res: Response) => {
-//   const parsed = addressSchema.safeParse(req.body);
-//   if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
-//   const data = clean(parsed.data);
+/**
+ * POST /api/auth/addresses
+ */
+export const saveAddress = async (req: Request, res: Response) => {
+  const parsed = addressSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
+  const data = clean(parsed.data);
 
-//   const me = await loadMe(req);
-//   if (!me) return res.status(404).json({ message: "Account not found" });
+  const me = await loadMe(req);
+  if (!me) return res.status(404).json({ message: "Account not found" });
 
-//   const existing = data.label !== "other" ? me.addresses.find((a) => a.label === data.label) : undefined;
-//   if (existing) {
-//     // Replace the old Home / Work (keeps its id)
-//     me.addresses = me.addresses.map((a) => (a === existing ? { ...data, ...(existing._id && { _id: existing._id }) } : a));
-//   } else {
-//     if (me.addresses.length >= MAX_SAVED_ADDRESSES) {
-//       return res.status(409).json({ message: `You can save up to ${MAX_SAVED_ADDRESSES} addresses. Delete one first.` });
-//     }
-//     me.addresses = [...me.addresses, data];
-//   }
-//   await me.save();
+  const existing = data.label !== "other" ? me.addresses.find((a) => a.label === data.label) : undefined;
+  if (existing) {
+    // Replace the old Home / Work (keeps its id)
+    me.addresses = me.addresses.map((a) => (a === existing ? { ...data, ...(existing._id && { _id: existing._id }) } : a));
+  } else {
+    if (me.addresses.length >= MAX_SAVED_ADDRESSES) {
+      return res.status(409).json({ message: `You can save up to ${MAX_SAVED_ADDRESSES} addresses. Delete one first.` });
+    }
+    me.addresses = [...me.addresses, data];
+  }
+  await me.save();
 
-//   res.status(existing ? 200 : 201).json({
-//     message: existing ? "Address updated" : "Address saved",
-//     addresses: sorted(me.addresses),
-//   });
-// };
+  res.status(existing ? 200 : 201).json({
+    message: existing ? "Address updated" : "Address saved",
+    addresses: sorted(me.addresses),
+  });
+};
 
 // /** PATCH /api/auth/addresses/:addressId — edit one address */
 // export const updateAddress = async (req: Request, res: Response) => {
