@@ -23,6 +23,7 @@ import {
   notifyNewOrder,
   notifyOrderCancelled,
 } from "../utils/orderNotifications.js";
+import { emitOrderEvent } from "../utils/realtime.js";
 import { rebuildOrderLines } from "../utils/reorder.js";
 
 const firstIssue = (error: { issues: { message: string }[] }) =>
@@ -54,7 +55,6 @@ export const createOrder = async (req: Request, res: Response) => {
   const input = parsed.data;
   const customer = req.user!;
 
-  // ---------- Restaurant checks ----------
   const [restaurant, hasManager] = await Promise.all([
     Restaurant.findOne({ _id: input.restaurantId, isActive: true }),
     User.exists({
@@ -97,7 +97,6 @@ export const createOrder = async (req: Request, res: Response) => {
   }
 
   try {
-    // ---------- Prices from the live menu ----------
     const { items, subtotal } = await buildOrderItems(
       restaurant.id,
       input.items,
@@ -109,7 +108,6 @@ export const createOrder = async (req: Request, res: Response) => {
         .json({ message: `Minimum order is Rs ${restaurant.minOrder}` });
     }
 
-    // ---------- Dine-in: is there room right now? (seats are held when the manager accepts) ----------
     if (input.type === "dineIn" && input.dineIn) {
       const free =
         restaurant.seatingCapacity - (await seatsInUse(restaurant._id));
@@ -175,7 +173,8 @@ export const createOrder = async (req: Request, res: Response) => {
     for (let attempt = 0; ; attempt++) {
       try {
         const order = await new Order(data).save();
-        void notifyNewOrder(order); // push to the manager (doesn't slow the response)
+        void notifyNewOrder(order);
+        emitOrderEvent("order:new", order);
         return res.status(201).json({ order });
       } catch (error) {
         const duplicate = (error as { code?: number }).code === 11000;
@@ -271,7 +270,8 @@ export const cancelMyOrder = async (req: Request, res: Response) => {
     });
   }
 
-  void notifyOrderCancelled(updated); // let the manager know
+  void notifyOrderCancelled(updated);
+  emitOrderEvent("order:updated", updated);
   res.json({ message: "Order cancelled", order: updated });
 };
 

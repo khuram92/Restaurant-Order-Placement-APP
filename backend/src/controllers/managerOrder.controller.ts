@@ -9,6 +9,8 @@ import {
   listRestaurantOrdersSchema,
   updateOrderStatusSchema,
 } from "../validators/managerOrder.validators.js";
+import { emitOrderEvent } from "../utils/realtime.js";
+
 
 const firstIssue = (error: { issues: { message: string }[] }) =>
   error.issues[0]?.message ?? "Invalid input";
@@ -168,6 +170,7 @@ export const updateOrderStatus = async (req: Request, res: Response) => {
       message: "This order was just updated by someone else. Pull to refresh.",
     });
   }
-  void notifyCustomerOfStatus(updated); // push to the customer
+  void notifyCustomerOfStatus(updated); 
+  emitOrderEvent("order:updated", updated);
   res.json({ message: "Order updated", order: updated });
 };
