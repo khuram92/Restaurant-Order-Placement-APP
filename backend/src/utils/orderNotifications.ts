@@ -229,3 +229,16 @@ export const notifyAutoCancelled = async (order: OrderDoc, minutes: number) => {
     data: { type: "manager-order", orderId: String(order._id) },
   });
 };
+
+export const notifyCustomerOfDelay = async (order: OrderDoc) => {
+  if (!order.readyBy) return;
+  const text = {
+    title: "⏱️ Taking a little longer",
+    body: `${order.restaurantName} needs a few more minutes. Order #${order.orderNumber} is now ready around ${clock(order.readyBy)}.`,
+  };
+  await saveToInbox([order.customerId], order, text, order.status);
+  await sendPushToUsers([order.customerId], {
+    ...text,
+    data: { type: "customer-order", orderId: String(order._id) },
+  });
+};
