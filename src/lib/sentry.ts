@@ -1,6 +1,5 @@
 import * as Sentry from "@sentry/react-native";
 
-
 const dsn = process.env.EXPO_PUBLIC_SENTRY_DSN;
 
 Sentry.init({
@@ -18,7 +17,7 @@ Sentry.init({
   },
 });
 
-/** Called when someone logs in / out */
+
 export const setSentryUser = (user: { _id: string; role: string } | null) => {
   Sentry.setUser(user ? { id: user._id } : null);
   Sentry.setTag("role", user?.role ?? "guest");

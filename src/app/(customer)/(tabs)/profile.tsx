@@ -1,3 +1,4 @@
+import DeleteAccountSheet from "@/components/customer/DeleteAccountSheet";
 import { Ionicons } from "@expo/vector-icons";
 import Constants from "expo-constants";
 import { Image } from "expo-image";
@@ -14,7 +15,6 @@ import { cardShadow, colors } from "../../../constants/theme";
 import { useAuth } from "../../../context/AuthContext";
 import { openInApp, PRIVACY_URL } from "../../../lib/links";
 import { listMyOrders } from "../../../services/orderApi";
-import DeleteAccountSheet from "@/components/customer/DeleteAccountSheet";
 
 type IconName = ComponentProps<typeof Ionicons>["name"];
 
@@ -318,6 +318,8 @@ export default function ProfileScreen() {
               Delete account
             </Text>
           </Pressable>
+
+         
 
           <Text className="mt-2 text-center text-xs text-brand-light">
             Version {version}

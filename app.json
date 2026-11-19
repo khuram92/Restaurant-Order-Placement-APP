@@ -72,7 +72,7 @@
         {
           "url": "https://sentry.io/",
           "organization": "hash-org-eb",
-          "project": "restaurant-app"
+          "project": "restaurantorders-app"
         }
       ]
     ],
