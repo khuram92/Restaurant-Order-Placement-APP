@@ -25,6 +25,7 @@ import { cardShadow, colors } from "../../../../constants/theme";
 import { getErrorMessage } from "../../../../lib/api";
 import { useOrderEvents } from "../../../../lib/realtime";
 import {
+  delayOrder,
   getRestaurantOrder,
   updateOrderStatus,
 } from "../../../../services/managerOrderApi";
@@ -40,6 +41,8 @@ import {
   stoppedLabel,
   timeAgo,
 } from "../../../../utils/orderFormat";
+import PrepTimeSheet from "../../../../components/manager/PrepTimeSheet";
+
 
 type IconName = ComponentProps<typeof Ionicons>["name"];
 
@@ -136,6 +139,8 @@ export default function ManagerOrderDetailScreen() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [rejecting, setRejecting] = useState(false);
+  const [accepting, setAccepting] = useState(false);
+  const [, setTick] = useState(0); 
 
   const load = useCallback(async () => {
     setError("");
@@ -163,11 +168,30 @@ export default function ManagerOrderDetailScreen() {
     return () => clearInterval(timer);
   }, [running, load]);
 
-  const changeStatus = async (status: OrderStatus, reason?: string) => {
+const counting = !!order && showsEta(order);
+  useEffect(() => {
+    if (!counting) return;
+    const t = setInterval(() => setTick((n) => n + 1), 30000);
+    return () => clearInterval(t);
+  }, [counting]);
+
+  const addTime = async (minutes: number) => {
     if (!order) return;
     setBusy(true);
     try {
-      setOrder(await updateOrderStatus(order._id, status, reason));
+      setOrder(await delayOrder(order._id, minutes));
+    } catch (err) {
+      Alert.alert("Couldn't update the time", getErrorMessage(err));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const changeStatus = async (status: OrderStatus, reason?: string, prepMinutes?: number) => {
+    if (!order) return;
+    setBusy(true);
+    try {
+      setOrder(await updateOrderStatus(order._id, status, reason, prepMinutes));
     } catch (err) {
       Alert.alert("Couldn't update the order", getErrorMessage(err));
       load();
@@ -180,6 +204,7 @@ export default function ManagerOrderDetailScreen() {
     if (!order) return;
     const next = nextOrderStatus(order.type, order.status);
     if (!next) return;
+    if (next === "accepted") return setAccepting(true);
     if (next === "completed") {
       Alert.alert(
         "Complete this order?",
@@ -313,7 +338,37 @@ export default function ManagerOrderDetailScreen() {
             </Text>
           </View>
         </View>
-
+        
+      {showsEta(o) && o.readyBy && (
+          <View className="mb-4 rounded-3xl bg-white p-4" style={cardShadow}>
+            <View className="flex-row items-center">
+              <View className="h-11 w-11 items-center justify-center rounded-2xl" style={{ backgroundColor: colors.brandSoft }}>
+                <Ionicons name="time" size={22} color={colors.brand} />
+              </View>
+              <View className="ml-3 flex-1">
+                <Text className="text-lg font-extrabold text-brand-dark">Ready by {clockTime(o.readyBy)}</Text>
+                <Text
+                  className="text-sm font-semibold"
+                  style={{ color: minutesUntil(o.readyBy) < -2 ? colors.danger : colors.brandLight }}>
+                  {etaLeftText(o.readyBy)}
+                </Text>
+              </View>
+            </View>
+            <Text className="mb-2 mt-3 text-xs font-semibold text-brand-light">Running late? Tell the customer:</Text>
+            <View className="flex-row gap-2">
+              {[5, 10, 15].map((m) => (
+                <Pressable
+                  key={m}
+                  onPress={() => addTime(m)}
+                  disabled={busy}
+                  className="flex-1 items-center rounded-xl py-2"
+                  style={{ backgroundColor: colors.mistLight, opacity: busy ? 0.5 : 1 }}>
+                  <Text className="font-bold text-brand">+{m} min</Text>
+                </Pressable>
+              ))}
+            </View>
+          </View>
+        )}
         {stopped && !!(o.rejectReason || o.cancelReason) && (
           <View
             className="mb-4 flex-row items-start rounded-2xl p-4"
@@ -707,6 +762,14 @@ export default function ManagerOrderDetailScreen() {
           )}
         </View>
       )}
+       <PrepTimeSheet
+        order={accepting ? o : null}
+        onClose={() => setAccepting(false)}
+        onConfirm={async (minutes) => {
+          setAccepting(false);
+          await changeStatus("accepted", undefined, minutes);
+        }}
+      />
 
       <RejectSheet
         order={rejecting ? o : null}
