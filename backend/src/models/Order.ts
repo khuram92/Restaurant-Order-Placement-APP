@@ -94,7 +94,7 @@ export interface IOrder {
   rejectReason?: string;
   cancelReason?: string;
   cancelledBy?: "customer" | "system";
-  prepMinutes?: number; // what the manager picked when accepting
+  prepMinutes?: number; 
   readyBy?: Date;
 }
 
