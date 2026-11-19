@@ -38,3 +38,9 @@ export const updateOrderStatus = async (
   });
   return data.order;
 };
+export const delayOrder = async (id: string, addMinutes: number) => {
+  const { data } = await api.patch<{ order: Order; message: string }>(`/manager/orders/${id}/delay`, {
+    addMinutes,
+  });
+  return data.order;
+};
