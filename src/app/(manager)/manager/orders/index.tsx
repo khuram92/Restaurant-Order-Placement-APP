@@ -444,7 +444,7 @@ export default function ManagerOrdersScreen() {
             </Pressable>
           )}
         </View>
-        {/* Seats (only if the restaurant has dine-in seats) */}
+       
         {!!seats && seats.capacity > 0 && !search && (
           <View
             className="mt-3 rounded-2xl bg-white px-4 py-3"

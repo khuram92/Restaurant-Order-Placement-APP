@@ -358,7 +358,7 @@ const counting = !!order && showsEta(order);
                 </Text>
               </View>
             </View>
-            <Text className="mb-2 mt-3 text-xs font-semibold text-brand-light">Running late? Tell the customer:</Text>
+            <Text className="mb-2 mt-3 text-sm font-semibold text-brand-light">Running late? Tell the customer:</Text>
             <View className="flex-row gap-2">
               {[5, 10, 15].map((m) => (
                 <Pressable
@@ -516,7 +516,7 @@ const counting = !!order && showsEta(order);
             </View>
             <View className="ml-3 flex-1">
               <Text className="text-base font-bold text-brand-dark">
-                Table for {o.dineIn.partySize}
+                Table for, {o.dineIn.partySize} person
               </Text>
               <Text className="text-xs text-brand-light">
                 {o.dineIn.seatsReserved
