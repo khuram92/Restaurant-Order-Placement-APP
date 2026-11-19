@@ -3,10 +3,11 @@ import mongoose from "mongoose";
 import { Order, type OrderStatus } from "../models/Order.js";
 import { Restaurant } from "../models/Restaurant.js";
 import { canMoveTo } from "../utils/orderFlow.js";
-import { notifyCustomerOfStatus } from "../utils/orderNotifications.js";
+import { notifyCustomerOfDelay, notifyCustomerOfStatus } from "../utils/orderNotifications.js";
 import { seatsInUse } from "../utils/orderPricing.js";
 import { emitOrderEvent } from "../utils/realtime.js";
 import {
+  delayOrderSchema,
   listRestaurantOrdersSchema,
   updateOrderStatusSchema,
 } from "../validators/managerOrder.validators.js";
