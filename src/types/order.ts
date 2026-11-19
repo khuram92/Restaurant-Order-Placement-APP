@@ -69,6 +69,8 @@ export interface Order {
   rejectReason?: string;
   cancelReason?: string;
   cancelledBy?: "customer" | "system";
+  prepMinutes?: number; 
+  readyBy?: string;
   reviewed?: boolean;
   createdAt: string;
   updatedAt: string;
