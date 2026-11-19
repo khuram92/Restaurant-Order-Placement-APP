@@ -221,7 +221,7 @@ export default function CustomerHome() {
             onChangeText={setSearch}
             onFocus={() => setSearchFocused(true)}
             onBlur={() => setSearchFocused(false)}
-            placeholder="Restaurant, cuisine or area"
+            placeholder="Restaurant, dish or area"
             placeholderTextColor={colors.placeholder}
             autoCorrect={false}
             className="ml-2 flex-1 py-3.5 text-base"

@@ -42,21 +42,50 @@ export const listRestaurants = async (req: Request, res: Response) => {
   const filter: Record<string, unknown> = { isActive: true, _id: { $in: managed } };
   if (city) filter["address.city"] = new RegExp(`^${escapeRegex(city)}$`, "i");
   if (service) filter[`services.${service}`] = true;
+  const dishMatches = new Map<string, string[]>(); // restaurantId → up to 3 dish names
   if (search) {
     const term = new RegExp(escapeRegex(search), "i");
-    filter.$or = [{ name: term }, { cuisines: term }, { "address.area": term }, { "address.city": term }];
+    const items = await MenuItem.find({ restaurantId: { $in: managed }, name: term, isAvailable: true })
+      .select("restaurantId categoryId name")
+      .limit(500)
+      .lean();
+    // Only dishes in categories customers can see
+    const visible = new Set(
+      (
+        await MenuCategory.find({ _id: { $in: items.map((i) => i.categoryId) }, isActive: true })
+          .select("_id")
+          .lean()
+      ).map((c) => String(c._id)),
+    );
+    for (const item of items) {
+      if (!visible.has(String(item.categoryId))) continue;
+      const key = String(item.restaurantId);
+      const names = dishMatches.get(key) ?? [];
+      if (names.length < 3 && !names.includes(item.name)) names.push(item.name);
+      dishMatches.set(key, names);
+    }
+
+    filter.$or = [
+      { name: term },
+      { cuisines: term },
+      { "address.area": term },
+      { "address.city": term },
+      { _id: { $in: [...dishMatches.keys()] } },
+    ];
   }
 
-  // ---------- Distance from the customer (when they shared their location) ----------
+ 
   const here = lat !== undefined && lng !== undefined ? { lat, lng } : null;
   const distanceOf = (r: RestaurantDoc) => {
     const c = r.location?.coordinates; // [lng, lat]
     return here && c ? distanceKm(here, { lat: c[1], lng: c[0] }) : null;
   };
-  const toCard = (r: RestaurantDoc, favorites: Set<string>) => {
+    const toCard = (r: RestaurantDoc, favorites: Set<string>) => {
     const d = distanceOf(r);
+    const dishes = dishMatches.get(String(r._id));
     return {
       ...toCustomerJSON(r, favorites),
+      ...(dishes && { matchedDishes: dishes }), // "Serves: Chicken Biryani, …"
       ...(d !== null && {
         distanceKm: Math.round(d * 10) / 10,
         deliversToYou: r.services.delivery && d <= r.deliveryRadiusKm,
@@ -64,7 +93,7 @@ export const listRestaurants = async (req: Request, res: Response) => {
     };
   };
 
-  // ---------- Nearest first ----------
+  
   // Sorted in code so restaurants without a map location still show (at the end).
   if (sort === "nearest" && here) {
     const [all, favorites] = await Promise.all([

@@ -111,6 +111,16 @@ export default function RestaurantCard({
             {item.cuisines.join(" · ")}
           </Text>
         )}
+        {!!item.matchedDishes?.length && (
+          <View
+            className="mt-2 flex-row items-center self-start rounded-xl px-2.5 py-1.5"
+            style={{ backgroundColor: colors.brandSoft }}>
+            <Ionicons name="restaurant" size={13} color={colors.brand} />
+            <Text className="ml-1.5 flex-shrink text-sm text-brand-dark" numberOfLines={1}>
+              Serves <Text className="font-bold">{item.matchedDishes.join(", ")}</Text>
+            </Text>
+          </View>
+        )}
 
         <View className="mt-2 flex-row items-center">
           <Ionicons name="location" size={13} color={colors.brandLight} />
