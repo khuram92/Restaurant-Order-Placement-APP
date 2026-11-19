@@ -281,7 +281,7 @@ export default function ItemForm({
   const [tags, setTags] = useState<Record<ItemTagKey, boolean>>({
     isBestseller: false,
     isChefSpecial: false,
-    isNew: false,
+    isNewDish: false,
     isSpicy: false,
   });
 
@@ -342,7 +342,7 @@ export default function ItemForm({
           setTags({
             isBestseller: item.isBestseller,
             isChefSpecial: item.isChefSpecial,
-            isNew: item.isNew,
+            isNewDish: item.isNewDish,
             isSpicy: item.isSpicy,
           });
           setIsAvailable(item.isAvailable);

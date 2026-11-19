@@ -9,7 +9,8 @@
     "start": "node dist/server.js",
     "typecheck": "tsc --noEmit",
     "seed:admin": "tsx src/scripts/seedSuperAdmin.ts",
-    "sync:indexes": "tsx src/scripts/syncUserIndexes.ts"
+    "sync:indexes": "tsx src/scripts/syncUserIndexes.ts",
+    "rename:isnew": "tsx src/scripts/renameIsNew.ts"
   },
   "keywords": [],
   "author": "",

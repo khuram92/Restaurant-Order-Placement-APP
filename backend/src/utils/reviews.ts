@@ -10,7 +10,7 @@ export const refreshRestaurantRating = async (restaurantId: Types.ObjectId | str
     { $group: { _id: null, avg: { $avg: "$rating" }, count: { $sum: 1 } } },
   ]);
   await Restaurant.updateOne(
-    { _id: id },
+    { _id: id }, 
     {
       $set: {
         ratingAvg: result ? Math.round(result.avg * 10) / 10 : 0, // 4.36 → 4.4

@@ -33,7 +33,7 @@ export interface MenuItem {
   addOnGroups: AddOnGroup[];
   isBestseller: boolean;
   isChefSpecial: boolean;
-  isNew: boolean;
+  isNewDish: boolean;
   isSpicy: boolean;
   isAvailable: boolean;
   sortOrder: number;
@@ -74,7 +74,7 @@ export interface MenuItemInput {
   addOnGroups?: AddOnGroup[];
   isBestseller?: boolean;
   isChefSpecial?: boolean;
-  isNew?: boolean;
+  isNewDish: boolean;
   isSpicy?: boolean;
   isAvailable?: boolean;
 }

@@ -42,7 +42,7 @@ export interface IMenuItem {
 
   isBestseller: boolean;
   isChefSpecial: boolean;
-  isNew: boolean;
+  isNewDish: boolean;
   isSpicy: boolean;
   isAvailable: boolean; 
   sortOrder: number;
@@ -98,7 +98,7 @@ const menuItemSchema = new Schema<IMenuItem>(
 
     isBestseller: { type: Boolean, default: false },
     isChefSpecial: { type: Boolean, default: false },
-    isNew: { type: Boolean, default: false },
+    isNewDish: { type: Boolean, default: false },
     isSpicy: { type: Boolean, default: false },
     isAvailable: { type: Boolean, default: true },
     sortOrder: { type: Number, default: 0 },

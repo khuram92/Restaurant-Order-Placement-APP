@@ -105,7 +105,7 @@ const itemFields = {
   addOnGroups: z.array(addOnGroupSchema).max(10, "At most 10 add-on groups"),
   isBestseller: z.boolean(),
   isChefSpecial: z.boolean(),
-  isNew: z.boolean(),
+  isNewDish: z.boolean(),
   isSpicy: z.boolean(),
   isAvailable: z.boolean(),
 };

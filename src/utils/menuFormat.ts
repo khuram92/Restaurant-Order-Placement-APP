@@ -3,8 +3,11 @@ import type { ComponentProps } from "react";
 import { colors } from "../constants/theme";
 import type { MenuItem } from "../types/menu";
 
-export type ItemTagKey = "isBestseller" | "isChefSpecial" | "isNew" | "isSpicy";
-
+export type ItemTagKey =
+  | "isBestseller"
+  | "isChefSpecial"
+  | "isNewDish"
+  | "isSpicy";
 
 export const ITEM_TAGS: {
   key: ItemTagKey;
@@ -12,21 +15,33 @@ export const ITEM_TAGS: {
   icon: ComponentProps<typeof Ionicons>["name"];
   color: string;
 }[] = [
-  { key: "isBestseller", label: "Bestseller", icon: "star", color: colors.brand },
-  { key: "isChefSpecial", label: "Chef's special", icon: "ribbon", color: colors.brand },
-  { key: "isNew", label: "New", icon: "sparkles", color: colors.brand },
+  {
+    key: "isBestseller",
+    label: "Bestseller",
+    icon: "star",
+    color: colors.brand,
+  },
+  {
+    key: "isChefSpecial",
+    label: "Chef's special",
+    icon: "ribbon",
+    color: colors.brand,
+  },
+  { key: "isNewDish", label: "New", icon: "sparkles", color: colors.brand },
   { key: "isSpicy", label: "Spicy", icon: "flame", color: colors.danger },
 ];
 
 export const money = (n: number) => `Rs ${n.toLocaleString("en-PK")}`;
 
-
 export const itemPriceText = (item: Pick<MenuItem, "price" | "sizes">) => {
-  if (item.sizes.length === 0) return item.price !== undefined ? money(item.price) : "";
+  if (item.sizes.length === 0)
+    return item.price !== undefined ? money(item.price) : "";
   const prices = item.sizes.map((s) => s.price);
   const min = Math.min(...prices);
   const max = Math.max(...prices);
-  return min === max ? money(min) : `${money(min)} – ${max.toLocaleString("en-PK")}`;
+  return min === max
+    ? money(min)
+    : `${money(min)} – ${max.toLocaleString("en-PK")}`;
 };
 
 export const itemServesText = (item: Pick<MenuItem, "serves" | "sizes">) => {
