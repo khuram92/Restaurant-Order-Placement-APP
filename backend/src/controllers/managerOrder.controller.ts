@@ -5,12 +5,11 @@ import { Restaurant } from "../models/Restaurant.js";
 import { canMoveTo } from "../utils/orderFlow.js";
 import { notifyCustomerOfStatus } from "../utils/orderNotifications.js";
 import { seatsInUse } from "../utils/orderPricing.js";
+import { emitOrderEvent } from "../utils/realtime.js";
 import {
   listRestaurantOrdersSchema,
   updateOrderStatusSchema,
 } from "../validators/managerOrder.validators.js";
-import { emitOrderEvent } from "../utils/realtime.js";
-
 
 const firstIssue = (error: { issues: { message: string }[] }) =>
   error.issues[0]?.message ?? "Invalid input";
@@ -117,7 +116,7 @@ export const updateOrderStatus = async (req: Request, res: Response) => {
   const parsed = updateOrderStatusSchema.safeParse(req.body ?? {});
   if (!parsed.success)
     return res.status(400).json({ message: firstIssue(parsed.error) });
-  const { status: to, reason } = parsed.data;
+  const { status: to, reason, prepMinutes } = parsed.data;
 
   const order = await Order.findOne({ _id: id, restaurantId });
   if (!order) return res.status(404).json({ message: "Order not found" });
@@ -129,11 +128,15 @@ export const updateOrderStatus = async (req: Request, res: Response) => {
       .json({ message: `Can't change this order from "${from}" to "${to}"` });
   }
 
-  // ---------- What changes ----------
+
   const set: Record<string, unknown> = { status: to };
 
   if (to === "rejected" && reason) set.rejectReason = reason;
-  if (to === "completed") set.paymentStatus = "paid"; // cash collected
+  if (to === "completed") set.paymentStatus = "paid";
+  if (to === "accepted" && prepMinutes) {
+    set.prepMinutes = prepMinutes;
+    set.readyBy = new Date(Date.now() + prepMinutes * 60 * 1000);
+  }
 
   if (order.dineIn) {
     if (to === "accepted") {
@@ -170,7 +173,7 @@ export const updateOrderStatus = async (req: Request, res: Response) => {
       message: "This order was just updated by someone else. Pull to refresh.",
     });
   }
-  void notifyCustomerOfStatus(updated); 
+  void notifyCustomerOfStatus(updated);
   emitOrderEvent("order:updated", updated);
   res.json({ message: "Order updated", order: updated });
 };
