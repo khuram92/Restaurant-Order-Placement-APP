@@ -100,3 +100,21 @@ export const stoppedLabel = (
       ? "The customer cancelled: "
       : "Cancelled by the customer: ";
 };
+
+export const clockTime = (iso: string) =>
+  new Date(iso).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+
+
+export const minutesUntil = (iso: string) => Math.ceil((new Date(iso).getTime() - Date.now()) / 60_000);
+
+
+export const showsEta = (o: { status: string; readyBy?: string }) =>
+  !!o.readyBy && (o.status === "accepted" || o.status === "preparing");
+
+
+export const etaLeftText = (iso: string) => {
+  const left = minutesUntil(iso);
+  if (left > 1) return `${left} min left`;
+  if (left >= -2) return "Any minute now";
+  return `Running ${-left} min late`;
+};
