@@ -21,7 +21,14 @@ export const ORDER_STATUSES = [
 export type OrderStatus = (typeof ORDER_STATUSES)[number];
 
 /** Statuses where the order is still running (dine-in seats are held while accepted+) */
-export const ACTIVE_STATUSES: OrderStatus[] = ["pending", "accepted", "preparing", "ready", "outForDelivery", "served"];
+export const ACTIVE_STATUSES: OrderStatus[] = [
+  "pending",
+  "accepted",
+  "preparing",
+  "ready",
+  "outForDelivery",
+  "served",
+];
 
 /** A chosen add-on, copied from the menu at order time */
 export interface IOrderAddOn {
@@ -94,7 +101,7 @@ export interface IOrder {
   rejectReason?: string;
   cancelReason?: string;
   cancelledBy?: "customer" | "system";
-  prepMinutes?: number; 
+  prepMinutes?: number;
   readyBy?: Date;
 }
 
@@ -132,13 +139,20 @@ const orderSchema = new Schema<IOrder>(
   {
     orderNumber: { type: String, required: true },
     customerId: { type: Schema.Types.ObjectId, ref: "User", required: true },
-    restaurantId: { type: Schema.Types.ObjectId, ref: "Restaurant", required: true },
+    restaurantId: {
+      type: Schema.Types.ObjectId,
+      ref: "Restaurant",
+      required: true,
+    },
     restaurantName: { type: String, required: true },
     type: { type: String, enum: ORDER_TYPES, required: true },
 
     items: {
       type: [orderItemSchema],
-      validate: { validator: (v: unknown[]) => v.length > 0, message: "The order has no items" },
+      validate: {
+        validator: (v: unknown[]) => v.length > 0,
+        message: "The order has no items",
+      },
     },
     subtotal: { type: Number, required: true, min: 0 },
     tax: { type: Number, required: true, min: 0 },
@@ -157,7 +171,7 @@ const orderSchema = new Schema<IOrder>(
           city: { type: String, required: true, trim: true },
           phone: { type: String, required: true, trim: true },
           instructions: { type: String, trim: true, maxlength: 200 },
-         location: {
+          location: {
             type: new Schema({ lat: Number, lng: Number }, { _id: false }),
             default: undefined,
           },
@@ -180,7 +194,11 @@ const orderSchema = new Schema<IOrder>(
 
     note: { type: String, trim: true, maxlength: 300 },
     paymentMethod: { type: String, enum: ["cash"], default: "cash" },
-    paymentStatus: { type: String, enum: ["unpaid", "paid"], default: "unpaid" },
+    paymentStatus: {
+      type: String,
+      enum: ["unpaid", "paid"],
+      default: "unpaid",
+    },
 
     status: { type: String, enum: ORDER_STATUSES, default: "pending" },
     statusHistory: {
@@ -198,14 +216,18 @@ const orderSchema = new Schema<IOrder>(
     },
     rejectReason: { type: String, trim: true, maxlength: 200 },
     cancelReason: { type: String, trim: true, maxlength: 200 },
-      cancelledBy: { type: String, enum: ["customer", "system"] },
+    cancelledBy: { type: String, enum: ["customer", "system"] },
+    prepMinutes: { type: Number, min: 1, max: 180 },
+    readyBy: { type: Date },
   },
   { timestamps: true },
 );
 
 orderSchema.pre("validate", function () {
-  if (this.type === "delivery" && !this.delivery) this.invalidate("delivery", "Add a delivery address");
-  if (this.type === "dineIn" && !this.dineIn) this.invalidate("dineIn", "Enter the number of people");
+  if (this.type === "delivery" && !this.delivery)
+    this.invalidate("delivery", "Add a delivery address");
+  if (this.type === "dineIn" && !this.dineIn)
+    this.invalidate("dineIn", "Enter the number of people");
 });
 
 orderSchema.index({ orderNumber: 1 }, { unique: true });

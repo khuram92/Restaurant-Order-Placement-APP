@@ -12,9 +12,13 @@ export const updateOrderStatusSchema = z
   .object({
     status: z.enum(ORDER_STATUSES, { message: "Choose a valid status" }),
     reason: z.string().trim().max(200, "Reason is too long").optional(),
+    prepMinutes: z.number().int().min(5, "At least 5 minutes").max(120, "At most 2 hours").optional(),
   })
   .refine((d) => d.status !== "rejected" || (d.reason?.length ?? 0) >= 3, {
     message: "Tell the customer why you're rejecting the order",
     path: ["reason"],
   });
 
+export const delayOrderSchema = z.object({
+  addMinutes: z.number().int().min(5, "At least 5 minutes").max(60, "At most 60 minutes"),
+});
