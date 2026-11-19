@@ -25,17 +25,21 @@ import OrderReviewCard from "../../../components/customer/OrderReviewCard";
 import { cardShadow, colors } from "../../../constants/theme";
 import { useReorder } from "../../../hooks/useReorder";
 import { getErrorMessage } from "../../../lib/api";
+import { useOrderEvents } from "../../../lib/realtime";
 import { cancelMyOrder, getMyOrder } from "../../../services/orderApi";
 import type { Order, OrderStatus } from "../../../types/order";
 import { money } from "../../../utils/menuFormat";
 import {
   autoCancelIn,
+  clockTime,
+  etaLeftText,
   formatOrderDate,
+  minutesUntil,
   ORDER_STATUS_INFO,
   ORDER_TYPE_INFO,
+  showsEta,
   trackerSteps,
 } from "../../../utils/orderFormat";
-import { useOrderEvents } from "../../../lib/realtime";
 
 type IconName = ComponentProps<typeof Ionicons>["name"];
 
@@ -45,7 +49,7 @@ const FINISHED: OrderStatus[] = ["completed", "rejected", "cancelled"];
 const statusMessage = (o: Order): string => {
   switch (o.status) {
     case "pending":
-      return `Waiting for ${o.restaurantName} to confirm. If they don't within ${autoCancelIn(o)} min, we'll cancel it for you.`
+      return `Waiting for ${o.restaurantName} to confirm. If they don't within ${autoCancelIn(o)} min, we'll cancel it for you.`;
     case "accepted":
       return o.type === "dineIn"
         ? "Your table is held. The kitchen will start soon."
@@ -62,14 +66,14 @@ const statusMessage = (o: Order): string => {
       return "Thanks for ordering. See you again!";
     case "rejected":
       return o.rejectReason || "The restaurant couldn't take this order";
-        case "cancelled":
+    case "cancelled":
       return o.cancelledBy === "system"
         ? `${o.restaurantName} didn't confirm in time, so we cancelled it. You haven't been charged.`
         : o.cancelReason || "You cancelled this order";
   }
 };
 
-// ---------- Small pieces ----------
+
 function Card({
   title,
   icon,
@@ -206,7 +210,7 @@ function StepBar({ order }: { order: Order }) {
   );
 }
 
-/** Full timeline: every step for this order type, with the time it happened */
+
 function Timeline({ order }: { order: Order }) {
   const stopped = order.status === "rejected" || order.status === "cancelled";
 
@@ -305,6 +309,52 @@ function Timeline({ order }: { order: Order }) {
   );
 }
 
+function EtaCard({ order }: { order: Order }) {
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setTick((n) => n + 1), 30000); // keep "min left" fresh
+    return () => clearInterval(t);
+  }, []);
+  if (!order.readyBy) return null;
+
+  const late = minutesUntil(order.readyBy) < -2;
+  const what =
+    order.type === "delivery"
+      ? "Leaves the kitchen around"
+      : order.type === "dineIn"
+        ? "Served around"
+        : "Ready for pickup around";
+
+  return (
+    <View
+      className="mb-4 flex-row items-center rounded-3xl bg-white p-4"
+      style={cardShadow}>
+      <View
+        className="h-12 w-12 items-center justify-center rounded-2xl"
+        style={{ backgroundColor: colors.brandSoft }}>
+        <Ionicons name="time" size={24} color={colors.brand} />
+      </View>
+      <View className="ml-3 flex-1">
+        <Text className="text-xs font-semibold uppercase tracking-wide text-brand">
+          {what}
+        </Text>
+        <Text className="text-2xl font-extrabold ">
+          {clockTime(order.readyBy)}
+        </Text>
+      </View>
+      <View
+        className="rounded-full px-3 py-1.5"
+        style={{ backgroundColor: late ? "#fdecea" : colors.mistLight }}>
+        <Text
+          className="text-sm font-bold"
+          style={{ color: late ? colors.danger : colors.brand }}>
+          {etaLeftText(order.readyBy)}
+        </Text>
+      </View>
+    </View>
+  );
+}
+
 export default function OrderScreen() {
   const { id, placed } = useLocalSearchParams<{
     id: string;
@@ -334,10 +384,9 @@ export default function OrderScreen() {
   useEffect(() => {
     load();
   }, [load]);
-useOrderEvents((e) => {
+  useOrderEvents((e) => {
     if (!e || e.orderId === String(id)) load();
   });
-  // Check for updates every 20 s while the order is still running
   const running = !!order && !FINISHED.includes(order.status);
   useEffect(() => {
     if (!running) return;
@@ -522,6 +571,7 @@ useOrderEvents((e) => {
         </View>
 
         <View className="-mt-4 px-4">
+          {showsEta(o) && <EtaCard order={o} />}
           <View
             className="mb-4 flex-row rounded-3xl bg-white p-4"
             style={cardShadow}>

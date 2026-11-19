@@ -23,6 +23,7 @@ import type {
 import { money } from "../../../utils/menuFormat";
 import {
   autoCancelIn,
+  clockTime,
   ORDER_STATUS_INFO,
   ORDER_TYPE_INFO,
   stoppedLabel,
@@ -46,11 +47,14 @@ const runningHint = (o: Order) => {
     case "pending":
       return `Waiting for the restaurant · auto-cancels in ${autoCancelIn(o)} min`;
     case "accepted":
+      if (o.readyBy) return `Confirmed · ready around ${clockTime(o.readyBy)}`;
       return o.type === "dineIn"
         ? "Confirmed · your table is held"
         : "Confirmed · cooking starts soon";
     case "preparing":
-      return "The kitchen is cooking your food";
+      return o.readyBy
+        ? `Cooking · ready around ${clockTime(o.readyBy)}`
+        : "The kitchen is cooking your food";
     case "ready":
       return "Ready for pickup";
     case "outForDelivery":
