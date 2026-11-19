@@ -6,6 +6,7 @@ import { AuthProvider, useAuth } from "../context/AuthContext";
 import { CartProvider } from "../context/CartContext";
 import { usePushNotifications } from "../hooks/usePushNotifications";
 import { useRealtime } from "../hooks/useRealtime";
+import { setSentryUser } from "../lib/sentry";
 
 LogBox.ignoreLogs(["ImageBackground is deprecated"]);
 SplashScreen.preventAutoHideAsync();
@@ -33,7 +34,11 @@ function RootNavigator() {
     (isManager && !mustChangePassword) || (isCustomer && !needsProfile);
   usePushNotifications(user, !isLoading && canOpenOrders);
   useRealtime(user, !isLoading && (canOpenOrders || isSuperAdmin));
-
+  const userId = user?._id;
+  const role = user?.role;
+  useEffect(() => {
+    setSentryUser(userId && role ? { _id: userId, role } : null);
+  }, [userId, role]);
   useEffect(() => {
     if (isLoading) return;
     const group = segments[0];
@@ -97,7 +102,7 @@ function RootNavigator() {
   );
 }
 
-export default function RootLayout() {
+function RootLayout() {
   return (
     <AuthProvider>
       <CartProvider>
@@ -107,3 +112,5 @@ export default function RootLayout() {
     </AuthProvider>
   );
 }
+
+export default Sentry.wrap(RootLayout);
