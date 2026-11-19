@@ -11,6 +11,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import PrepTimeSheet from "../../../../components/manager/PrepTimeSheet";
 import RejectSheet from "../../../../components/manager/RejectSheet";
 import { cardShadow, colors } from "../../../../constants/theme";
 import { getErrorMessage } from "../../../../lib/api";
@@ -267,6 +268,7 @@ export default function ManagerOrdersScreen() {
   const [error, setError] = useState("");
   const [busyId, setBusyId] = useState<string | null>(null);
   const [rejecting, setRejecting] = useState<Order | null>(null);
+  const [accepting, setAccepting] = useState<Order | null>(null);
   const [query, setQuery] = useState(""); // what's typed
   const [search, setSearch] = useState(""); // what we search (after a short pause)
   const tabRef = useRef(tab);
@@ -327,15 +329,15 @@ export default function ManagerOrdersScreen() {
     }
   };
 
-  /** Move one order forward (or reject) and refresh the list */
   const changeStatus = async (
     order: Order,
     status: Order["status"],
     reason?: string,
+    prepMinutes?: number,
   ) => {
     setBusyId(order._id);
     try {
-      await updateOrderStatus(order._id, status, reason);
+      await updateOrderStatus(order._id, status, reason, prepMinutes);
       await load(tab);
     } catch (err) {
       Alert.alert("Couldn't update the order", getErrorMessage(err));
@@ -348,6 +350,7 @@ export default function ManagerOrdersScreen() {
   const confirmNext = (order: Order) => {
     const next = nextOrderStatus(order.type, order.status);
     if (!next) return;
+    if (next === "accepted") return setAccepting(order);
     if (next === "completed") {
       Alert.alert(
         "Complete this order?",
@@ -565,6 +568,17 @@ export default function ManagerOrdersScreen() {
           }
         />
       )}
+
+      <PrepTimeSheet
+        order={accepting}
+        onClose={() => setAccepting(null)}
+        onConfirm={async (minutes) => {
+          const order = accepting;
+          if (!order) return;
+          setAccepting(null);
+          await changeStatus(order, "accepted", undefined, minutes);
+        }}
+      />
 
       <RejectSheet
         order={rejecting}
