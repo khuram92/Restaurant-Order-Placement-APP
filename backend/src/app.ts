@@ -8,7 +8,7 @@ import managerRoutes from "./routes/manager.routes.js";
 import orderRoutes from "./routes/order.routes.js";
 import notificationRoutes from "./routes/notification.routes.js";
 import { privacyPolicyHtml } from "./pages/privacyPolicy.js";
-
+import * as Sentry from "@sentry/node";
 
 const app = express();
 if (process.env.TRUST_PROXY) app.set("trust proxy", Number(process.env.TRUST_PROXY) || 1);
@@ -64,6 +64,11 @@ app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
   }
 
   console.error(err);
+  Sentry.withScope((scope) => {
+    scope.setTag("route", `${_req.method} ${_req.route?.path ?? _req.path}`);
+    if (_req.user) scope.setUser({ id: String(_req.user._id) }); 
+    Sentry.captureException(err);
+  });
   res.status(500).json({ message: "Internal Server Error" });
 });
 
