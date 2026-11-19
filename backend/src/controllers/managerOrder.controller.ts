@@ -177,3 +177,35 @@ export const updateOrderStatus = async (req: Request, res: Response) => {
   emitOrderEvent("order:updated", updated);
   res.json({ message: "Order updated", order: updated });
 };
+export const delayOrder = async (req: Request, res: Response) => {
+  const restaurantId = myRestaurantId(req, res);
+  if (!restaurantId) return;
+
+  const id = String(req.params.id);
+  if (!mongoose.isValidObjectId(id)) return res.status(400).json({ message: "Invalid order id" });
+
+  const parsed = delayOrderSchema.safeParse(req.body ?? {});
+  if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
+  const { addMinutes } = parsed.data;
+
+  const order = await Order.findOne({ _id: id, restaurantId });
+  if (!order) return res.status(404).json({ message: "Order not found" });
+  if (order.status !== "accepted" && order.status !== "preparing") {
+    return res.status(409).json({ message: "You can only add time while the order is being prepared" });
+  }
+
+  // From the current ready time, or from now if it has already passed / was never set
+  const base = Math.max(order.readyBy?.getTime() ?? 0, Date.now());
+  const updated = await Order.findOneAndUpdate(
+    { _id: order._id, status: order.status },
+    { $set: { readyBy: new Date(base + addMinutes * 60 * 1000) } },
+    { new: true },
+  );
+  if (!updated) {
+    return res.status(409).json({ message: "This order was just updated. Pull to refresh." });
+  }
+
+  void notifyCustomerOfDelay(updated);
+  emitOrderEvent("order:updated", updated);
+  res.json({ message: "Ready time updated", order: updated });
+};
