@@ -8,20 +8,24 @@ import type {
 } from "../types/menu";
 import type { PickedImage } from "../types/restaurant";
 
-
 export const createMenuApi = (base: string) => ({
   getMenu: async () => {
     const { data } = await api.get<MenuResponse>(base);
     return data;
   },
 
-
   createCategory: async (input: CategoryInput) => {
-    const { data } = await api.post<{ category: MenuCategory }>(`${base}/categories`, input);
+    const { data } = await api.post<{ category: MenuCategory }>(
+      `${base}/categories`,
+      input,
+    );
     return data.category;
   },
   updateCategory: async (id: string, input: Partial<CategoryInput>) => {
-    const { data } = await api.patch<{ category: MenuCategory }>(`${base}/categories/${id}`, input);
+    const { data } = await api.patch<{ category: MenuCategory }>(
+      `${base}/categories/${id}`,
+      input,
+    );
     return data.category;
   },
   deleteCategory: async (id: string) => {
@@ -30,7 +34,6 @@ export const createMenuApi = (base: string) => ({
   reorderCategories: async (ids: string[]) => {
     await api.put(`${base}/categories/order`, { ids });
   },
-
 
   getItem: async (id: string) => {
     const { data } = await api.get<{ item: MenuItem }>(`${base}/items/${id}`);
@@ -41,11 +44,17 @@ export const createMenuApi = (base: string) => ({
     return data.item;
   },
   updateItem: async (id: string, input: Partial<MenuItemInput>) => {
-    const { data } = await api.patch<{ item: MenuItem }>(`${base}/items/${id}`, input);
+    const { data } = await api.patch<{ item: MenuItem }>(
+      `${base}/items/${id}`,
+      input,
+    );
     return data.item;
   },
   setItemAvailability: async (id: string, isAvailable: boolean) => {
-    const { data } = await api.patch<{ item: MenuItem }>(`${base}/items/${id}/availability`, { isAvailable });
+    const { data } = await api.patch<{ item: MenuItem }>(
+      `${base}/items/${id}/availability`,
+      { isAvailable },
+    );
     return data.item;
   },
   deleteItem: async (id: string) => {
@@ -54,7 +63,6 @@ export const createMenuApi = (base: string) => ({
   reorderItems: async (categoryId: string, ids: string[]) => {
     await api.put(`${base}/categories/${categoryId}/items/order`, { ids });
   },
-
 
   uploadItemImage: async (id: string, image: PickedImage) => {
     const type = image.mimeType ?? "image/jpeg";
@@ -66,20 +74,27 @@ export const createMenuApi = (base: string) => ({
       name: image.fileName ?? `item.${extension}`,
     } as unknown as Blob);
 
-    const { data } = await api.patch<{ item: MenuItem }>(`${base}/items/${id}/image`, form, {
-      headers: { "Content-Type": "multipart/form-data" },
-      transformRequest: (body) => body,
-      timeout: 60000,
-    });
+    const { data } = await api.patch<{ item: MenuItem }>(
+      `${base}/items/${id}/image`,
+      form,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+        transformRequest: (body) => body,
+        timeout: 60000,
+      },
+    );
     return data.item;
   },
   removeItemImage: async (id: string) => {
-    const { data } = await api.delete<{ item: MenuItem }>(`${base}/items/${id}/image`);
+    const { data } = await api.delete<{ item: MenuItem }>(
+      `${base}/items/${id}/image`,
+    );
     return data.item;
   },
 });
 
 export type MenuApi = ReturnType<typeof createMenuApi>;
 
-export const adminMenuApi = (restaurantId: string) => createMenuApi(`/admin/restaurants/${restaurantId}/menu`);
+export const adminMenuApi = (restaurantId: string) =>
+  createMenuApi(`/admin/restaurants/${restaurantId}/menu`);
 export const managerMenuApi = createMenuApi("/manager/menu");

@@ -38,9 +38,13 @@ export function useReorder() {
         const notes: string[] = [];
         if (data.skipped.length) notes.push(`Not added:\n${skippedText}`);
         if (data.priceChanged)
-          notes.push("Some prices have changed since last time. Your cart shows today's prices.");
+          notes.push(
+            "Some prices have changed since last time. Your cart shows today's prices.",
+          );
         if (!isOpenNow)
-          notes.push(`${restaurant.name} is closed right now. You can order once it opens.`);
+          notes.push(
+            `${restaurant.name} is closed right now. You can order once it opens.`,
+          );
         if (notes.length) Alert.alert("Added to your cart", notes.join("\n\n"));
       };
 

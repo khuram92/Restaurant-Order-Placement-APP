@@ -3,7 +3,10 @@ import mongoose from "mongoose";
 import { Order, type OrderStatus } from "../models/Order.js";
 import { Restaurant } from "../models/Restaurant.js";
 import { canMoveTo } from "../utils/orderFlow.js";
-import { notifyCustomerOfDelay, notifyCustomerOfStatus } from "../utils/orderNotifications.js";
+import {
+  notifyCustomerOfDelay,
+  notifyCustomerOfStatus,
+} from "../utils/orderNotifications.js";
 import { seatsInUse } from "../utils/orderPricing.js";
 import { emitOrderEvent } from "../utils/realtime.js";
 import {
@@ -129,7 +132,6 @@ export const updateOrderStatus = async (req: Request, res: Response) => {
       .json({ message: `Can't change this order from "${from}" to "${to}"` });
   }
 
-
   const set: Record<string, unknown> = { status: to };
 
   if (to === "rejected" && reason) set.rejectReason = reason;
@@ -179,22 +181,25 @@ export const updateOrderStatus = async (req: Request, res: Response) => {
   res.json({ message: "Order updated", order: updated });
 };
 
-
 export const delayOrder = async (req: Request, res: Response) => {
   const restaurantId = myRestaurantId(req, res);
   if (!restaurantId) return;
 
   const id = String(req.params.id);
-  if (!mongoose.isValidObjectId(id)) return res.status(400).json({ message: "Invalid order id" });
+  if (!mongoose.isValidObjectId(id))
+    return res.status(400).json({ message: "Invalid order id" });
 
   const parsed = delayOrderSchema.safeParse(req.body ?? {});
-  if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
+  if (!parsed.success)
+    return res.status(400).json({ message: firstIssue(parsed.error) });
   const { addMinutes } = parsed.data;
 
   const order = await Order.findOne({ _id: id, restaurantId });
   if (!order) return res.status(404).json({ message: "Order not found" });
   if (order.status !== "accepted" && order.status !== "preparing") {
-    return res.status(409).json({ message: "You can only add time while the order is being prepared" });
+    return res.status(409).json({
+      message: "You can only add time while the order is being prepared",
+    });
   }
 
   // From the current ready time, or from now if it has already passed / was never set
@@ -205,7 +210,9 @@ export const delayOrder = async (req: Request, res: Response) => {
     { new: true },
   );
   if (!updated) {
-    return res.status(409).json({ message: "This order was just updated. Pull to refresh." });
+    return res
+      .status(409)
+      .json({ message: "This order was just updated. Pull to refresh." });
   }
 
   void notifyCustomerOfDelay(updated);

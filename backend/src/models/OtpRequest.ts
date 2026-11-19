@@ -1,9 +1,9 @@
 import { Schema, model } from "mongoose";
 
 export interface IOtpRequest {
-  identifier: string; 
+  identifier: string;
   ip: string;
-    purpose: "login" | "contact" | "delete";
+  purpose: "login" | "contact" | "delete";
   createdAt: Date;
 }
 
@@ -11,7 +11,11 @@ const otpRequestSchema = new Schema<IOtpRequest>(
   {
     identifier: { type: String, required: true },
     ip: { type: String, required: true },
-        purpose: { type: String, enum: ["login", "contact", "delete"], required: true },
+    purpose: {
+      type: String,
+      enum: ["login", "contact", "delete"],
+      required: true,
+    },
     createdAt: { type: Date, default: Date.now, expires: 60 * 60 * 24 },
   },
   { versionKey: false },

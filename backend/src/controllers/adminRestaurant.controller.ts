@@ -235,7 +235,7 @@ export const deleteRestaurant = async (req: Request, res: Response) => {
     MenuItem.deleteMany({ restaurantId: restaurant._id }),
     MenuCategory.deleteMany({ restaurantId: restaurant._id }),
   ]);
-  
+
   try {
     await Promise.all([
       deleteRestaurantImages(restaurant.id),

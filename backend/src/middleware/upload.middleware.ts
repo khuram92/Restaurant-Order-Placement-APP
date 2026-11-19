@@ -1,4 +1,4 @@
-import type { Request, Response, NextFunction, RequestHandler } from "express";
+import type { NextFunction, Request, RequestHandler, Response } from "express";
 import multer from "multer";
 
 const MAX_SIZE_MB = 5;
@@ -14,16 +14,26 @@ const upload = multer({
 
 /** Wraps a multer handler so upload errors become friendly 400 messages */
 const withFriendlyErrors =
-  (handler: RequestHandler) => (req: Request, res: Response, next: NextFunction) => {
+  (handler: RequestHandler) =>
+  (req: Request, res: Response, next: NextFunction) => {
     handler(req, res, (err: unknown) => {
       if (err instanceof multer.MulterError && err.code === "LIMIT_FILE_SIZE") {
-        return res.status(400).json({ message: `Image must be smaller than ${MAX_SIZE_MB} MB` });
+        return res
+          .status(400)
+          .json({ message: `Image must be smaller than ${MAX_SIZE_MB} MB` });
       }
-      if (err instanceof multer.MulterError && err.code === "LIMIT_UNEXPECTED_FILE") {
-        return res.status(400).json({ message: `Unexpected file field "${err.field}"` });
+      if (
+        err instanceof multer.MulterError &&
+        err.code === "LIMIT_UNEXPECTED_FILE"
+      ) {
+        return res
+          .status(400)
+          .json({ message: `Unexpected file field "${err.field}"` });
       }
       if (err) {
-        return res.status(400).json({ message: (err as Error).message || "Invalid upload" });
+        return res
+          .status(400)
+          .json({ message: (err as Error).message || "Invalid upload" });
       }
       next();
     });
@@ -37,8 +47,7 @@ export const restaurantImagesUpload = withFriendlyErrors(
   upload.fields([
     { name: "logo", maxCount: 1 },
     { name: "cover", maxCount: 1 },
-  ])
+  ]),
 );
-
 
 export const menuItemImageUpload = withFriendlyErrors(upload.single("image"));

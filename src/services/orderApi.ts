@@ -1,6 +1,10 @@
 import { api } from "../lib/api";
-import type { Order, OrderListResponse, PlaceOrderInput, ReorderPreview } from "../types/order";
-
+import type {
+  Order,
+  OrderListResponse,
+  PlaceOrderInput,
+  ReorderPreview,
+} from "../types/order";
 
 /** Customer: place an order */
 export const placeOrder = async (input: PlaceOrderInput) => {
@@ -9,8 +13,13 @@ export const placeOrder = async (input: PlaceOrderInput) => {
 };
 
 /** Customer: own orders, newest first */
-export const listMyOrders = async (status: "active" | "past" | "all" = "all", page = 1) => {
-  const { data } = await api.get<OrderListResponse>("/orders", { params: { status, page } });
+export const listMyOrders = async (
+  status: "active" | "past" | "all" = "all",
+  page = 1,
+) => {
+  const { data } = await api.get<OrderListResponse>("/orders", {
+    params: { status, page },
+  });
   return data;
 };
 
@@ -21,7 +30,10 @@ export const getMyOrder = async (id: string) => {
 
 /** Only works while the order is still pending */
 export const cancelMyOrder = async (id: string, reason?: string) => {
-  const { data } = await api.patch<{ order: Order; message: string }>(`/orders/${id}/cancel`, reason ? { reason } : {});
+  const { data } = await api.patch<{ order: Order; message: string }>(
+    `/orders/${id}/cancel`,
+    reason ? { reason } : {},
+  );
   return data.order;
 };
 

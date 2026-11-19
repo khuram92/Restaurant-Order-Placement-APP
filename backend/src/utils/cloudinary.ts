@@ -6,13 +6,14 @@ let configured = false;
 const getCloudinary = () => {
   if (configured) return cloudinary;
 
-  const { CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET } = process.env;
+  const { CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET } =
+    process.env;
   if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_API_KEY || !CLOUDINARY_API_SECRET) {
     throw new Error("Cloudinary settings are missing in .env");
   }
 
   cloudinary.config({
-    cloud_name: CLOUDINARY_CLOUD_NAME,  
+    cloud_name: CLOUDINARY_CLOUD_NAME,
     api_key: CLOUDINARY_API_KEY,
     api_secret: CLOUDINARY_API_SECRET,
     secure: true,
@@ -25,7 +26,10 @@ const getCloudinary = () => {
  * Uploads a user's avatar. Using the user id as public_id means a new upload
  * replaces the old image instead of creating a new one.
  */
-export const uploadAvatarImage = (buffer: Buffer, userId: string): Promise<UploadApiResponse> => {
+export const uploadAvatarImage = (
+  buffer: Buffer,
+  userId: string,
+): Promise<UploadApiResponse> => {
   return new Promise((resolve, reject) => {
     const stream = getCloudinary().uploader.upload_stream(
       {
@@ -40,15 +44,14 @@ export const uploadAvatarImage = (buffer: Buffer, userId: string): Promise<Uploa
         ],
       },
       (error, result) => {
-        if (error || !result) return reject(error ?? new Error("Upload failed"));
+        if (error || !result)
+          return reject(error ?? new Error("Upload failed"));
         resolve(result);
-      }
+      },
     );
     stream.end(buffer);
   });
 };
-
-
 
 export type RestaurantImageKind = "logo" | "cover";
 
@@ -59,9 +62,12 @@ export type RestaurantImageKind = "logo" | "cover";
 export const uploadRestaurantImage = (
   buffer: Buffer,
   restaurantId: string,
-  kind: RestaurantImageKind
+  kind: RestaurantImageKind,
 ): Promise<UploadApiResponse> => {
-  const size = kind === "logo" ? { width: 400, height: 400 } : { width: 1200, height: 600 };
+  const size =
+    kind === "logo"
+      ? { width: 400, height: 400 }
+      : { width: 1200, height: 600 };
 
   return new Promise((resolve, reject) => {
     const stream = getCloudinary().uploader.upload_stream(
@@ -77,30 +83,35 @@ export const uploadRestaurantImage = (
         ],
       },
       (error, result) => {
-        if (error || !result) return reject(error ?? new Error("Upload failed"));
+        if (error || !result)
+          return reject(error ?? new Error("Upload failed"));
         resolve(result);
-      }
+      },
     );
     stream.end(buffer);
   });
 };
 
 /** Deletes a restaurant's logo and cover from Cloudinary (missing images are ignored) */
-export const deleteRestaurantImages = async (restaurantId: string): Promise<void> => {
+export const deleteRestaurantImages = async (
+  restaurantId: string,
+): Promise<void> => {
   const cloud = getCloudinary();
   await Promise.allSettled(
     (["logo", "cover"] as const).map((kind) =>
-      cloud.uploader.destroy(`food-app/restaurants/${restaurantId}-${kind}`, { invalidate: true })
-    )
+      cloud.uploader.destroy(`food-app/restaurants/${restaurantId}-${kind}`, {
+        invalidate: true,
+      }),
+    ),
   );
 };
 
 /** Deletes a user's avatar from Cloudinary (missing image is ignored) */
 export const deleteAvatarImage = async (userId: string): Promise<void> => {
-  await getCloudinary().uploader.destroy(`food-app/avatars/${userId}`, { invalidate: true });
+  await getCloudinary().uploader.destroy(`food-app/avatars/${userId}`, {
+    invalidate: true,
+  });
 };
-
-
 
 export const uploadMenuItemImage = (
   buffer: Buffer,
@@ -121,7 +132,8 @@ export const uploadMenuItemImage = (
         ],
       },
       (error, result) => {
-        if (error || !result) return reject(error ?? new Error("Upload failed"));
+        if (error || !result)
+          return reject(error ?? new Error("Upload failed"));
         resolve(result);
       },
     );
@@ -130,11 +142,22 @@ export const uploadMenuItemImage = (
 };
 
 /** Deletes one menu item photo (missing image is ignored) */
-export const deleteMenuItemImage = async (restaurantId: string, itemId: string): Promise<void> => {
-  await getCloudinary().uploader.destroy(`food-app/menu/${restaurantId}/${itemId}`, { invalidate: true });
+export const deleteMenuItemImage = async (
+  restaurantId: string,
+  itemId: string,
+): Promise<void> => {
+  await getCloudinary().uploader.destroy(
+    `food-app/menu/${restaurantId}/${itemId}`,
+    { invalidate: true },
+  );
 };
 
 /** Deletes every menu photo of a restaurant (used when the restaurant is deleted) */
-export const deleteRestaurantMenuImages = async (restaurantId: string): Promise<void> => {
-  await getCloudinary().api.delete_resources_by_prefix(`food-app/menu/${restaurantId}/`, { invalidate: true });
+export const deleteRestaurantMenuImages = async (
+  restaurantId: string,
+): Promise<void> => {
+  await getCloudinary().api.delete_resources_by_prefix(
+    `food-app/menu/${restaurantId}/`,
+    { invalidate: true },
+  );
 };
