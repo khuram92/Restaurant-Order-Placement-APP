@@ -6,7 +6,7 @@ Sentry.init({
   dsn,
   enabled: !!dsn && !__DEV__,
   environment: __DEV__ ? "development" : "production",
-  tracesSampleRate: 0, // errors only
+  tracesSampleRate: 0, 
   beforeSend(event) {
     if (event.user) delete event.user.ip_address;
     if (event.request?.headers) {
