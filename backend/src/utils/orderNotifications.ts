@@ -8,6 +8,8 @@ import { sendPushToUsers } from "./push.js";
 type OrderDoc = HydratedDocument<IOrder>;
 
 const money = (n: number) => `Rs ${Math.round(n).toLocaleString("en-PK")}`;
+const clock = (d: Date) =>
+  d.toLocaleTimeString("en-US", { timeZone: "Asia/Karachi", hour: "numeric", minute: "2-digit" });
 
 const TYPE_LABEL = {
   delivery: "Delivery",
@@ -92,12 +94,13 @@ export const notifyOrderCancelled = async (order: OrderDoc) => {
 const CUSTOMER_TEXT: Partial<
   Record<OrderStatus, (o: OrderDoc) => { title: string; body: string }>
 > = {
-  accepted: (o) => ({
+    accepted: (o) => ({
     title: "✅ Order confirmed",
     body:
-      o.type === "dineIn"
+      (o.type === "dineIn"
         ? `${o.restaurantName} confirmed your order. Your table is held.`
-        : `${o.restaurantName} confirmed your order #${o.orderNumber}.`,
+        : `${o.restaurantName} confirmed your order #${o.orderNumber}.`) +
+      (o.readyBy ? ` Ready around ${clock(o.readyBy)}.` : ""),
   }),
   rejected: (o) => ({
     title: "Order not accepted",
