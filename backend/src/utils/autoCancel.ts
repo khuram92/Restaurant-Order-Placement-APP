@@ -1,7 +1,7 @@
 import { Order } from "../models/Order.js";
 import { notifyAutoCancelled } from "./orderNotifications.js";
 import { emitOrderEvent } from "./realtime.js";
-
+import * as Sentry from "@sentry/node";
 
 export const AUTO_CANCEL_MINUTES =  20;
 const CHECK_EVERY_MS = 60 * 1000; 
@@ -36,9 +36,10 @@ const cancelIgnoredOrders = async () => {
 
 export const startAutoCancel = () => {
   const run = () =>
-    cancelIgnoredOrders().catch((error) =>
-      console.error("❌ Auto-cancel failed:", (error as Error).message),
-    );
+    cancelIgnoredOrders().catch((error) => {
+      console.error("❌ Auto-cancel failed:", (error as Error).message);
+      Sentry.captureException(error, { tags: { job: "auto-cancel" } });
+    });
   void run(); // once at start-up (catches orders that expired while the server was off)
   setInterval(run, CHECK_EVERY_MS);
   console.log(`⌛ Auto-cancel on: pending orders expire after ${AUTO_CANCEL_MINUTES} min`);
