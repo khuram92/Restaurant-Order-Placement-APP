@@ -21,13 +21,14 @@ export interface Restaurant {
   coverImage?: string;
   services: { dineIn: boolean; takeaway: boolean; delivery: boolean };
   deliveryFee: number;
-  deliveryFeePerKm?: number
+  deliveryFeePerKm?: number;
   minOrder: number;
   deliveryRadiusKm: number;
   taxRate: number;
   seatingCapacity: number;
   isActive: boolean;
   isTemporarilyClosed?: boolean;
+  reopensAt?: string | null;
   ratingAvg?: number;
   ratingCount?: number;
   createdAt: string;
@@ -55,7 +56,7 @@ export interface RestaurantInput {
   openingHours?: OpeningHour[];
   services?: { dineIn: boolean; takeaway: boolean; delivery: boolean };
   deliveryFee?: number;
-  deliveryFeePerKm?: number
+  deliveryFeePerKm?: number;
   minOrder?: number;
   deliveryRadiusKm?: number;
   taxRate?: number;
@@ -76,7 +77,7 @@ export interface CustomerRestaurant extends Omit<
 > {
   isOpenNow: boolean;
   isFavorite?: boolean;
-  distanceKm?: number; 
+  distanceKm?: number;
   deliversToYou?: boolean;
   matchedDishes?: string[];
 }

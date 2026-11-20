@@ -20,11 +20,18 @@ export const updateMyRestaurant = async (changes: Partial<RestaurantInput>) => {
   return data.restaurant;
 };
 
-export const setTemporarilyClosed = async (isTemporarilyClosed: boolean) => {
+
+export const setTemporarilyClosed = async (
+  isTemporarilyClosed: boolean,
+  reopenInMinutes?: number,
+) => {
   const { data } = await api.patch<{
     restaurant: ManagerRestaurant;
     message: string;
-  }>("/manager/restaurant/temporary-close", { isTemporarilyClosed });
+  }>("/manager/restaurant/temporary-close", {
+    isTemporarilyClosed,
+    ...(reopenInMinutes && { reopenInMinutes }),
+  });
   return data;
 };
 
