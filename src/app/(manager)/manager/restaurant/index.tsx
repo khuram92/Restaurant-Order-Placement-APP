@@ -3,6 +3,7 @@ import { Image } from "expo-image";
 import { Stack, router, useFocusEffect } from "expo-router";
 import {
   useCallback,
+  useEffect,
   useState,
   type ComponentProps,
   type ReactNode,
@@ -26,6 +27,8 @@ import {
   setTemporarilyClosed,
 } from "../../../../services/managerApi";
 import type { Day, ManagerRestaurant } from "../../../../types/restaurant";
+import { clockTime } from "@/utils/orderFormat";
+import CloseForSheet from "@/components/manager/CloseForSheet";
 
 type IconName = ComponentProps<typeof Ionicons>["name"];
 
@@ -137,6 +140,7 @@ export default function ManagerRestaurantScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
   const [toggling, setToggling] = useState(false);
+  const [closeSheetOpen, setCloseSheetOpen] = useState(false);
 
   const load = useCallback(async () => {
     setError("");
@@ -157,10 +161,19 @@ export default function ManagerRestaurantScreen() {
     }, [load]),
   );
 
-  const changeClosed = async (closed: boolean) => {
+  const reopensAt = restaurant?.reopensAt;
+  useEffect(() => {
+    if (!reopensAt) return;
+    const ms = new Date(reopensAt).getTime() - Date.now() + 1000;
+    if (ms <= 0 || ms > 13 * 60 * 60_000) return;
+    const timer = setTimeout(load, ms);
+    return () => clearTimeout(timer);
+  }, [reopensAt, load]);
+
+  const changeClosed = async (closed: boolean, minutes?: number) => {
     setToggling(true);
     try {
-      const res = await setTemporarilyClosed(closed);
+      const res = await setTemporarilyClosed(closed, minutes);
       setRestaurant(res.restaurant);
     } catch (err) {
       Alert.alert("Couldn't change", getErrorMessage(err));
@@ -171,18 +184,12 @@ export default function ManagerRestaurantScreen() {
 
   const onToggleClosed = (closed: boolean) => {
     if (!closed) return changeClosed(false);
-    Alert.alert(
-      "Close for now?",
-      "Customers will see the restaurant as closed and can't order until you open again.",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Close now",
-          style: "destructive",
-          onPress: () => changeClosed(true),
-        },
-      ],
-    );
+    setCloseSheetOpen(true); // ask "for how long?"
+  };
+
+  const confirmClose = async (minutes: number | null) => {
+    await changeClosed(true, minutes ?? undefined);
+    setCloseSheetOpen(false);
   };
 
   const header = (
@@ -239,6 +246,7 @@ export default function ManagerRestaurantScreen() {
 
   const r = restaurant;
   const paused = !!r.isTemporarilyClosed;
+  const backAt = paused && r.reopensAt ? clockTime(r.reopensAt) : null;
   const today = todayKey();
   const address = [r.address.street, r.address.area, r.address.city]
     .filter(Boolean)
@@ -321,7 +329,9 @@ export default function ManagerRestaurantScreen() {
                     {r.isOpenNow
                       ? "Open now"
                       : paused
-                        ? "Closed for now"
+                        ? backAt
+                          ? `Closed until ${backAt}`
+                          : "Closed for now"
                         : "Closed"}
                   </Text>
                 </View>
@@ -367,7 +377,9 @@ export default function ManagerRestaurantScreen() {
                 className="text-xs"
                 style={{ color: paused ? colors.mistDark : colors.brandLight }}>
                 {paused
-                  ? "Turn off to open again"
+                  ? backAt
+                    ? `Opens again by itself at ${backAt} · or turn off now`
+                    : "Turn off to open again"
                   : "Close now for a power cut, rush or break"}
               </Text>
             </View>
@@ -495,6 +507,11 @@ export default function ManagerRestaurantScreen() {
           </Card>
         </View>
       </ScrollView>
+      <CloseForSheet
+        visible={closeSheetOpen}
+        onClose={() => setCloseSheetOpen(false)}
+        onConfirm={confirmClose}
+      />
     </View>
   );
 }
