@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import { Restaurant, type RestaurantDoc } from "../models/Restaurant.js";
 import { User } from "../models/User.js";
-import { isOpenNow } from "../utils/openingHours.js";
+import { closureFields } from "../utils/openingHours.js";
 import { seatsInUse } from "../utils/orderPricing.js";
 import { customerListQuerySchema } from "../validators/customerRestaurant.validators.js";
 import mongoose from "mongoose";
@@ -20,7 +20,7 @@ const NEAREST_MAX_KM = Number(process.env.NEAREST_MAX_KM) || 100;
 /** Restaurant JSON + isOpenNow + isFavorite (for this customer) */
 const toCustomerJSON = (restaurant: RestaurantDoc, favorites?: Set<string>) => ({
   ...restaurant.toJSON(),
-  isOpenNow: !restaurant.isTemporarilyClosed && isOpenNow(restaurant.openingHours),
+    ...closureFields(restaurant),
   isFavorite: favorites?.has(String(restaurant._id)) ?? false,
 });
 

@@ -48,3 +48,33 @@ export const isOpenNow = (hours: IOpeningHour[], now = new Date()) => {
 
   return false;
 };
+
+
+
+type ClosableRestaurant = {
+  openingHours: IOpeningHour[];
+  isTemporarilyClosed: boolean;
+  reopensAt?: Date | null;
+};
+
+
+export const isTemporarilyClosedNow = (r: ClosableRestaurant, now = new Date()) =>
+  r.isTemporarilyClosed && (!r.reopensAt || r.reopensAt > now);
+
+/** Taking orders right now: not closed by the manager AND inside opening hours */
+export const isRestaurantOpen = (r: ClosableRestaurant, now = new Date()) =>
+  !isTemporarilyClosedNow(r, now) && isOpenNow(r.openingHours, now);
+
+/** Status fields sent to the apps (overrides the raw DB values) */
+export const closureFields = (r: ClosableRestaurant, now = new Date()) => {
+  const closed = isTemporarilyClosedNow(r, now);
+  return {
+    isTemporarilyClosed: closed,
+    reopensAt: closed ? (r.reopensAt ?? null) : null,
+    isOpenNow: !closed && isOpenNow(r.openingHours, now),
+  };
+};
+
+
+export const clockTimePk = (date: Date) =>
+  date.toLocaleTimeString("en-US", { timeZone: TIMEZONE, hour: "numeric", minute: "2-digit" });

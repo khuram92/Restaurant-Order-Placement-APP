@@ -4,7 +4,11 @@ import { ACTIVE_STATUSES, Order, type IOrder } from "../models/Order.js";
 import { Restaurant } from "../models/Restaurant.js";
 import { Review } from "../models/Review.js";
 import { User } from "../models/User.js";
-import { isOpenNow } from "../utils/openingHours.js";
+import {
+  clockTimePk,
+  isRestaurantOpen,
+  isTemporarilyClosedNow,
+} from "../utils/openingHours.js";
 import { generateOrderNumber } from "../utils/orderNumber.js";
 import {
   buildOrderItems,
@@ -68,10 +72,14 @@ export const createOrder = async (req: Request, res: Response) => {
       .status(404)
       .json({ message: "This restaurant isn't taking orders right now" });
   }
-  if (restaurant.isTemporarilyClosed || !isOpenNow(restaurant.openingHours)) {
+  if (!isRestaurantOpen(restaurant)) {
+    const backAt =
+      isTemporarilyClosedNow(restaurant) && restaurant.reopensAt
+        ? ` · back at ${clockTimePk(restaurant.reopensAt)}`
+        : "";
     return res
       .status(409)
-      .json({ message: `${restaurant.name} is closed right now` });
+      .json({ message: `${restaurant.name} is closed right now${backAt}` });
   }
   if (!restaurant.services[input.type]) {
     return res.status(409).json({
@@ -244,7 +252,10 @@ export const cancelMyOrder = async (req: Request, res: Response) => {
   const order = await findMyOrderOr404(req, res);
   if (!order) return;
 
-  const set: Record<string, unknown> = { status: "cancelled", cancelledBy: "customer" };
+  const set: Record<string, unknown> = {
+    status: "cancelled",
+    cancelledBy: "customer",
+  };
   if (parsed.data.reason) set.cancelReason = parsed.data.reason;
 
   // Cancel ONLY if it's still pending right now (the manager may have just accepted it)
@@ -310,8 +321,7 @@ export const reorderPreview = async (req: Request, res: Response) => {
       deliveryFeePerKm: restaurant.deliveryFeePerKm ?? 0,
       minOrder: restaurant.minOrder,
       services: restaurant.services,
-      isOpenNow:
-        !restaurant.isTemporarilyClosed && isOpenNow(restaurant.openingHours),
+      isOpenNow: isRestaurantOpen(restaurant),
     },
     lines,
     skipped,
