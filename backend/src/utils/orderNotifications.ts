@@ -191,8 +191,47 @@ export const notifyReviewReply = async (review: {
     console.error("❌ Review reply notification failed:", (error as Error).message);
   }
 };
+export const notifyNewReview = async (review: {
+  _id: Types.ObjectId;
+  restaurantId: Types.ObjectId;
+  orderId: Types.ObjectId;
+  customerName: string;
+  rating: number;
+  comment?: string | undefined;
+  tags: string[];
+}) => {
+  try {
+    const managerIds = (
+      await User.find({ role: "manager", isActive: true, restaurantId: review.restaurantId }).select("_id")
+    ).map((u) => u._id);
+    if (managerIds.length === 0) return;
 
-/** Not accepted in time → tell the customer (inbox + push) and the manager */
+    const stars = "★".repeat(review.rating) + "☆".repeat(5 - review.rating);
+    const low = review.rating <= 2;
+    const said = review.comment || review.tags.join(" · ");
+    const text = {
+      title: low ? `⚠️ ${review.rating}★ review · worth a reply` : `⭐ New ${review.rating}★ review`,
+      body: `${stars} ${review.customerName}${said ? `: "${said.length > 100 ? `${said.slice(0, 97)}…` : said}"` : ""}`,
+    };
+
+    await Notification.insertMany(
+      managerIds.map((userId) => ({
+        userId,
+        type: "review",
+        ...text,
+        orderId: review.orderId,
+      })),
+    );
+    await sendPushToUsers(managerIds, {
+      ...text,
+      data: { type: "manager-review", reviewId: String(review._id), orderId: String(review.orderId) },
+    });
+  } catch (error) {
+    console.error("❌ New review notification failed:", (error as Error).message);
+  }
+};
+
+
 export const notifyAutoCancelled = async (order: OrderDoc, minutes: number) => {
   const customerText = {
     title: "⌛ Order cancelled",
