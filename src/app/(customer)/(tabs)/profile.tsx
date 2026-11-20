@@ -283,7 +283,7 @@ export default function ProfileScreen() {
               onPress={() => router.push("/addresses")}
             />
             <LinkRow
-              icon="help-circle"
+              icon="chatbubble-ellipses-outline"
               label="Help & support"
               hint="FAQs, call, WhatsApp or email us"
               onPress={() => router.push("/help")}
