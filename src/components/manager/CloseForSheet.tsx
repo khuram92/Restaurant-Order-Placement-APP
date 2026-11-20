@@ -18,7 +18,7 @@ const timeIn = (minutes: number) =>
     minute: "2-digit",
   });
 
-/** Closing the restaurant for now: "For how long?" */
+
 export default function CloseForSheet({
   visible,
   onClose,
@@ -32,7 +32,7 @@ export default function CloseForSheet({
   const [minutes, setMinutes] = useState<number | null>(60);
   const [saving, setSaving] = useState(false);
 
-  // Start at 1 hour each time it opens
+  
   useEffect(() => {
     if (visible) setMinutes(60);
   }, [visible]);
@@ -47,15 +47,26 @@ export default function CloseForSheet({
   };
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="slide"
+      onRequestClose={onClose}>
       <Pressable
-        className="flex-1"
+        className="flex-1 "
         style={{ backgroundColor: "rgba(0,0,0,0.35)" }}
         onPress={saving ? undefined : onClose}
       />
-      <View className="rounded-t-[28px] bg-white px-5 pt-3" style={{ paddingBottom: insets.bottom + 16 }}>
-        <View className="mb-4 h-1.5 w-12 self-center rounded-full" style={{ backgroundColor: colors.mistDark }} />
-        <Text className="text-xl font-extrabold text-brand-dark">Close for how long?</Text>
+      <View
+        className="rounded-t-[28px] bg-white px-5 pt-3"
+        style={{ paddingBottom: insets.bottom + 16 }}>
+        <View
+          className="mb-4 h-1.5 w-12 self-center rounded-full"
+          style={{ backgroundColor: colors.mistDark }}
+        />
+        <Text className="text-xl font-extrabold text-brand-dark">
+          Close for how long?
+        </Text>
         <Text className="mb-4 text-sm text-brand-light">
           Customers can't order while you're closed
         </Text>
@@ -88,12 +99,19 @@ export default function CloseForSheet({
           })}
         </View>
 
-        <View className="mb-4 flex-row items-center rounded-2xl px-3 py-2.5" style={{ backgroundColor: colors.mistLight }}>
-          <Ionicons name={minutes ? "refresh-circle" : "information-circle"} size={16} color={colors.brand} />
+        <View
+          className="mb-4 flex-row items-center rounded-2xl px-3 py-2.5"
+          style={{ backgroundColor: colors.mistLight }}>
+          <Ionicons
+            name={minutes ? "refresh-circle" : "information-circle"}
+            size={16}
+            color={colors.brand}
+          />
           <Text className="ml-2 flex-1 text-sm text-brand-dark">
             {minutes ? (
               <>
-                Opens again by itself at <Text className="font-bold">{timeIn(minutes)}</Text>
+                Opens again by itself at{" "}
+                <Text className="font-bold">{timeIn(minutes)}</Text>
               </>
             ) : (
               "Stays closed until you turn it back on"
@@ -111,7 +129,9 @@ export default function CloseForSheet({
           ) : (
             <>
               <Ionicons name="pause-circle" size={18} color={colors.white} />
-              <Text className="ml-1.5 text-base font-bold text-white">Close now</Text>
+              <Text className="ml-1.5 text-base font-bold text-white">
+                Close now
+              </Text>
             </>
           )}
         </Pressable>
