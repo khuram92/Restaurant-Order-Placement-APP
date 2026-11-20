@@ -87,18 +87,16 @@ export default function OrderReviewCard({
   }
 
   return (
-    <View
-      className="mb-4 rounded-3xl p-5"
-      style={[cardShadow, { backgroundColor: colors.brand }]}>
-      <Text className="text-center text-lg font-extrabold text-white">
+    <View className="mb-4 rounded-3xl p-5">
+      <Text className="text-center text-lg font-extrabold text-black">
         {orderType === "dineIn"
           ? "How was your experience with us?"
           : "How was your order?"}
       </Text>
-      <Text className="mb-3 mt-0.5 text-center text-sm text-white">
+      <Text className="mb-3 mt-0.5 text-center text-sm text-black">
         Rate {restaurantName}
       </Text>
-      <View className="self-center rounded-2xl bg-white px-3 py-2">
+      <View className="self-center py-2">
         <StarInput value={0} onChange={setSheetRating} size={34} />
       </View>
 

@@ -23,7 +23,7 @@ export function StarInput({ value, onChange, size = 40 }: { value: number; onCha
     <View className="flex-row justify-center">
       {[1, 2, 3, 4, 5].map((n) => (
         <Pressable key={n} onPress={() => onChange(n)} hitSlop={6} className="mx-1">
-          <Ionicons name="star" size={size} color={value >= n ? STAR_GOLD : colors.mistDark} />
+          <Ionicons name="star" size={size} color={value >= n ? STAR_GOLD : colors.white} />
         </Pressable>
       ))}
     </View>
