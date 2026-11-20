@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { type InternalAxiosRequestConfig } from "axios";
 import { getToken } from "./storage";
 
 const baseURL = process.env.EXPO_PUBLIC_API_URL;
@@ -20,14 +20,29 @@ api.interceptors.request.use(async (config) => {
   return config;
 });
 
+const MAX_RETRIES = 2;
+api.interceptors.response.use(undefined, async (error: unknown) => {
+  const config = axios.isAxiosError(error)
+    ? (error.config as (InternalAxiosRequestConfig & { _retry?: number }) | undefined)
+    : undefined;
+  const isNetworkProblem = axios.isAxiosError(error) && !error.response;
+  const isGet = (config?.method ?? "get").toLowerCase() === "get";
+  if (!config || !isNetworkProblem || !isGet) throw error;
+
+  config._retry = (config._retry ?? 0) + 1;
+  if (config._retry > MAX_RETRIES) throw error;
+  await new Promise((r) => setTimeout(r, 1000 * config._retry!));
+  return api(config);
+});
+
 /** Turns any API/network error into a readable message for the UI */
 export const getErrorMessage = (error: unknown): string => {
   if (axios.isAxiosError(error)) {
     if (error.response?.data?.message) return error.response.data.message;
-    if (error.code === "ECONNABORTED")
-      return "Request timed out. Please try again.";
+     if (error.code === "ECONNABORTED")
+      return "This is taking too long. Check your internet and try again.";
     if (!error.response)
-      return "Can't reach the server. Check your internet connection.";
+      return "You seem to be offline. Check your internet and try again.";
   }
   if (error instanceof Error && error.message) {
     // fetch network failures say "Network request failed"
