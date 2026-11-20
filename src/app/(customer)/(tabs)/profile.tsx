@@ -285,9 +285,8 @@ export default function ProfileScreen() {
             <LinkRow
               icon="help-circle"
               label="Help & support"
-              hint="Questions about an order"
-              onPress={showHelp}
-              last
+              hint="FAQs, call, WhatsApp or email us"
+              onPress={() => router.push("/help")}
             />
             <LinkRow
               icon="shield-checkmark"
@@ -318,8 +317,6 @@ export default function ProfileScreen() {
               Delete account
             </Text>
           </Pressable>
-
-         
 
           <Text className="mt-2 text-center text-xs text-brand-light">
             Version {version}
