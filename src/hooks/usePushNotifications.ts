@@ -7,21 +7,17 @@ import type { User } from "../types/auth";
 
 type PushData = { type?: string; orderId?: string };
 
-/** Open the right screen for a tapped notification */
+
 const openFromNotification = (data: PushData, role: User["role"]) => {
   if (!data.orderId) return;
-  if (data.type === "manager-order" && role === "manager") {
-    router.push({ pathname: "/manager/orders/[id]", params: { id: data.orderId } });
-  } else if (data.type === "customer-order" && role === "customer") {
+  if (data.type === "manager-review" && role === "manager") {
+    router.push("/manager/reviews");
+  } else if (data.type === "manager-order" && role === "manager") {
     router.push({ pathname: "/order/[id]", params: { id: data.orderId } });
   }
 };
 
-/**
- * Use once, in the root layout:
- *  - registers this phone's push token for the logged-in user
- *  - opens the order when a notification is tapped (also when the tap started the app)
- */
+
 export function usePushNotifications(user: User | null, ready: boolean) {
   const lastResponse = Notifications.useLastNotificationResponse();
   const handledId = useRef<string | null>(null);
@@ -49,7 +45,11 @@ export function usePushNotifications(user: User | null, ready: boolean) {
     handledId.current = id;
     // small delay so the redirect to the right group (customer / manager) happens first
     const timer = setTimeout(
-      () => openFromNotification(lastResponse.notification.request.content.data as PushData, role),
+      () =>
+        openFromNotification(
+          lastResponse.notification.request.content.data as PushData,
+          role,
+        ),
       300,
     );
     return () => clearTimeout(timer);

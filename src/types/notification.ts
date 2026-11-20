@@ -1,6 +1,6 @@
 export interface AppNotification {
   _id: string;
-  type: "order";
+    type: "order" | "review";
   title: string;
   body: string;
   orderId?: string;

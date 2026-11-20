@@ -2,7 +2,15 @@ import { Ionicons } from "@expo/vector-icons";
 import * as Notifications from "expo-notifications";
 import { router, Stack } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Alert, Pressable, RefreshControl, SectionList, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Alert,
+  Pressable,
+  RefreshControl,
+  SectionList,
+  Text,
+  View,
+} from "react-native";
 import { cardShadow, colors } from "../../../constants/theme";
 import { getErrorMessage } from "../../../lib/api";
 import {
@@ -15,7 +23,8 @@ import type { AppNotification } from "../../../types/notification";
 import { timeAgo } from "../../../utils/orderFormat";
 
 // ---------- Helpers ----------
-const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+const startOfDay = (d: Date) =>
+  new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
 
 /** "Today" / "Yesterday" / "Earlier" */
 const groupOf = (iso: string) => {
@@ -27,25 +36,42 @@ const groupOf = (iso: string) => {
 };
 
 // ---------- One notification ----------
-function NotificationRow({ item, onPress }: { item: AppNotification; onPress: () => void }) {
+function NotificationRow({
+  item,
+  onPress,
+}: {
+  item: AppNotification;
+  onPress: () => void;
+}) {
   const unread = !item.readAt;
   const cancelled = item.orderStatus === "cancelled";
-
+  const isReview = item.type === "review";
   return (
     <Pressable
       onPress={onPress}
       className="mb-2.5 flex-row rounded-3xl p-4 active:opacity-80"
-      style={[cardShadow, { backgroundColor: unread ? colors.white : colors.mistLight }]}>
+      style={[
+        cardShadow,
+        { backgroundColor: unread ? colors.white : colors.mistLight },
+      ]}>
       {/* New order = olive bell · Cancelled = red ✕ */}
       <View
         className="h-12 w-12 items-center justify-center rounded-2xl"
         style={{
-          backgroundColor: cancelled ? "#fde8e6" : unread ? colors.brand : colors.brandSoft,
+          backgroundColor: cancelled
+            ? "#fde8e6"
+            : unread
+              ? colors.brand
+              : colors.brandSoft,
         }}>
         <Ionicons
-          name={cancelled ? "close-circle" : "notifications"}
+          name={
+            cancelled ? "close-circle" : isReview ? "star" : "notifications"
+          }
           size={22}
-          color={cancelled ? colors.danger : unread ? colors.white : colors.brand}
+          color={
+            cancelled ? colors.danger : unread ? colors.white : colors.brand
+          }
         />
       </View>
 
@@ -57,7 +83,9 @@ function NotificationRow({ item, onPress }: { item: AppNotification; onPress: ()
             numberOfLines={1}>
             {item.title}
           </Text>
-          <Text className="text-xs text-brand-light">{timeAgo(item.createdAt)}</Text>
+          <Text className="text-xs text-brand-light">
+            {timeAgo(item.createdAt)}
+          </Text>
         </View>
         <Text
           className="mt-0.5 text-sm leading-5"
@@ -65,15 +93,22 @@ function NotificationRow({ item, onPress }: { item: AppNotification; onPress: ()
           numberOfLines={3}>
           {item.body}
         </Text>
-        {!!item.orderId && (
+        {(isReview || !!item.orderId) && (
           <View className="mt-2 flex-row items-center">
-            <Text className="text-xs font-bold text-brand">Open order</Text>
+            <Text className="text-xs font-bold text-brand">
+              {isReview ? "Open review" : "Open order"}
+            </Text>
             <Ionicons name="chevron-forward" size={13} color={colors.brand} />
           </View>
         )}
       </View>
 
-      {unread && <View className="ml-2 mt-1.5 h-2.5 w-2.5 rounded-full" style={{ backgroundColor: colors.danger }} />}
+      {unread && (
+        <View
+          className="ml-2 mt-1.5 h-2.5 w-2.5 rounded-full"
+          style={{ backgroundColor: colors.danger }}
+        />
+      )}
     </Pressable>
   );
 }
@@ -134,11 +169,18 @@ export default function ManagerNotificationsScreen() {
   const open = (item: AppNotification) => {
     if (!item.readAt) {
       const now = new Date().toISOString();
-      setItems((prev) => prev.map((n) => (n._id === item._id ? { ...n, readAt: now } : n)));
+      setItems((prev) =>
+        prev.map((n) => (n._id === item._id ? { ...n, readAt: now } : n)),
+      );
       setUnread((u) => Math.max(0, u - 1));
       markNotificationRead(item._id).catch(() => {});
     }
-    if (item.orderId) router.push({ pathname: "/manager/orders/[id]", params: { id: item.orderId } });
+    if (item.type === "review") router.push("/manager/reviews");
+    else if (item.orderId)
+      router.push({
+        pathname: "/manager/orders/[id]",
+        params: { id: item.orderId },
+      });
   };
 
   const readAll = async () => {
@@ -154,23 +196,27 @@ export default function ManagerNotificationsScreen() {
   };
 
   const confirmClear = () =>
-    Alert.alert("Clear all notifications?", "This only clears this list. Your orders stay in Orders.", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Clear all",
-        style: "destructive",
-        onPress: async () => {
-          try {
-            await clearNotifications();
-            setItems([]);
-            setUnread(0);
-            setPages(1);
-          } catch (err) {
-            Alert.alert("Couldn't clear", getErrorMessage(err));
-          }
+    Alert.alert(
+      "Clear all notifications?",
+      "This only clears this list. Your orders stay in Orders.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Clear all",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await clearNotifications();
+              setItems([]);
+              setUnread(0);
+              setPages(1);
+            } catch (err) {
+              Alert.alert("Couldn't clear", getErrorMessage(err));
+            }
+          },
         },
-      },
-    ]);
+      ],
+    );
 
   const sections = useMemo(() => {
     const order = ["Today", "Yesterday", "Earlier"];
@@ -179,7 +225,9 @@ export default function ManagerNotificationsScreen() {
       const g = groupOf(n.createdAt);
       groups.set(g, [...(groups.get(g) ?? []), n]);
     });
-    return order.filter((g) => groups.has(g)).map((g) => ({ title: g, data: groups.get(g)! }));
+    return order
+      .filter((g) => groups.has(g))
+      .map((g) => ({ title: g, data: groups.get(g)! }));
   }, [items]);
 
   return (
@@ -204,7 +252,10 @@ export default function ManagerNotificationsScreen() {
         <View className="flex-1 items-center justify-center px-8">
           <Ionicons name="alert-circle" size={44} color={colors.brandLight} />
           <Text className="mt-3 text-center text-brand-dark">{error}</Text>
-          <Pressable onPress={load} className="mt-4 rounded-2xl px-6 py-3" style={{ backgroundColor: colors.brand }}>
+          <Pressable
+            onPress={load}
+            className="mt-4 rounded-2xl px-6 py-3"
+            style={{ backgroundColor: colors.brand }}>
             <Text className="font-bold text-white">Try again</Text>
           </Pressable>
         </View>
@@ -212,26 +263,42 @@ export default function ManagerNotificationsScreen() {
         <SectionList
           sections={sections}
           keyExtractor={(n) => n._id}
-          renderItem={({ item }) => <NotificationRow item={item} onPress={() => open(item)} />}
+          renderItem={({ item }) => (
+            <NotificationRow item={item} onPress={() => open(item)} />
+          )}
           renderSectionHeader={({ section }) => (
             <Text className="mb-2 mt-3 ml-1 text-xs font-bold uppercase tracking-wide text-brand-light">
               {section.title}
             </Text>
           )}
           stickySectionHeadersEnabled={false}
-          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 32, flexGrow: 1 }}
+          contentContainerStyle={{
+            paddingHorizontal: 16,
+            paddingBottom: 32,
+            flexGrow: 1,
+          }}
           ListHeaderComponent={
             <View className="mt-4 flex-row items-center justify-between">
               <Text className="ml-1 text-sm font-semibold text-brand-dark">
-                {unread > 0 ? `${unread} unread` : items.length > 0 ? "You're all caught up" : ""}
+                {unread > 0
+                  ? `${unread} unread`
+                  : items.length > 0
+                    ? "You're all caught up"
+                    : ""}
               </Text>
               {unread > 0 && (
                 <Pressable
                   onPress={readAll}
                   className="flex-row items-center rounded-full px-3.5 py-2"
                   style={{ backgroundColor: colors.brandSoft }}>
-                  <Ionicons name="checkmark-done" size={15} color={colors.brand} />
-                  <Text className="ml-1 text-sm font-bold text-brand">Mark all as read</Text>
+                  <Ionicons
+                    name="checkmark-done"
+                    size={15}
+                    color={colors.brand}
+                  />
+                  <Text className="ml-1 text-sm font-bold text-brand">
+                    Mark all as read
+                  </Text>
                 </Pressable>
               )}
             </View>
@@ -249,13 +316,21 @@ export default function ManagerNotificationsScreen() {
               colors={[colors.brand]}
             />
           }
-          ListFooterComponent={loadingMore ? <ActivityIndicator color={colors.brand} /> : undefined}
+          ListFooterComponent={
+            loadingMore ? <ActivityIndicator color={colors.brand} /> : undefined
+          }
           ListEmptyComponent={
             <View className="flex-1 items-center justify-center py-20">
               <View className="h-20 w-20 items-center justify-center rounded-full bg-white">
-                <Ionicons name="notifications" size={34} color={colors.brandLight} />
+                <Ionicons
+                  name="notifications"
+                  size={34}
+                  color={colors.brandLight}
+                />
               </View>
-              <Text className="mt-4 text-base font-bold text-brand-dark">No notifications yet</Text>
+              <Text className="mt-4 text-base font-bold text-brand-dark">
+                No notifications yet
+              </Text>
               <Text className="mt-1 px-6 text-center text-sm text-brand-light">
                 New orders and cancellations will show here.
               </Text>
