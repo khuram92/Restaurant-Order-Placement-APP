@@ -9,7 +9,7 @@ import { formatKm } from "../../utils/geo";
 import FavoriteButton from "./FavoriteButton";
 import RatingBadge from "./RatingBadge";
 import { deliveryFeeLabel } from "../../utils/deliveryFee";
-
+import { backAtTime } from "../../utils/restaurantStatus";
 
 type IconName = ComponentProps<typeof Ionicons>["name"];
 
@@ -63,7 +63,11 @@ export default function RestaurantCard({
             color={colors.white}
           />
           <Text className="ml-1 text-xs font-bold text-white">
-            {item.isOpenNow ? "Open now" : "Closed"}
+            {item.isOpenNow
+              ? "Open now"
+              : backAtTime(item)
+                ? `Back at ${backAtTime(item)}`
+                : "Closed"}
           </Text>
         </View>
         <View className="absolute right-3 top-1">

@@ -38,6 +38,7 @@ import { cardShadow, colors } from "../../../constants/theme";
 import { useCart } from "../../../context/CartContext";
 import { getErrorMessage } from "../../../lib/api";
 import { getQuickPosition } from "../../../lib/location";
+import { setMyLocation, useMyLocation } from "../../../lib/myLocation";
 import {
   getCustomerMenu,
   getCustomerRestaurant,
@@ -48,9 +49,8 @@ import type {
   Day,
   ServiceKey,
 } from "../../../types/restaurant";
-import { setMyLocation, useMyLocation } from "../../../lib/myLocation";
-
 import { distanceKm, formatKm } from "../../../utils/geo";
+import { backAtTime } from "../../../utils/restaurantStatus";
 
 type IconName = ComponentProps<typeof Ionicons>["name"];
 
@@ -183,6 +183,7 @@ function InfoSheet({
     .join(", ");
   const todayHours = r.openingHours.find((h) => h.day === today);
   const timeLeft = timeLeftText(r);
+  const backAt = backAtTime(r);
   const [showWeek, setShowWeek] = useState(false);
 
   // ---------- Drag the handle down to close ----------
@@ -205,7 +206,6 @@ function InfoSheet({
     }),
   ).current;
 
-  // Reset position each time it opens
   useEffect(() => {
     if (visible) {
       dragY.setValue(0);
@@ -328,7 +328,9 @@ function InfoSheet({
                   {r.isOpenNow
                     ? "Open now"
                     : r.isTemporarilyClosed
-                      ? "Closed for now"
+                      ? backAt
+                        ? `Closed · back at ${backAt}`
+                        : "Closed for now"
                       : "Closed"}
                 </Text>
                 <Text className="text-xs" style={{ color: colors.brandSoft }}>
@@ -483,7 +485,7 @@ export default function CustomerRestaurantScreen() {
   const tabX = useRef<Record<string, number>>({}); // x of each tab chip
   const jumping = useRef(false); // true while scrolling after a tab tap
   const [activeId, setActiveId] = useState<string | null>(null);
-    // Shared location (set by Nearest on Home, checkout, or the check below)
+  // Shared location (set by Nearest on Home, checkout, or the check below)
   const myLoc = useMyLocation();
   const here = useMemo(
     () => (myLoc ? { lat: myLoc.lat, lng: myLoc.lng } : null),
@@ -500,11 +502,9 @@ export default function CustomerRestaurantScreen() {
     setCheckingArea(false);
   }, []);
 
-  // Silent check (no popup) only if no screen has found the location yet
   const canCheckArea = !!restaurant?.services.delivery && !!restaurant.location;
   useEffect(() => {
     if (canCheckArea && !myLoc) checkArea(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canCheckArea, checkArea]);
   const load = useCallback(async () => {
     setError("");
@@ -527,6 +527,16 @@ export default function CustomerRestaurantScreen() {
   useEffect(() => {
     load();
   }, [load]);
+  const reopensAt = restaurant?.isTemporarilyClosed
+    ? restaurant.reopensAt
+    : null;
+  useEffect(() => {
+    if (!reopensAt) return;
+    const ms = new Date(reopensAt).getTime() - Date.now() + 1000;
+    if (ms <= 0 || ms > 13 * 60 * 60_000) return;
+    const timer = setTimeout(load, ms);
+    return () => clearTimeout(timer);
+  }, [reopensAt, load]);
 
   const highlightTab = (categoryId: string) => {
     setActiveId(categoryId);
@@ -647,12 +657,15 @@ export default function CustomerRestaurantScreen() {
   const otherWays = services
     .filter((s) => s.key !== "delivery")
     .map((s) => s.label);
+  const backAt = backAtTime(r);
   const statusText = r.isOpenNow
     ? todayHours && !todayHours.closed
       ? `Open · closes ${formatTime(todayHours.close)}`
       : "Open now"
     : r.isTemporarilyClosed
-      ? "Closed for now"
+      ? backAt
+        ? `Closed · back at ${backAt}`
+        : "Closed for now"
       : todayHours && !todayHours.closed
         ? `Closed · opens ${formatTime(todayHours.open)}`
         : "Closed today";
@@ -891,7 +904,9 @@ export default function CustomerRestaurantScreen() {
               <Ionicons name="moon" size={16} color={colors.white} />
               <Text className="ml-2 flex-1 text-sm text-white">
                 {r.isTemporarilyClosed
-                  ? "The restaurant has closed for now. You can still look at the menu."
+                  ? backAt
+                    ? `The restaurant is closed for a short while and opens again at ${backAt}. You can still look at the menu.`
+                    : "The restaurant has closed for now. You can still look at the menu."
                   : "The restaurant is closed right now. You can still look at the menu."}
               </Text>
             </View>
