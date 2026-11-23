@@ -383,7 +383,7 @@ export default function CustomerHome() {
         />
       )}
       <Pressable
-        // onPress={() => router.push("/assistant")}
+        onPress={() => router.push("/assistant")}
         className="absolute bottom-5 right-4 flex-row items-center rounded-full px-4 py-3.5 active:opacity-90"
         style={[cardShadow, { backgroundColor: colors.brand, elevation: 6 }]}>
         <Ionicons name="chatbubbles" size={18} color={colors.white} />
