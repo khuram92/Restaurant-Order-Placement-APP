@@ -134,7 +134,7 @@ function RestaurantMiniCard({
           <Ionicons name="restaurant" size={22} color={colors.brand} />
         )}
       </View>
-      <View className="ml-2 flex-1">
+      <View className="ml-2 flex-1 ">
         <Text className="text-sm font-bold text-brand-dark" numberOfLines={1}>
           {card.name}
         </Text>
@@ -142,8 +142,12 @@ function RestaurantMiniCard({
           {[
             card.ratingAvg ? `★ ${card.ratingAvg.toFixed(1)}` : null,
             card.distance,
-            card.cuisines?.map((cuisine) => ` ${cuisine}`).join(", "),
           ]
+            .filter(Boolean)
+            .join(" · ")}
+        </Text>
+        <Text className="text-xs text-brand-light" numberOfLines={1}>
+          {[card.cuisines?.map((cuisine) => ` ${cuisine}`).join(", ")]
             .filter(Boolean)
             .join(" · ")}
         </Text>
