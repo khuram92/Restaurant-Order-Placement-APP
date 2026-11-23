@@ -6,7 +6,6 @@ import type { ToolDef } from "./aiProvider.js";
 import { distanceKm, formatKm } from "./geo.js";
 import { clockTimePk, closureFields } from "./openingHours.js";
 
-
 export type AssistantCard =
   | {
       kind: "dish";
@@ -44,23 +43,36 @@ type Ctx = {
   cards: AssistantCard[];
 };
 
-const escapeRegex = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const escapeRegex = (text: string) =>
+  text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const money = (n: number) => `Rs ${Math.round(n).toLocaleString("en-PK")}`;
 const MAX_CARDS = 8;
 
 const addCard = (ctx: Ctx, card: AssistantCard) => {
-  const id = card.kind === "dish" ? card.itemId : card.kind === "restaurant" ? card.restaurantId : card.orderId;
+  const id =
+    card.kind === "dish"
+      ? card.itemId
+      : card.kind === "restaurant"
+        ? card.restaurantId
+        : card.orderId;
   const exists = ctx.cards.some(
-    (c) => c.kind === card.kind && (c.kind === "dish" ? c.itemId : c.kind === "restaurant" ? c.restaurantId : c.orderId) === id,
+    (c) =>
+      c.kind === card.kind &&
+      (c.kind === "dish"
+        ? c.itemId
+        : c.kind === "restaurant"
+          ? c.restaurantId
+          : c.orderId) === id,
   );
   if (!exists && ctx.cards.length < MAX_CARDS) ctx.cards.push(card);
 };
 
 const distanceOf = (ctx: Ctx, r: RestaurantDoc) => {
   const c = r.location?.coordinates;
-  return ctx.location && c ? distanceKm(ctx.location, { lat: c[1], lng: c[0] }) : undefined;
+  return ctx.location && c
+    ? distanceKm(ctx.location, { lat: c[1], lng: c[0] })
+    : undefined;
 };
-
 
 const statusOf = (r: RestaurantDoc) => {
   const s = closureFields(r);
@@ -91,7 +103,6 @@ const restaurantCard = (ctx: Ctx, r: RestaurantDoc) => {
   });
 };
 
-
 export const ASSISTANT_TOOLS: ToolDef[] = [
   {
     name: "search_dishes",
@@ -100,20 +111,38 @@ export const ASSISTANT_TOOLS: ToolDef[] = [
     parameters: {
       type: "object",
       properties: {
-        query: { type: "string", description: "1–2 short keywords in English, e.g. 'biryani', 'zinger burger'. Leave out to browse." },
-        max_price: { type: "number", description: "Highest price in PKR, if the customer gave a budget" },
-        spicy: { type: "boolean", description: "true if the customer wants spicy food" },
+        query: {
+          type: "string",
+          description:
+            "1–2 short keywords in English, e.g. 'biryani', 'zinger burger'. Leave out to browse.",
+        },
+        max_price: {
+          type: "number",
+          description: "Highest price in PKR, if the customer gave a budget",
+        },
+        spicy: {
+          type: "boolean",
+          description: "true if the customer wants spicy food",
+        },
       },
     },
   },
   {
     name: "search_restaurants",
-    description: "Find restaurants by name or cuisine (e.g. 'pizza', 'Chinese', 'Café Aroma').",
+    description:
+      "Find restaurants by name or cuisine (e.g. 'pizza', 'Chinese', 'Café Aroma').",
     parameters: {
       type: "object",
       properties: {
-        query: { type: "string", description: "Restaurant name or cuisine. Leave out to list nearby/popular ones." },
-        open_now: { type: "boolean", description: "true to show only restaurants open right now" },
+        query: {
+          type: "string",
+          description:
+            "Restaurant name or cuisine. Leave out to list nearby/popular ones.",
+        },
+        open_now: {
+          type: "boolean",
+          description: "true to show only restaurants open right now",
+        },
       },
     },
   },
@@ -123,24 +152,36 @@ export const ASSISTANT_TOOLS: ToolDef[] = [
       "Details of one restaurant: open or closed, today's hours, services, minimum order, delivery fee, rating, address.",
     parameters: {
       type: "object",
-      properties: { name: { type: "string", description: "The restaurant's name (or part of it)" } },
+      properties: {
+        name: {
+          type: "string",
+          description: "The restaurant's name (or part of it)",
+        },
+      },
       required: ["name"],
     },
   },
   {
     name: "my_orders",
-    description: "The customer's own recent orders and their live status (for 'where is my order?').",
+    description:
+      "The customer's own recent orders and their live status (for 'where is my order?').",
     parameters: {
       type: "object",
-      properties: { active_only: { type: "boolean", description: "true for orders still in progress only" } },
+      properties: {
+        active_only: {
+          type: "boolean",
+          description: "true for orders still in progress only",
+        },
+      },
     },
   },
 ];
 
-
 const searchDishes = async (ctx: Ctx, args: Record<string, unknown>) => {
-  const query = typeof args.query === "string" ? args.query.trim().slice(0, 40) : "";
-  const maxPrice = typeof args.max_price === "number" ? args.max_price : undefined;
+  const query =
+    typeof args.query === "string" ? args.query.trim().slice(0, 40) : "";
+  const maxPrice =
+    typeof args.max_price === "number" ? args.max_price : undefined;
   const spicy = args.spicy === true;
 
   const regex = query ? new RegExp(escapeRegex(query), "i") : null;
@@ -162,10 +203,16 @@ const searchDishes = async (ctx: Ctx, args: Record<string, unknown>) => {
     .map((i) => {
       const r = byId.get(String(i.restaurantId));
       if (!r) return null;
-      const price = i.sizes.length > 0 ? Math.min(...i.sizes.map((s) => s.price)) : (i.price ?? 0);
+      const price =
+        i.sizes.length > 0
+          ? Math.min(...i.sizes.map((s) => s.price))
+          : (i.price ?? 0);
       return { i, r, price, st: statusOf(r), km: distanceOf(ctx, r) };
     })
-    .filter((x): x is NonNullable<typeof x> => !!x && (maxPrice === undefined || x.price <= maxPrice))
+    .filter(
+      (x): x is NonNullable<typeof x> =>
+        !!x && (maxPrice === undefined || x.price <= maxPrice),
+    )
     .sort(
       (a, b) =>
         Number(b.st.isOpenNow) - Number(a.st.isOpenNow) ||
@@ -204,7 +251,8 @@ const searchDishes = async (ctx: Ctx, args: Record<string, unknown>) => {
 };
 
 const searchRestaurants = async (ctx: Ctx, args: Record<string, unknown>) => {
-  const query = typeof args.query === "string" ? args.query.trim().slice(0, 40) : "";
+  const query =
+    typeof args.query === "string" ? args.query.trim().slice(0, 40) : "";
   const openOnly = args.open_now === true;
   const regex = query ? new RegExp(escapeRegex(query), "i") : null;
 
@@ -233,39 +281,54 @@ const searchRestaurants = async (ctx: Ctx, args: Record<string, unknown>) => {
           name: r.name,
           cuisines: r.cuisines.join(", "),
           status: st.text,
-          ...(r.ratingCount > 0 && { rating: `${r.ratingAvg.toFixed(1)} (${r.ratingCount})` }),
+          ...(r.ratingCount > 0 && {
+            rating: `${r.ratingAvg.toFixed(1)} (${r.ratingCount})`,
+          }),
           ...(km !== undefined && { distance: formatKm(km) }),
         })),
       };
 };
 
-
 const todayPk = () =>
-  new Date().toLocaleDateString("en-US", { timeZone: "Asia/Karachi", weekday: "short" }).toLowerCase().slice(0, 3);
+  new Date()
+    .toLocaleDateString("en-US", { timeZone: "Asia/Karachi", weekday: "short" })
+    .toLowerCase()
+    .slice(0, 3);
 
 const restaurantDetails = async (ctx: Ctx, args: Record<string, unknown>) => {
-  const name = typeof args.name === "string" ? args.name.trim().slice(0, 60) : "";
+  const name =
+    typeof args.name === "string" ? args.name.trim().slice(0, 60) : "";
   if (!name) return { error: "Which restaurant?" };
-  const r = await Restaurant.findOne({ isActive: true, name: new RegExp(escapeRegex(name), "i") });
+  const r = await Restaurant.findOne({
+    isActive: true,
+    name: new RegExp(escapeRegex(name), "i"),
+  });
   if (!r) return { found: false, note: `No restaurant called "${name}"` };
 
   restaurantCard(ctx, r);
   const st = statusOf(r);
   const today = r.openingHours.find((h) => h.day === todayPk());
   const km = distanceOf(ctx, r);
-  const services = (["dineIn", "takeaway", "delivery"] as const).filter((s) => r.services[s]);
+  const services = (["dineIn", "takeaway", "delivery"] as const).filter(
+    (s) => r.services[s],
+  );
 
   return {
     name: r.name,
     status: st.text,
-    todayHours: !today || today.closed ? "closed today" : `${today.open}–${today.close}`,
+    todayHours:
+      !today || today.closed ? "closed today" : `${today.open}–${today.close}`,
     services: services.join(", "),
     minimumOrder: r.minOrder > 0 ? money(r.minOrder) : "none",
     ...(r.services.delivery && {
       delivery: `${money(r.deliveryFee)} base + ${money(r.deliveryFeePerKm ?? 0)} per km, within ${r.deliveryRadiusKm} km`,
     }),
-    ...(r.ratingCount > 0 && { rating: `${r.ratingAvg.toFixed(1)} from ${r.ratingCount} reviews` }),
-    address: [r.address.street, r.address.area, r.address.city].filter(Boolean).join(", "),
+    ...(r.ratingCount > 0 && {
+      rating: `${r.ratingAvg.toFixed(1)} from ${r.ratingCount} reviews`,
+    }),
+    address: [r.address.street, r.address.area, r.address.city]
+      .filter(Boolean)
+      .join(", "),
     ...(km !== undefined && { distanceFromCustomer: formatKm(km) }),
   };
 };
@@ -299,13 +362,19 @@ const myOrders = async (ctx: Ctx, args: Record<string, unknown>) => {
           type: o.type,
           status: o.status,
           total: money(o.total),
-          ...(o.readyBy && ACTIVE_STATUSES.includes(o.status) && { readyAround: clockTimePk(o.readyBy) }),
+          ...(o.readyBy &&
+            ACTIVE_STATUSES.includes(o.status) && {
+              readyAround: clockTimePk(o.readyBy),
+            }),
         })),
       };
 };
 
-
-export const runAssistantTool = (ctx: Ctx, name: string, args: Record<string, unknown>) => {
+export const runAssistantTool = (
+  ctx: Ctx,
+  name: string,
+  args: Record<string, unknown>,
+) => {
   switch (name) {
     case "search_dishes":
       return searchDishes(ctx, args);
