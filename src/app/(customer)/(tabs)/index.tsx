@@ -29,6 +29,7 @@ import { getCurrentAddress, getQuickPosition } from "../../../lib/location";
 import { setMyLocation, useMyLocation } from "../../../lib/myLocation";
 import { browseRestaurants } from "../../../services/restaurantApi";
 import type { CustomerRestaurant, ServiceKey } from "../../../types/restaurant";
+import AssistantSheet from "@/components/customer/AssistantSheet";
 type IconName = ComponentProps<typeof Ionicons>["name"];
 
 const SERVICES: { key: ServiceKey; label: string; icon: IconName }[] = [
@@ -390,7 +391,7 @@ export default function CustomerHome() {
         <Ionicons name="chatbubbles" size={18} color={colors.white} />
         <Text className="ml-1.5 text-sm font-extrabold text-white">Ask AI</Text>
       </Pressable>
-      {/* <AssistantSheet visible={assistantOpen} onClose={() => setAssistantOpen(false)} /> */}
+      <AssistantSheet visible={assistantOpen} onClose={() => setAssistantOpen(false)} />
     </View>
   );
 }
