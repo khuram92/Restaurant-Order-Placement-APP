@@ -50,6 +50,7 @@ export default function CustomerHome() {
   const { user, signOut } = useAuth();
 
   const [restaurants, setRestaurants] = useState<CustomerRestaurant[]>([]);
+  const [assistantOpen, setAssistantOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [service, setService] = useState<ServiceKey | null>(null);
@@ -383,12 +384,13 @@ export default function CustomerHome() {
         />
       )}
       <Pressable
-        onPress={() => router.push("/assistant")}
+        onPress={() => setAssistantOpen(true)}
         className="absolute bottom-5 right-4 flex-row items-center rounded-full px-4 py-3.5 active:opacity-90"
         style={[cardShadow, { backgroundColor: colors.brand, elevation: 6 }]}>
         <Ionicons name="chatbubbles" size={18} color={colors.white} />
         <Text className="ml-1.5 text-sm font-extrabold text-white">Ask AI</Text>
       </Pressable>
+      {/* <AssistantSheet visible={assistantOpen} onClose={() => setAssistantOpen(false)} /> */}
     </View>
   );
 }
