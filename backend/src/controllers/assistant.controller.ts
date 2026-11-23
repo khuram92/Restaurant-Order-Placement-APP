@@ -77,7 +77,7 @@ export const chat = async (req: Request, res: Response) => {
   if (!parsed.success)
     return res.status(400).json({ message: firstIssue(parsed.error) });
 
-  // Drop any assistant greeting before the first customer message, and require the last one to be the customer's
+
   const messages = parsed.data.messages.slice(
     parsed.data.messages.findIndex((m) => m.role === "user"),
   );
@@ -85,7 +85,7 @@ export const chat = async (req: Request, res: Response) => {
     return res.status(400).json({ message: "Send a message first" });
   }
 
-  // Daily limit per customer (counted atomically)
+  
   const usage = await AssistantUsage.findOneAndUpdate(
     { userId: req.user!._id, day: todayKey() },
     { $inc: { count: 1 }, $setOnInsert: { createdAt: new Date() } },
@@ -115,7 +115,6 @@ export const chat = async (req: Request, res: Response) => {
   } catch (error) {
     console.error("❌ Assistant failed:", (error as Error).message);
     Sentry.captureException(error, { tags: { feature: "assistant" } });
-    // Don't count a failed answer against the customer
     await AssistantUsage.updateOne(
       { _id: usage._id },
       { $inc: { count: -1 } },
