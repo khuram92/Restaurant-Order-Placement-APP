@@ -8,6 +8,7 @@ import managerRoutes from "./routes/manager.routes.js";
 import orderRoutes from "./routes/order.routes.js";
 import notificationRoutes from "./routes/notification.routes.js";
 import { privacyPolicyHtml } from "./pages/privacyPolicy.js";
+import assistantRoutes from "./routes/assistant.routes.js";
 import * as Sentry from "@sentry/node";
 
 const app = express();
@@ -36,6 +37,7 @@ app.use("/api/restaurants", restaurantRoutes);
 app.use("/api/manager", managerRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/assistant", assistantRoutes);
 
 // 404 handler
 app.use((req: Request, res: Response) => {
