@@ -17,6 +17,7 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "@google/genai": "^3.6.1",
     "@sentry/node": "^11.14.0",
     "bcryptjs": "^3.0.3",
     "cloudinary": "^2.11.0",
