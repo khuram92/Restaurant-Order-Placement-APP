@@ -36,7 +36,7 @@ const chatSchema = z.object({
 const firstIssue = (error: { issues: { message: string }[] }) =>
   error.issues[0]?.message ?? "Invalid input";
 
-/** "2026-11-23" in Pakistan time */
+
 const todayKey = () =>
   new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Karachi" });
 
@@ -71,7 +71,7 @@ App facts (for help questions):
 - Other problems: Profile → Help & support (call, WhatsApp or email).`;
 };
 
-/** POST /api/assistant/chat   { messages: [{ role, text }], location? } */
+
 export const chat = async (req: Request, res: Response) => {
   const parsed = chatSchema.safeParse(req.body ?? {});
   if (!parsed.success)
