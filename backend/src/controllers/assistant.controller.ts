@@ -36,7 +36,6 @@ const chatSchema = z.object({
 const firstIssue = (error: { issues: { message: string }[] }) =>
   error.issues[0]?.message ?? "Invalid input";
 
-
 const todayKey = () =>
   new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Karachi" });
 
@@ -71,12 +70,10 @@ App facts (for help questions):
 - Other problems: Profile → Help & support (call, WhatsApp or email).`;
 };
 
-
 export const chat = async (req: Request, res: Response) => {
   const parsed = chatSchema.safeParse(req.body ?? {});
   if (!parsed.success)
     return res.status(400).json({ message: firstIssue(parsed.error) });
-
 
   const messages = parsed.data.messages.slice(
     parsed.data.messages.findIndex((m) => m.role === "user"),
@@ -85,7 +82,6 @@ export const chat = async (req: Request, res: Response) => {
     return res.status(400).json({ message: "Send a message first" });
   }
 
-  
   const usage = await AssistantUsage.findOneAndUpdate(
     { userId: req.user!._id, day: todayKey() },
     { $inc: { count: 1 }, $setOnInsert: { createdAt: new Date() } },
