@@ -46,7 +46,7 @@ type Ctx = {
 const escapeRegex = (text: string) =>
   text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const money = (n: number) => `Rs ${Math.round(n).toLocaleString("en-PK")}`;
-const MAX_CARDS = 8;
+const MAX_CARDS = 4;
 
 const addCard = (ctx: Ctx, card: AssistantCard) => {
   const id =

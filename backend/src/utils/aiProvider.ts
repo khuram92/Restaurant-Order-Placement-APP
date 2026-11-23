@@ -4,7 +4,7 @@ export type ChatTurn = { role: "user" | "assistant"; text: string };
 export type ToolDef = {
   name: string;
   description: string;
-  parameters: Record<string, unknown>; // JSON schema of the arguments
+  parameters: Record<string, unknown>;
 };
 export type RunTool = (name: string, args: Record<string, unknown>) => Promise<unknown>;
 
