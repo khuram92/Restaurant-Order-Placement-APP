@@ -2,7 +2,7 @@ import { Schema, model, type Types } from "mongoose";
 
 export interface IAssistantUsage {
   userId: Types.ObjectId;
-  day: string; // "2026-11-23"
+  day: string; 
   count: number;
   createdAt: Date;
 }
