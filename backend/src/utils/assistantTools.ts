@@ -61,7 +61,7 @@ const distanceOf = (ctx: Ctx, r: RestaurantDoc) => {
   return ctx.location && c ? distanceKm(ctx.location, { lat: c[1], lng: c[0] }) : undefined;
 };
 
-/** What the AI (and the card) needs to know about whether a restaurant is open */
+
 const statusOf = (r: RestaurantDoc) => {
   const s = closureFields(r);
   const backAt = s.reopensAt ? clockTimePk(s.reopensAt) : undefined;
@@ -91,7 +91,6 @@ const restaurantCard = (ctx: Ctx, r: RestaurantDoc) => {
   });
 };
 
-// ---------- Tool definitions (what the AI is allowed to ask for) ----------
 
 export const ASSISTANT_TOOLS: ToolDef[] = [
   {
@@ -138,7 +137,6 @@ export const ASSISTANT_TOOLS: ToolDef[] = [
   },
 ];
 
-// ---------- Tool implementations (always scoped to this customer) ----------
 
 const searchDishes = async (ctx: Ctx, args: Record<string, unknown>) => {
   const query = typeof args.query === "string" ? args.query.trim().slice(0, 40) : "";
@@ -168,7 +166,6 @@ const searchDishes = async (ctx: Ctx, args: Record<string, unknown>) => {
       return { i, r, price, st: statusOf(r), km: distanceOf(ctx, r) };
     })
     .filter((x): x is NonNullable<typeof x> => !!x && (maxPrice === undefined || x.price <= maxPrice))
-    // open first, then nearest, then cheapest
     .sort(
       (a, b) =>
         Number(b.st.isOpenNow) - Number(a.st.isOpenNow) ||
@@ -242,7 +239,7 @@ const searchRestaurants = async (ctx: Ctx, args: Record<string, unknown>) => {
       };
 };
 
-/** "mon" / "tue"… in Pakistan time */
+
 const todayPk = () =>
   new Date().toLocaleDateString("en-US", { timeZone: "Asia/Karachi", weekday: "short" }).toLowerCase().slice(0, 3);
 
@@ -307,7 +304,7 @@ const myOrders = async (ctx: Ctx, args: Record<string, unknown>) => {
       };
 };
 
-/** Runs one tool the AI asked for */
+
 export const runAssistantTool = (ctx: Ctx, name: string, args: Record<string, unknown>) => {
   switch (name) {
     case "search_dishes":
