@@ -1,7 +1,7 @@
 const APP_NAME = "Restaurant Orders";
 const OWNER = "Muhammad Hashir";
-const CONTACT_EMAIL = "support@example.com";
-const EFFECTIVE_DATE = "18 November 2026";
+const CONTACT_EMAIL = "your-real-email@gmail.com";
+const EFFECTIVE_DATE = "24 November 2026";
 
 const css = `
   :root { --brand:#4e5c4a; --dark:#2c3329; --light:#6f7d6a; --mist:#e0e1df; }
@@ -55,7 +55,8 @@ export const privacyPolicyHtml = `<!DOCTYPE html>
     <tr><td><b>Location</b> (only while you use the app)</td><td>When you tap “Use my current location”, turn on “Nearest”, or check if a restaurant delivers to you: to fill in your address, show distances, check the delivery area and work out the delivery fee. We never track your location in the background.</td></tr>
     <tr><td><b>Delivery addresses</b></td><td>To deliver your order, and (if you choose) to save Home / Work addresses for next time.</td></tr>
     <tr><td><b>Orders, reviews and favourites</b></td><td>To place and track orders, show your order history, let you rate orders, and keep your favourite restaurants.</td></tr>
-    <tr><td><b>Device push token</b></td><td>To send notifications about your orders (for example “Your order is ready”).</td></tr>
+    <tr><td><b>Device push token</b></td><td>To send notifications about your orders (for example “Your order is ready”).</td></tr>     <tr><td><b>Messages to the food assistant</b></td><td>When you use “Ask AI”, your messages (and your approximate location, if you turned on “Nearest”) are sent to an AI service to answer you. We don't keep the text of your chats; we only count how many messages you send each day.</td></tr>
+    <tr><td><b>Crash reports</b></td><td>If the app or our server crashes, a technical report (device model, app version, what went wrong) and your account ID are sent so we can fix the problem. Reports never include passwords, sign-in codes or payment details.</td></tr>
     <tr><td><b>IP address and sign-in attempts</b></td><td>To protect accounts: limiting how many codes can be requested and blocking repeated wrong passwords. These records are deleted automatically within 24 hours.</td></tr>
   </table>
   <p>Payments are <b>cash only</b>. The app does not collect or store card or bank details.</p>
@@ -68,8 +69,9 @@ export const privacyPolicyHtml = `<!DOCTYPE html>
       for delivery, your address and map pin so the rider can find you.</li>
     <li><b>Service providers</b> that run parts of the app for us, only for that purpose:
       cloud database hosting (MongoDB Atlas), image storage for photos (Cloudinary),
-      SMS codes (Twilio), email delivery, and push notifications (Expo and Google Firebase
-      Cloud Messaging). Turning GPS coordinates into a street address uses your phone's
+      SMS codes (Twilio), email delivery, push notifications (Expo and Google Firebase
+      Cloud Messaging), crash reporting (Sentry), and AI answers for the food assistant
+      (Google Gemini API). Turning GPS coordinates into a street address uses your phone's
       built-in location service.</li>
     <li><b>When the law requires it</b>, for example a valid request from authorities.</li>
   </ul>
@@ -84,6 +86,8 @@ export const privacyPolicyHtml = `<!DOCTYPE html>
     <li>Orders: kept as business records for the restaurant (sales and tax). If you delete your
       account, your name and contact details are removed from them.</li>
     <li>Notifications in the app: deleted after 90 days.</li>
+    <li>Food assistant: we don't store your chat messages. The daily message count is deleted within 2 days. The AI provider may keep messages for a limited time under its own terms.</li>
+    <li>Crash reports: deleted automatically by Sentry after 90 days.</li>
     <li>Sign-in codes: expire within minutes. Security logs (code requests, wrong passwords): deleted within 24 hours.</li>
   </ul>
 </section>
@@ -96,7 +100,7 @@ export const privacyPolicyHtml = `<!DOCTYPE html>
       need a location to check their delivery area.</li>
     <li><b>Notifications:</b> you can turn them off in your phone's settings.</li>
     <li><b>Edit your details:</b> change your name, photo, phone, email and saved addresses in the app.</li>
-     <li><b>Delete your account:</b> in the app, go to <b>Profile → Delete account</b> and confirm
+          <li id="delete-account"><b>Delete your account:</b> in the app, go to <b>Profile → Delete account</b> and confirm
       with the code we send you. Your account and personal information are deleted straight away.
       Past orders stay for the restaurant's records without your name, phone or address, and your
       reviews stay under the name “Customer”. If you can't use the app, email
