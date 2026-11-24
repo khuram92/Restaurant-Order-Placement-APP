@@ -2,13 +2,21 @@ import type { NextFunction, Request, RequestHandler, Response } from "express";
 import multer from "multer";
 
 const MAX_SIZE_MB = 5;
+const ALLOWED_TYPES = [
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+  "image/heic",
+  "image/heif",
+];
 
 const upload = multer({
   storage: multer.memoryStorage(), // keep in memory, we send it straight to Cloudinary
   limits: { fileSize: MAX_SIZE_MB * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
-    if (file.mimetype.startsWith("image/")) cb(null, true);
-    else cb(new Error("Only image files are allowed"));
+    if (ALLOWED_TYPES.includes(file.mimetype.toLowerCase())) cb(null, true);
+    else cb(new Error("Only JPG, PNG, WebP or HEIC photos are allowed"));
   },
 });
 

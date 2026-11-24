@@ -19,8 +19,8 @@ api.interceptors.request.use(async (config) => {
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
-let onSessionEnded: (() => void) | null = null;
-export const setSessionEndedHandler = (handler: (() => void) | null) => {
+let onSessionEnded: ((reason?: string) => void) | null = null;
+export const setSessionEndedHandler = (handler: ((reason?: string) => void) | null) => {
   onSessionEnded = handler;
 };
 
@@ -31,7 +31,7 @@ api.interceptors.response.use(undefined, (error: unknown) => {
     error.response?.status === 401 &&
     error.config?.headers?.Authorization
   ) {
-    onSessionEnded?.();
+    onSessionEnded?.(error.response.data?.message);
   }
   throw error;
 });

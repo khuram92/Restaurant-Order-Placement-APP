@@ -4,15 +4,15 @@ import {
   useCallback,
   useContext,
   useEffect,
-  useState,
   useRef,
+  useState,
   type ReactNode,
 } from "react";
 import { Alert } from "react-native";
 import { setSessionEndedHandler } from "../lib/api";
-import { reconnectRealtime } from "../lib/realtime";
 import { clearMyLocation } from "../lib/myLocation";
 import { getCurrentPushToken } from "../lib/notifications";
+import { reconnectRealtime } from "../lib/realtime";
 import { getToken, removeToken, saveToken } from "../lib/storage";
 import { getMe } from "../services/authApi";
 import { removePushToken } from "../services/pushApi";
@@ -67,9 +67,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     clearMyLocation();
     setUser(null);
   }, []);
-const ending = useRef(false);
+  const ending = useRef(false);
   useEffect(() => {
-    setSessionEndedHandler(() => {
+    setSessionEndedHandler((reason) => {
       if (ending.current) return;
       ending.current = true;
       void (async () => {
@@ -78,7 +78,9 @@ const ending = useRef(false);
         setUser(null);
         Alert.alert(
           "You've been signed out",
-          "Your session ended on this phone (password changed, logged out from another device, or account updated). Please sign in again.",
+          reason === "Invalid or expired token"
+            ? "Your login expired. Please sign in again."
+            : "Your session ended on this phone (password changed, logged out from another device, or account updated). Please sign in again.",
         );
         ending.current = false;
       })();
@@ -100,7 +102,15 @@ const ending = useRef(false);
   }, []);
   return (
     <AuthContext.Provider
-           value={{ user, isLoading, signIn, signOut, refreshUser, updateUser, replaceToken }}>
+      value={{
+        user,
+        isLoading,
+        signIn,
+        signOut,
+        refreshUser,
+        updateUser,
+        replaceToken,
+      }}>
       {children}
     </AuthContext.Provider>
   );

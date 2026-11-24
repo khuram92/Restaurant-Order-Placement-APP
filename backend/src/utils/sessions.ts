@@ -7,7 +7,7 @@ import { disconnectUser } from "./realtime.js";
  */
 export const revokeSessions = (user: UserDoc) => {
   user.tokenVersion = (user.tokenVersion ?? 0) + 1;
-};
-
+}; 
+  
 /** Cut the user's live (Socket.io) connections — call after saving */
 export const afterRevoke = (user: UserDoc) => disconnectUser(user.id);

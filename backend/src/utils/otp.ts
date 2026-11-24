@@ -20,8 +20,10 @@ export const parseIdentifier = (raw: string): { identifier: string; channel: Cha
 
 export const generateOtp = (): string => crypto.randomInt(100000, 1000000).toString();
 
+const otpSecret = () => process.env.OTP_SECRET || process.env.JWT_SECRET || "";
+
 export const hashOtp = (code: string): string =>
-  crypto.createHash("sha256").update(code).digest("hex");
+  crypto.createHmac("sha256", otpSecret()).update(code).digest("hex");
 
 export const otpMatches = (code: string, hash: string): boolean => {
   const a = Buffer.from(hashOtp(code));
