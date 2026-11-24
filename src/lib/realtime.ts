@@ -41,7 +41,9 @@ export const connectRealtime = (token: string) => {
     if (__DEV__) console.log("⚡ realtime:", err.message);
   });
 };
-
+export const reconnectRealtime = (token: string) => {
+  if (socket) connectRealtime(token);
+};
 export const disconnectRealtime = () => {
   socket?.disconnect();
   socket = null;

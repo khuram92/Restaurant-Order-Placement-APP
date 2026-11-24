@@ -75,13 +75,21 @@ export const uploadAvatar = async (image: {
   });
   return data.user;
 };
-/** Super Admin & Manager: change own password (clears mustChangePassword) */
+/** Staff: returns the updated user + a fresh token (other phones get logged out) */
 export const changePassword = async (currentPassword: string, newPassword: string) => {
-  const { data } = await api.patch<{ message: string; user: User }>(
+  const { data } = await api.patch<{ message: string; user: User; token: string }>(
     "/auth/change-password",
     { currentPassword, newPassword },
   );
-  return data.user;
+  return data;
+};
+
+/** Log out every other phone; this one gets a fresh token */
+export const logoutAllDevices = async (keepPushToken?: string | null) => {
+  const { data } = await api.post<{ message: string; token: string }>("/auth/logout-all", {
+    ...(keepPushToken && { keepPushToken }),
+  });
+  return data;
 };
 
 /** Customer: send a code to a NEW phone/email (to add or change it) */

@@ -13,7 +13,10 @@ import { Alert, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { cardShadow, colors } from "../../../constants/theme";
 import { useAuth } from "../../../context/AuthContext";
+import { getErrorMessage } from "../../../lib/api";
 import { openInApp, PRIVACY_URL } from "../../../lib/links";
+import { getCurrentPushToken } from "../../../lib/notifications";
+import { logoutAllDevices } from "../../../services/authApi";
 import { listMyOrders } from "../../../services/orderApi";
 
 type IconName = ComponentProps<typeof Ionicons>["name"];
@@ -116,7 +119,7 @@ function Stat({ value, label }: { value: string; label: string }) {
 
 // ---------- Screen ----------
 export default function ProfileScreen() {
-  const { user, signOut } = useAuth();
+  const { user, signOut, replaceToken } = useAuth();
   const [stats, setStats] = useState<{ total: number; active: number } | null>(
     null,
   );
@@ -161,7 +164,27 @@ export default function ProfileScreen() {
         { text: "OK", style: "cancel" },
       ],
     );
-
+  const confirmLogoutOthers = () =>
+    Alert.alert(
+      "Log out of other devices?",
+      "Every other phone signed in to your account will be signed out. This phone stays signed in.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Log out others",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const res = await logoutAllDevices(getCurrentPushToken());
+              await replaceToken(res.token);
+              Alert.alert("Done", "All other devices have been signed out.");
+            } catch (err) {
+              Alert.alert("Couldn't do that", getErrorMessage(err));
+            }
+          },
+        },
+      ],
+    );
   const confirmSignOut = () =>
     Alert.alert("Sign out?", "You'll need a new code to sign in again.", [
       { text: "Cancel", style: "cancel" },
@@ -293,8 +316,14 @@ export default function ProfileScreen() {
               label="Privacy policy"
               hint="What we collect and why"
               onPress={() => openInApp(PRIVACY_URL)}
-              last
             />
+            {/* <LinkRow
+              icon="phone-portrait"
+              label="Log out of other devices"
+              hint="Sign out everywhere except this phone"
+              onPress={confirmLogoutOthers}
+              last
+            /> */}
           </Section>
 
           {/* ---------- Sign out ---------- */}

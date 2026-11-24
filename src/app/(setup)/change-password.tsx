@@ -101,7 +101,7 @@ function PasswordField({
 
 // ---------- Screen ----------
 export default function ChangePasswordScreen() {
-  const { user, updateUser, signOut } = useAuth();
+    const { user, updateUser, signOut, replaceToken } = useAuth();
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -128,8 +128,9 @@ export default function ChangePasswordScreen() {
 
     setLoading(true);
     try {
-      const updated = await changePassword(currentPassword, newPassword);
-      updateUser(updated); // mustChangePassword: false → guards switch to (manager)
+      const res = await changePassword(currentPassword, newPassword);
+      await replaceToken(res.token); // stay logged in on this phone
+      updateUser(res.user);
     } catch (err) {
       setError(getErrorMessage(err));
       setLoading(false);

@@ -19,7 +19,22 @@ api.interceptors.request.use(async (config) => {
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
+let onSessionEnded: (() => void) | null = null;
+export const setSessionEndedHandler = (handler: (() => void) | null) => {
+  onSessionEnded = handler;
+};
 
+api.interceptors.response.use(undefined, (error: unknown) => {
+  // Only for requests that carried a token (a wrong password at login is also 401)
+  if (
+    axios.isAxiosError(error) &&
+    error.response?.status === 401 &&
+    error.config?.headers?.Authorization
+  ) {
+    onSessionEnded?.();
+  }
+  throw error;
+});
 const MAX_RETRIES = 2;
 api.interceptors.response.use(undefined, async (error: unknown) => {
   const config = axios.isAxiosError(error)
