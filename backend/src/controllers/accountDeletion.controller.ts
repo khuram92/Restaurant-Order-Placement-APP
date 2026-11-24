@@ -11,6 +11,7 @@ import { deleteAvatarImage } from "../utils/cloudinary.js";
 import { generateOtp, hashOtp, otpMatches } from "../utils/otp.js";
 import { checkOtpLimits, clientIp, recordOtpRequest } from "../utils/otpLimits.js";
 import { sendOtp } from "../utils/sendOtp.js";
+import { disconnectUser } from "../utils/realtime.js";
 
 const OTP_EXPIRES_MINUTES = Number(process.env.OTP_EXPIRES_MINUTES) || 5;
 const OTP_RESEND_SECONDS = Number(process.env.OTP_RESEND_SECONDS) || 60;
@@ -151,7 +152,8 @@ export const confirmAccountDeletion = async (req: Request, res: Response) => {
     OtpRequest.deleteMany({ identifier: { $in: identifiers } }),
     deleteAvatarImage(String(user._id)).catch(() => {}), // no photo is fine
   ]);
-  await User.deleteOne({ _id: user._id }); // also removes addresses, favourites, push tokens
+  await User.deleteOne({ _id: user._id });
+  disconnectUser(String(user._id));
 
   res.json({ message: "Your account has been deleted" });
 };

@@ -4,6 +4,8 @@ import { Restaurant } from "../models/Restaurant.js";
 import { User, type UserDoc } from "../models/User.js";
 import { deleteAvatarImage } from "../utils/cloudinary.js";
 import { generatePassword } from "../utils/password.js";
+import { disconnectUser } from "../utils/realtime.js";
+import { afterRevoke, revokeSessions } from "../utils/sessions.js";
 import { sendManagerCredentials } from "../utils/staffEmails.js";
 import {
   createManagerSchema,
@@ -121,9 +123,11 @@ export const listManagers = async (req: Request, res: Response) => {
 export const restaurantOptions = async (_req: Request, res: Response) => {
   const [restaurants, managers] = await Promise.all([
     Restaurant.find().select(RESTAURANT_FIELDS).sort({ name: 1 }),
-     User.find({ role: "manager", isActive: true, restaurantId: { $exists: true } }).select(
-      "firstName lastName restaurantId",
-    ),
+    User.find({
+      role: "manager",
+      isActive: true,
+      restaurantId: { $exists: true },
+    }).select("firstName lastName restaurantId"),
   ]);
 
   const managerByRestaurant = new Map(
@@ -276,15 +280,23 @@ export const setManagerStatus = async (req: Request, res: Response) => {
     }).select("firstName lastName");
 
     if (holder) {
-      const name = `${holder.firstName ?? ""} ${holder.lastName ?? ""}`.trim() || "Another manager";
+      const name =
+        `${holder.firstName ?? ""} ${holder.lastName ?? ""}`.trim() ||
+        "Another manager";
       return res.status(409).json({
         message: `${name} now manages this restaurant. Edit this manager and choose a free restaurant, then activate them.`,
       });
     }
   }
 
+  const deactivating = !parsed.data.isActive && manager.isActive;
   manager.isActive = parsed.data.isActive;
+  if (deactivating) {
+    revokeSessions(manager); // logged out everywhere
+    manager.pushTokens = []; // no more order notifications on their phone
+  }
   await manager.save();
+  if (deactivating) afterRevoke(manager);
 
   res.json({
     message: manager.isActive
@@ -300,9 +312,12 @@ export const resetManagerPassword = async (req: Request, res: Response) => {
   if (!manager) return;
 
   const password = generatePassword();
-  manager.password = password; // hashed by the model
+   manager.password = password; // hashed by the model
   manager.mustChangePassword = true;
+  revokeSessions(manager); // the old password's logins stop working now
+  manager.pushTokens = [];
   await manager.save();
+  afterRevoke(manager);
 
   const emailSent = await deliverPassword(manager, password, "reset");
 
@@ -324,6 +339,7 @@ export const deleteManager = async (req: Request, res: Response) => {
     `${manager.firstName ?? ""} ${manager.lastName ?? ""}`.trim() || "Manager";
   const hadAvatar = !!manager.avatar;
   await manager.deleteOne();
+    disconnectUser(manager.id);
 
   if (hadAvatar) {
     try {

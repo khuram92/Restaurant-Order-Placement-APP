@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import { User, type Role } from "../models/User.js";
-import { verifyToken } from "../utils/jwt.js";
+import { tokenIsCurrent, verifyToken } from "../utils/jwt.js";
 
 /** Checks the token and attaches the logged-in user to req.user */
 export const protect = async (req: Request, res: Response, next: NextFunction) => {
@@ -10,10 +10,13 @@ export const protect = async (req: Request, res: Response, next: NextFunction) =
   }
 
   try {
-    const { id } = verifyToken(header.split(" ")[1] as string);
-    const user = await User.findById(id);
+        const payload = verifyToken(header.split(" ")[1] as string);
+    const user = await User.findById(payload.id);
 
     if (!user) return res.status(401).json({ message: "User no longer exists" });
+    if (!tokenIsCurrent(payload, user)) {
+      return res.status(401).json({ message: "Your session has ended. Please log in again." });
+    }
     if (!user.isActive) return res.status(403).json({ message: "Account is deactivated" });
 
     req.user = user;

@@ -2,28 +2,32 @@ import type { Server as HttpServer } from "node:http";
 import { Server } from "socket.io";
 import type { OrderDoc } from "../models/Order.js";
 import { User } from "../models/User.js";
-import { verifyToken } from "./jwt.js";
+import { tokenIsCurrent, verifyToken } from "./jwt.js";
 
 let io: Server | null = null;
 
 export const initRealtime = (server: HttpServer) => {
   io = new Server(server, {
-    cors: { origin: "*" }, 
+    cors: { origin: "*" },
     pingInterval: 25000,
     pingTimeout: 20000,
   });
-
 
   io.use(async (socket, next) => {
     try {
       const token = socket.handshake.auth?.token as string | undefined;
       if (!token) return next(new Error("Not logged in"));
-      const { id } = verifyToken(token);
-      const user = await User.findById(id).select("role restaurantId isActive");
-      if (!user || !user.isActive) return next(new Error("Not allowed"));
+      const payload = verifyToken(token);
+      const user = await User.findById(payload.id).select(
+        "role restaurantId isActive tokenVersion",
+      );
+      if (!user || !user.isActive || !tokenIsCurrent(payload, user))
+        return next(new Error("Not allowed"));
       socket.data.userId = String(user._id);
       socket.data.role = user.role;
-      socket.data.restaurantId = user.restaurantId ? String(user.restaurantId) : undefined;
+      socket.data.restaurantId = user.restaurantId
+        ? String(user.restaurantId)
+        : undefined;
       next();
     } catch {
       next(new Error("Invalid or expired token"));
@@ -40,7 +44,9 @@ export const initRealtime = (server: HttpServer) => {
 
   console.log("⚡ Live updates ready (Socket.io)");
 };
-
+export const disconnectUser = (userId: string) => {
+  io?.in(`user:${userId}`).disconnectSockets(true);
+};
 export type OrderEventName = "order:new" | "order:updated";
 
 export interface OrderEvent {
@@ -50,7 +56,6 @@ export interface OrderEvent {
   status: string;
   at: string;
 }
-
 
 export const emitOrderEvent = (name: OrderEventName, order: OrderDoc) => {
   if (!io) return;

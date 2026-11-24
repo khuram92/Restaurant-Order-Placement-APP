@@ -39,6 +39,7 @@ export interface IUser {
   addresses: ISavedAddress[];
   isActive: boolean;
   mustChangePassword: boolean;
+  tokenVersion: number;
   profileCompleted: boolean;
 }
 
@@ -74,12 +75,21 @@ const userSchema = new Schema<
     addresses: {
       type: [
         new Schema<ISavedAddress>({
-          label: { type: String, enum: ["home", "work", "other"], required: true },
+          label: {
+            type: String,
+            enum: ["home", "work", "other"],
+            required: true,
+          },
           name: { type: String, trim: true, maxlength: 30 },
           street: { type: String, trim: true, required: true, maxlength: 150 },
           area: { type: String, trim: true, maxlength: 80 },
           city: { type: String, trim: true, required: true, maxlength: 60 },
-          phone: { type: String, trim: true, required: true, match: /^03\d{9}$/ },
+          phone: {
+            type: String,
+            trim: true,
+            required: true,
+            match: /^03\d{9}$/,
+          },
           instructions: { type: String, trim: true, maxlength: 200 },
           location: {
             type: new Schema({ lat: Number, lng: Number }, { _id: false }),
@@ -94,6 +104,7 @@ const userSchema = new Schema<
     restaurantId: { type: Schema.Types.ObjectId, ref: "Restaurant" },
     isActive: { type: Boolean, default: true },
     mustChangePassword: { type: Boolean, default: false },
+    tokenVersion: { type: Number, default: 0 },
     profileCompleted: { type: Boolean, default: false },
   },
   { timestamps: true },

@@ -3,7 +3,8 @@ import { z } from "zod";
 import { Otp } from "../models/Otp.js";
 import { User } from "../models/User.js";
 import { uploadAvatarImage } from "../utils/cloudinary.js";
-import { signToken } from "../utils/jwt.js";
+import { tokenFor } from "../utils/jwt.js";
+import { afterRevoke, revokeSessions } from "../utils/sessions.js";
 import {
   clearFailures,
   lockMessage,
@@ -119,7 +120,7 @@ export const staffLogin = async (req: Request, res: Response) => {
     return res.status(403).json({ message: "Account is deactivated" });
   }
 
-  const token = signToken({ id: user.id, role: user.role });
+  const token = tokenFor(user);
   res.json({ token, user });
 };
 
@@ -153,7 +154,7 @@ export const requestOtp = async (req: Request, res: Response) => {
   // Resend cooldown
   const last = await Otp.findOne({
     identifier,
-    purpose: { $nin: ["contact", "delete"] }
+    purpose: { $nin: ["contact", "delete"] },
   }).sort({ createdAt: -1 });
   if (last) {
     const secondsSince = (Date.now() - last.createdAt.getTime()) / 1000;
@@ -176,7 +177,10 @@ export const requestOtp = async (req: Request, res: Response) => {
   }
   await recordOtpRequest(identifier, ip, "login");
   const code = generateOtp();
-  await Otp.deleteMany({ identifier, purpose: { $nin: ["contact", "delete"] } }); // only one active code at a time
+  await Otp.deleteMany({
+    identifier,
+    purpose: { $nin: ["contact", "delete"] },
+  }); // only one active code at a time
   await Otp.create({
     identifier,
     channel,
@@ -218,7 +222,10 @@ export const verifyOtp = async (req: Request, res: Response) => {
   const { identifier, channel } = result;
   const { code } = parsed.data;
 
-  const otp = await Otp.findOne({ identifier, purpose: { $nin: ["contact", "delete"] } });
+  const otp = await Otp.findOne({
+    identifier,
+    purpose: { $nin: ["contact", "delete"] },
+  });
   if (!otp || otp.expiresAt < new Date()) {
     return res
       .status(400)
@@ -261,7 +268,7 @@ export const verifyOtp = async (req: Request, res: Response) => {
 
   await otp.deleteOne(); // one-time use
 
-  const token = signToken({ id: user.id, role: user.role });
+  const token = tokenFor(user);
   res.status(isNewUser ? 201 : 200).json({ token, user, isNewUser });
 };
 
@@ -392,9 +399,30 @@ export const changePassword = async (req: Request, res: Response) => {
 
   user.password = newPassword; // hashed by the model
   user.mustChangePassword = false;
+  revokeSessions(user); // other phones are logged out
   await user.save();
+  afterRevoke(user);
 
-  res.json({ message: "Password changed", user });
+  // This phone stays logged in with a fresh token
+  res.json({ message: "Password changed", user, token: tokenFor(user) });
+};
+
+/**
+ * POST /api/auth/logout-all   { keepPushToken? }
+ * Logs out every other device. This phone gets a fresh token and keeps its notifications.
+ */
+export const logoutAllDevices = async (req: Request, res: Response) => {
+  const keep = typeof req.body?.keepPushToken === "string" ? req.body.keepPushToken : null;
+
+  const user = await User.findById(req.user!._id).select("+pushTokens");
+  if (!user) return res.status(404).json({ message: "User not found" });
+
+  revokeSessions(user);
+  user.pushTokens = keep && user.pushTokens.includes(keep) ? [keep] : [];
+  await user.save();
+  afterRevoke(user);
+
+  res.json({ message: "Logged out of all other devices", token: tokenFor(user) });
 };
 // ---------- Everyone ----------
 

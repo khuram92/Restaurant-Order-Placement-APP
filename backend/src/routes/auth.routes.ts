@@ -13,6 +13,7 @@ import {
   changePassword,
   completeProfile,
   getMe,
+  logoutAllDevices,
   requestOtp,
   staffLogin,
   uploadAvatar,
@@ -92,6 +93,7 @@ router.patch(
   changePassword,
 );
 router.get("/me", protect, getMe);
+router.post("/logout-all", protect, logoutAllDevices);
 
 router.post("/push-token", protect, savePushToken);
 router.post("/push-token/remove", protect, removePushToken);
