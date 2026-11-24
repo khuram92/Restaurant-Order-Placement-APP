@@ -1,23 +1,42 @@
-import express, { type Request, type Response, type NextFunction } from "express";
-import cors from "cors";
-import mongoose from "mongoose";
-import authRoutes from "./routes/auth.routes.js";
-import adminRoutes from "./routes/admin.routes.js";
-import restaurantRoutes from "./routes/restaurant.routes.js";
-import managerRoutes from "./routes/manager.routes.js";
-import orderRoutes from "./routes/order.routes.js";
-import notificationRoutes from "./routes/notification.routes.js";
-import { privacyPolicyHtml } from "./pages/privacyPolicy.js";
-import assistantRoutes from "./routes/assistant.routes.js";
 import * as Sentry from "@sentry/node";
+import cors from "cors";
+import express, {
+  type NextFunction,
+  type Request,
+  type Response,
+} from "express";
+import { rateLimit } from "express-rate-limit";
+import helmet from "helmet";
+import mongoose from "mongoose";
+import { privacyPolicyHtml } from "./pages/privacyPolicy.js";
+import adminRoutes from "./routes/admin.routes.js";
+import assistantRoutes from "./routes/assistant.routes.js";
+import authRoutes from "./routes/auth.routes.js";
+import managerRoutes from "./routes/manager.routes.js";
+import notificationRoutes from "./routes/notification.routes.js";
+import orderRoutes from "./routes/order.routes.js";
+import restaurantRoutes from "./routes/restaurant.routes.js";
 
 const app = express();
-if (process.env.TRUST_PROXY) app.set("trust proxy", Number(process.env.TRUST_PROXY) || 1);
+if (process.env.TRUST_PROXY)
+  app.set("trust proxy", Number(process.env.TRUST_PROXY) || 1);
 
 // Middleware
+app.use(helmet());
 app.use(cors());
 app.use(express.json());
-
+app.use(
+  "/api",
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: Number(process.env.API_RATE_LIMIT) || 300,
+    standardHeaders: "draft-8",
+    legacyHeaders: false,
+    message: {
+      message: "Too many requests. Please wait a few minutes and try again.",
+    },
+  }),
+);
 // API answers must always be fresh: no ETag / 304, no stored copies on the phone
 app.set("etag", false);
 app.use("/api", (_req, res, next) => {
@@ -41,7 +60,9 @@ app.use("/api/assistant", assistantRoutes);
 
 // 404 handler
 app.use((req: Request, res: Response) => {
-  res.status(404).json({ message: `Route not found: ${req.method} ${req.originalUrl}` });
+  res
+    .status(404)
+    .json({ message: `Route not found: ${req.method} ${req.originalUrl}` });
 });
 
 // Error handler (Express 5 sends errors from async handlers here)
@@ -56,8 +77,13 @@ app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
     return res.status(400).json({ message: `Invalid ${err.path}` });
   }
   // Duplicate key (unique index)
-  if (typeof err === "object" && err !== null && (err as { code?: number }).code === 11000) {
-    const field = Object.keys((err as { keyValue?: object }).keyValue ?? {})[0] ?? "value";
+  if (
+    typeof err === "object" &&
+    err !== null &&
+    (err as { code?: number }).code === 11000
+  ) {
+    const field =
+      Object.keys((err as { keyValue?: object }).keyValue ?? {})[0] ?? "value";
     return res.status(409).json({ message: `This ${field} is already in use` });
   }
   // Invalid JSON body
@@ -68,7 +94,7 @@ app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
   console.error(err);
   Sentry.withScope((scope) => {
     scope.setTag("route", `${_req.method} ${_req.route?.path ?? _req.path}`);
-    if (_req.user) scope.setUser({ id: String(_req.user._id) }); 
+    if (_req.user) scope.setUser({ id: String(_req.user._id) });
     Sentry.captureException(err);
   });
   res.status(500).json({ message: "Internal Server Error" });
