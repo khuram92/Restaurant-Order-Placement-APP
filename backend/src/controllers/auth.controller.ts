@@ -425,9 +425,9 @@ export const logoutAllDevices = async (req: Request, res: Response) => {
 
   res.json({ message: "Logged out of all other devices", token: tokenFor(user) });
 };
-// ---------- Everyone ----------
 
-/** GET /api/auth/me */
+
+
 export const getMe = async (req: Request, res: Response) => {
   res.json({ user: req.user });
 };

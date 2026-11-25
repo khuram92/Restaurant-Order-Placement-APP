@@ -24,6 +24,7 @@ import { adminMenuAccess } from "../middleware/menuAccess.middleware.js";
 import menuRoutes from "./menu.routes.js"
 import { getAdminStats } from "../controllers/adminStats.controller.js";
 import { getAnyOrder, listAllOrders, orderFilterRestaurants } from "../controllers/adminOrder.controller.js";
+import { listBroadcasts, previewBroadcast, sendBroadcast } from "../controllers/adminBroadcast.controller.js";
 
 const router = Router();
 
@@ -43,6 +44,11 @@ router.patch("/restaurants/:id", updateRestaurant);
 router.patch("/restaurants/:id/status", setRestaurantStatus);
 router.patch("/restaurants/:id/images", restaurantImagesUpload, uploadRestaurantImages);
 router.delete("/restaurants/:id", deleteRestaurant);
+
+// Broadcasts ("preview" before the plain POST)
+router.post("/broadcasts/preview", previewBroadcast);
+router.post("/broadcasts", sendBroadcast);
+router.get("/broadcasts", listBroadcasts);
 // Menu of any restaurant
 router.use("/restaurants/:restaurantId/menu", adminMenuAccess, menuRoutes);
 // Managers ("restaurant-options" must come before "/:id")

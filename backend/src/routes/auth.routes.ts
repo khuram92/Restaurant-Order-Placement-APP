@@ -16,6 +16,7 @@ import {
   logoutAllDevices,
   requestOtp,
   staffLogin,
+  updatePreferences,
   uploadAvatar,
   verifyOtp,
 } from "../controllers/auth.controller.js";
@@ -93,6 +94,7 @@ router.patch(
   changePassword,
 );
 router.get("/me", protect, getMe);
+router.patch("/preferences", protect, authorize("customer"), updatePreferences);
 router.post("/logout-all", protect, logoutAllDevices);
 
 router.post("/push-token", protect, savePushToken);
