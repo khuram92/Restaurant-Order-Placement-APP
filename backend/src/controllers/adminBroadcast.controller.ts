@@ -128,7 +128,6 @@ const deliver = async (
   }
 };
 
-/** GET /api/admin/broadcasts — history, newest first */
 export const listBroadcasts = async (_req: Request, res: Response) => {
   const broadcasts = await Broadcast.find()
     .sort({ createdAt: -1 })

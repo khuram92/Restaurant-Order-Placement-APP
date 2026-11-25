@@ -23,6 +23,7 @@ import {
 } from "../utils/otpLimits.js";
 import { PASSWORD_REGEX, PASSWORD_RULE_MESSAGE } from "../utils/password.js";
 import { sendOtp } from "../utils/sendOtp.js";
+import { promotionsSchema } from "../validators/broadcast.validators.js";
 
 const OTP_EXPIRES_MINUTES = Number(process.env.OTP_EXPIRES_MINUTES) || 5;
 const OTP_RESEND_SECONDS = Number(process.env.OTP_RESEND_SECONDS) || 60;
@@ -429,4 +430,18 @@ export const logoutAllDevices = async (req: Request, res: Response) => {
 /** GET /api/auth/me */
 export const getMe = async (req: Request, res: Response) => {
   res.json({ user: req.user });
+};
+
+
+export const updatePreferences = async (req: Request, res: Response) => {
+  const parsed = promotionsSchema.safeParse(req.body ?? {});
+  if (!parsed.success) return res.status(400).json({ message: parsed.error.issues[0]?.message });
+
+  const user = req.user!;
+  user.allowPromotions = parsed.data.allowPromotions;
+  await user.save();
+  res.json({
+    message: user.allowPromotions ? "You'll get offers and announcements" : "Offers and announcements turned off",
+    user,
+  });
 };
