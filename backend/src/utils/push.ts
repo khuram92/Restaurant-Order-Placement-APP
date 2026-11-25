@@ -52,7 +52,7 @@ export const sendPushToUsers = async (
           }),
     }));
 
-    // Expo accepts up to 100 messages per request
+   
     for (let i = 0; i < messages.length; i += 100) {
       const chunk = messages.slice(i, i + 100);
       const response = await fetch(EXPO_PUSH_URL, {
@@ -60,7 +60,6 @@ export const sendPushToUsers = async (
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
-          // Only needed if you turn on "Enhanced push security" in your Expo account
           ...(process.env.EXPO_ACCESS_TOKEN && {
             Authorization: `Bearer ${process.env.EXPO_ACCESS_TOKEN}`,
           }),
@@ -77,7 +76,7 @@ export const sendPushToUsers = async (
         continue;
       }
 
-      // Remove tokens of phones that uninstalled the app / turned off notifications
+      
       const { data: tickets } = (await response.json()) as {
         data: PushTicket[];
       };
