@@ -35,7 +35,7 @@ export const previewBroadcast = async (req: Request, res: Response) => {
   });
 };
 
-/** POST /api/admin/broadcasts — send it (answers at once, delivers in the background) */
+
 export const sendBroadcast = async (req: Request, res: Response) => {
   const parsed = sendBroadcastSchema.safeParse(req.body ?? {});
   if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
@@ -82,7 +82,7 @@ export const sendBroadcast = async (req: Request, res: Response) => {
   });
 };
 
-/** Inbox entries + push, in batches, so thousands of people don't freeze the server */
+
 const deliver = async (
   broadcastId: Types.ObjectId,
   userIds: Types.ObjectId[],
@@ -128,14 +128,14 @@ const deliver = async (
   }
 };
 
-// /** GET /api/admin/broadcasts — history, newest first */
-// export const listBroadcasts = async (_req: Request, res: Response) => {
-//   const broadcasts = await Broadcast.find()
-//     .sort({ createdAt: -1 })
-//     .limit(50)
-//     .populate("restaurantIds", "name")
-//     .populate("linkRestaurantId", "name")
-//     .populate("sentBy", "firstName lastName email");
-//   const used = await sentToday();
-//   res.json({ broadcasts, remainingToday: Math.max(0, DAILY_LIMIT - used), dailyLimit: DAILY_LIMIT });
-// };
+/** GET /api/admin/broadcasts — history, newest first */
+export const listBroadcasts = async (_req: Request, res: Response) => {
+  const broadcasts = await Broadcast.find()
+    .sort({ createdAt: -1 })
+    .limit(50)
+    .populate("restaurantIds", "name")
+    .populate("linkRestaurantId", "name")
+    .populate("sentBy", "firstName lastName email");
+  const used = await sentToday();
+  res.json({ broadcasts, remainingToday: Math.max(0, DAILY_LIMIT - used), dailyLimit: DAILY_LIMIT });
+};
