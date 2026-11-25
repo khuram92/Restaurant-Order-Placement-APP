@@ -121,6 +121,12 @@ export default function AdminDashboard() {
           subtitle="Revenue, orders and top restaurants"
           onPress={() => router.push("/admin/dashboard")}
         />
+        <MenuCard
+          icon="megaphone"
+          title="Broadcasts"
+          subtitle="Send news and offers to customers and managers"
+          // onPress={() => router.push("/admin/broadcasts")}
+        />
       </View>
     </View>
   );
