@@ -147,7 +147,7 @@ export default function BroadcastsScreen() {
 
       <View className="absolute bottom-6 left-4 right-4">
         <Pressable
-        //   onPress={() => router.push("/admin/broadcasts/new")}
+          onPress={() => router.push("/admin/broadcasts/new")}
           disabled={!loading && left === 0}
           className="flex-row items-center justify-center rounded-2xl py-4"
           style={[cardShadow, { backgroundColor: colors.brand, opacity: !loading && left === 0 ? 0.45 : 1 }]}>
