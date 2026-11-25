@@ -1,7 +1,14 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Stack, router, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
-import { ActivityIndicator, FlatList, Pressable, RefreshControl, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  FlatList,
+  Pressable,
+  RefreshControl,
+  Text,
+  View,
+} from "react-native";
 import { cardShadow, colors } from "../../../../constants/theme";
 import { getErrorMessage } from "../../../../lib/api";
 import { listBroadcasts } from "../../../../services/adminBroadcastApi";
@@ -17,7 +24,10 @@ const audienceLabel = (b: Broadcast) => {
       return "All managers";
     case "restaurants": {
       const names = b.restaurantIds.map((r) => r.name);
-      const who = b.restaurantTarget === "both" ? "customers + managers" : b.restaurantTarget;
+      const who =
+        b.restaurantTarget === "both"
+          ? "customers + managers"
+          : b.restaurantTarget;
       return `${names.length > 2 ? `${names.slice(0, 2).join(", ")} +${names.length - 2}` : names.join(", ")} · ${who}`;
     }
   }
@@ -40,16 +50,22 @@ function BroadcastRow({ item }: { item: Broadcast }) {
   return (
     <View className="mb-3 rounded-3xl bg-white p-4" style={cardShadow}>
       <View className="flex-row items-center">
-        <View className="h-10 w-10 items-center justify-center rounded-2xl" style={{ backgroundColor: colors.brandSoft }}>
+        <View
+          className="h-10 w-10 items-center justify-center rounded-2xl"
+          style={{ backgroundColor: colors.brandSoft }}>
           <Ionicons name="megaphone" size={18} color={colors.brand} />
         </View>
         <View className="ml-3 flex-1">
-          <Text className="text-base font-bold text-brand-dark" numberOfLines={1}>
+          <Text
+            className="text-base font-bold text-brand-dark"
+            numberOfLines={1}>
             {item.title}
           </Text>
           <Text className="text-xs text-brand-light">{when}</Text>
         </View>
-        <Text className="text-xs font-bold" style={{ color: STATUS[item.status].color }}>
+        <Text
+          className="text-xs font-bold"
+          style={{ color: STATUS[item.status].color }}>
           {STATUS[item.status].label}
         </Text>
       </View>
@@ -64,7 +80,9 @@ function BroadcastRow({ item }: { item: Broadcast }) {
         {!!item.linkRestaurantId && (
           <View className="flex-row items-center">
             <Ionicons name="link" size={13} color={colors.brandLight} />
-            <Text className="ml-1 text-xs text-brand-light">Opens {item.linkRestaurantId.name}</Text>
+            <Text className="ml-1 text-xs text-brand-light">
+              Opens {item.linkRestaurantId.name}
+            </Text>
           </View>
         )}
       </View>
@@ -122,8 +140,14 @@ export default function BroadcastsScreen() {
           }
           ListHeaderComponent={
             <View className="mb-4">
-              {!!error && <Text className="mb-3 text-sm" style={{ color: colors.danger }}>{error}</Text>}
-              <View className="flex-row items-center rounded-2xl px-4 py-3" style={{ backgroundColor: colors.brandSoft }}>
+              {!!error && (
+                <Text className="mb-3 text-sm" style={{ color: colors.danger }}>
+                  {error}
+                </Text>
+              )}
+              <View
+                className="flex-row items-center rounded-2xl px-4 py-3"
+                style={{ backgroundColor: colors.brandSoft }}>
                 <Ionicons name="time" size={16} color={colors.brand} />
                 <Text className="ml-2 flex-1 text-sm text-brand-dark">
                   {left > 0
@@ -136,7 +160,9 @@ export default function BroadcastsScreen() {
           ListEmptyComponent={
             <View className="mt-10 items-center px-6">
               <Ionicons name="megaphone" size={44} color={colors.mistDark} />
-              <Text className="mt-3 text-base font-bold text-brand-dark">No broadcasts yet</Text>
+              <Text className="mt-3 text-base font-bold text-brand-dark">
+                No broadcasts yet
+              </Text>
               <Text className="mt-1 text-center text-sm text-brand-light">
                 Send news, offers or notices to customers and managers.
               </Text>
@@ -150,9 +176,17 @@ export default function BroadcastsScreen() {
           onPress={() => router.push("/admin/broadcasts/new")}
           disabled={!loading && left === 0}
           className="flex-row items-center justify-center rounded-2xl py-4"
-          style={[cardShadow, { backgroundColor: colors.brand, opacity: !loading && left === 0 ? 0.45 : 1 }]}>
+          style={[
+            cardShadow,
+            {
+              backgroundColor: colors.brand,
+              opacity: !loading && left === 0 ? 0.45 : 1,
+            },
+          ]}>
           <Ionicons name="add-circle" size={20} color={colors.white} />
-          <Text className="ml-2 text-base font-bold text-white">New broadcast</Text>
+          <Text className="ml-2 text-base font-bold text-white">
+            New broadcast
+          </Text>
         </Pressable>
       </View>
     </View>
