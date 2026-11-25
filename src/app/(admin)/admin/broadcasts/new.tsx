@@ -57,7 +57,7 @@ function Tick({ on }: { on: boolean }) {
   );
 }
 
-/** List of restaurants to tick (many) or pick (one) */
+
 function RestaurantPicker({
   visible,
   title,
@@ -387,7 +387,7 @@ export default function NewBroadcastScreen() {
             <>
               <Ionicons name="send" size={18} color={colors.white} />
               <Text className="ml-2 text-base font-bold text-white">
-                {preview ? `Send to ${preview.total}` : "Send"}
+                Send
               </Text>
             </>
           )}
