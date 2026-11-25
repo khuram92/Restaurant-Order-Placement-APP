@@ -11,7 +11,7 @@ import { broadcastAudienceSchema, sendBroadcastSchema } from "../validators/broa
 const DAILY_LIMIT = Number(process.env.BROADCAST_DAILY_LIMIT) || 3;
 const firstIssue = (error: { issues: { message: string }[] }) => error.issues[0]?.message ?? "Invalid input";
 
-/** Midnight today in Pakistan time */
+
 const startOfTodayPk = () => {
   const day = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Karachi" }); // "2026-11-25"
   return new Date(`${day}T00:00:00+05:00`);
@@ -19,21 +19,21 @@ const startOfTodayPk = () => {
 
 const sentToday = () => Broadcast.countDocuments({ createdAt: { $gte: startOfTodayPk() } });
 
-// /** POST /api/admin/broadcasts/preview — how many people would receive it */
-// export const previewBroadcast = async (req: Request, res: Response) => {
-//   const parsed = broadcastAudienceSchema.safeParse(req.body ?? {});
-//   if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
 
-//   const { customerIds, managerIds, optedOut } = await resolveRecipients(parsed.data);
-//   const used = await sentToday();
-//   res.json({
-//     customers: customerIds.length,
-//     managers: managerIds.length,
-//     total: customerIds.length + managerIds.length,
-//     optedOut,
-//     remainingToday: Math.max(0, DAILY_LIMIT - used),
-//   });
-// };
+export const previewBroadcast = async (req: Request, res: Response) => {
+  const parsed = broadcastAudienceSchema.safeParse(req.body ?? {});
+  if (!parsed.success) return res.status(400).json({ message: firstIssue(parsed.error) });
+
+  const { customerIds, managerIds, optedOut } = await resolveRecipients(parsed.data);
+  const used = await sentToday();
+  res.json({
+    customers: customerIds.length,
+    managers: managerIds.length,
+    total: customerIds.length + managerIds.length,
+    optedOut,
+    remainingToday: Math.max(0, DAILY_LIMIT - used),
+  });
+};
 
 // /** POST /api/admin/broadcasts — send it (answers at once, delivers in the background) */
 // export const sendBroadcast = async (req: Request, res: Response) => {
