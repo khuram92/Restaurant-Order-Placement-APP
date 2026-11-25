@@ -125,7 +125,7 @@ export default function AdminDashboard() {
           icon="megaphone"
           title="Broadcasts"
           subtitle="Send news and offers to customers and managers"
-          // onPress={() => router.push("/admin/broadcasts")}
+          onPress={() => router.push("/admin/broadcasts")}
         />
       </View>
     </View>
