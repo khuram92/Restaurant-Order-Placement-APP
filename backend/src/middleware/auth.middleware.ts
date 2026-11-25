@@ -17,8 +17,7 @@ export const protect = async (
     return res.status(401).json({ message: "Not logged in" });
   }
 
-  // Only a bad/expired TOKEN is a 401. A database hiccup must not log people out:
-  // it's thrown below and becomes a normal 500 ("try again"), not a sign-out.
+  
   let payload: TokenPayload;
   try {
     payload = verifyToken(header.split(" ")[1] as string);
