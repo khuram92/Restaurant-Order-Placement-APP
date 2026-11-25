@@ -40,6 +40,7 @@ export interface IUser {
   isActive: boolean;
   mustChangePassword: boolean;
   tokenVersion: number;
+  allowPromotions: boolean;
   profileCompleted: boolean;
 }
 
@@ -105,6 +106,7 @@ const userSchema = new Schema<
     isActive: { type: Boolean, default: true },
     mustChangePassword: { type: Boolean, default: false },
     tokenVersion: { type: Number, default: 0 },
+    allowPromotions: { type: Boolean, default: true },
     profileCompleted: { type: Boolean, default: false },
   },
   { timestamps: true },
